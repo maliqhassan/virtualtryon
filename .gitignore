@@ -21,3 +21,8 @@ docker-compose.override.yml
 
 # Local agent/tooling state, not project source
 .claude/
+
+# One-time Windows->Mac migration bundle: real .env secrets, a full
+# Postgres dump, and uploaded user images — never committed, regardless
+# of how this repo's other ignore rules evolve.
+migration_bundle/
