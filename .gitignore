@@ -1,0 +1,23 @@
+# Each service also has its own .gitignore for stack-specific patterns
+# (frontend/.gitignore, backend/.gitignore, ai/.gitignore). This file covers
+# root-level and cross-cutting patterns only.
+
+# Env files (never commit real secrets)
+.env
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Docker
+docker-compose.override.yml
+
+# Local agent/tooling state, not project source
+.claude/

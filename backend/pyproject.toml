@@ -1,0 +1,43 @@
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["app", "ai"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["app", "ai", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "ai"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's own documented pattern for file/query/dependency params is a
+# function call in the default (`file: UploadFile = File(...)`) — the
+# first endpoint in this repo to need it (app/api/v1/endpoints/ai.py).
+extend-immutable-calls = ["fastapi.Depends", "fastapi.File", "fastapi.Query", "fastapi.Body"]
+
+[tool.mypy]
+python_version = "3.11"
+plugins = ["pydantic.mypy"]
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+# Session-scoped, not the default function-scoped: app/db/session.py's
+# `engine` is a module-level global whose connection pool binds to whatever
+# event loop first used it. A fresh loop per test (pytest-asyncio's default)
+# makes later tests reuse a pooled asyncpg connection from a now-different
+# loop -> "another operation is in progress". Invisible until Saved Looks,
+# the first test suite in this repo to actually touch the database.
+asyncio_default_fixture_loop_scope = "session"
+testpaths = ["tests"]

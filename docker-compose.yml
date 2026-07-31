@@ -1,0 +1,96 @@
+# Local development orchestration only. Production deployment (image
+# registry, secrets management, scaling) is a separate, not-yet-created
+# manifest — see docs/decisions.
+#
+# Frontend is intentionally not a service here: Expo's Metro bundler runs on
+# the host so the dev client / simulator / physical device can connect to it
+# directly.
+#
+# Usage:
+#   docker compose up postgres redis backend      # everyday backend dev
+#   docker compose --profile ai up                 # add the GPU inference service
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-virtualtryon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-virtualtryon}
+      POSTGRES_DB: ${POSTGRES_DB:-virtualtryon}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-virtualtryon}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      DEBUG: "true"
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-virtualtryon}:${POSTGRES_PASSWORD:-virtualtryon}@postgres:5432/${POSTGRES_DB:-virtualtryon}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${BACKEND_SECRET_KEY:-change-me}
+      CORS_ORIGINS: '["http://localhost:8081"]'
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/ai:/app/ai
+      - mediapipe_models:/app/.mediapipe_models
+
+  # GPU inference service. Excluded from the default `docker compose up` via
+  # the "ai" profile since most dev machines don't have an NVIDIA GPU + the
+  # NVIDIA Container Toolkit installed. Not yet functional — see ai/Dockerfile.
+  ai:
+    build:
+      context: ./ai
+    restart: unless-stopped
+    profiles: ["ai"]
+    environment:
+      SERVICE_ENV: development
+      DEVICE: ${AI_DEVICE:-cpu}
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./ai/src:/app/src
+      - ai_models:/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  postgres_data:
+  redis_data:
+  ai_models:
+  mediapipe_models:

@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Noto+Nastaliq+Urdu:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EAE7E1;font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:oklch(0.55 0.11 55);text-decoration:none}
+a:hover{color:oklch(0.45 0.11 55)}
+.dv-turn{padding:48px 52px 40px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 24px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#16130F;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 Manrope,system-ui,sans-serif;color:#16130F}
+.dv-opts{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#16130F;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Manrope,system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#F6F4F0;border:1px solid rgba(0,0,0,.08);border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:oklch(0.62 0.11 55);color:#fff}
+.dv-next{margin:26px 0 0;font:12px/1.5 Manrope,system-ui,sans-serif;color:rgba(0,0,0,.5)}
+.ms{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+@keyframes shimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
+@keyframes pulseGlow{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+</style></helmet>
+
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Recovery, sharing, editorial and the men's variant</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2a">
+<div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Account recovery &amp; sharing</div>
+<div class="dv-card" style="width:850px;padding:28px;background:#EFECE6">
+<div style="display:flex;flex-wrap:wrap;gap:22px">
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <span class="ms" style="font-size:22px;color:#16130F">arrow_back</span>
+  <div style="font:400 27px/1.1 'Instrument Serif',serif;color:#16130F;margin-top:16px">Forgot your<br>password?</div>
+  <div style="font:400 12.5px/1.55 Manrope,sans-serif;color:#6B655D;margin-top:9px">Enter the email you signed up with. We'll send a six-digit code — no links to lose.</div>
+  <div style="background:#fff;border:1.5px solid #16130F;border-radius:14px;padding:12px 14px;margin-top:20px"><div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#A39B90">EMAIL</div><div style="display:flex;align-items:center;gap:2px;margin-top:4px"><span style="font:400 13.5px Manrope,sans-serif;color:#16130F">zara@studio.pk</span><span style="width:1.5px;height:17px;background:oklch(0.62 0.11 55)"></span></div></div>
+  <div style="background:#16130F;color:#F6F4F0;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;text-align:center;margin-top:14px">Send code</div>
+  <div style="display:flex;gap:9px;align-items:flex-start;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:13px;margin-top:20px">
+    <span class="ms" style="font-size:19px;color:#A39B90">lock</span>
+    <div style="font:400 11px/1.5 Manrope,sans-serif;color:#6B655D">Your closet and style profile stay intact — resetting a password never touches your data.</div>
+  </div>
+  <div style="height:1px;background:rgba(22,19,15,.1);margin:20px 0"></div>
+  <div style="font:400 12px/1.55 Manrope,sans-serif;color:#6B655D">Signed up with Google or Apple? <span style="color:#16130F;font-weight:700">Use that instead</span> — there's no password to reset.</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">21 · Forgot password</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <span class="ms" style="font-size:22px;color:#16130F">arrow_back</span>
+  <div style="font:400 27px/1.1 'Instrument Serif',serif;color:#16130F;margin-top:16px">Check your<br>inbox</div>
+  <div style="font:400 12.5px/1.55 Manrope,sans-serif;color:#6B655D;margin-top:9px">Six digits sent to <span style="color:#16130F;font-weight:600">zara@studio.pk</span>.</div>
+  <div style="display:flex;gap:7px;margin-top:20px">
+    <div style="flex:1;aspect-ratio:.78;border-radius:12px;background:#fff;border:1px solid rgba(22,19,15,.1);display:flex;align-items:center;justify-content:center;font:600 18px Manrope,sans-serif;color:#16130F">4</div>
+    <div style="flex:1;aspect-ratio:.78;border-radius:12px;background:#fff;border:1px solid rgba(22,19,15,.1);display:flex;align-items:center;justify-content:center;font:600 18px Manrope,sans-serif;color:#16130F">1</div>
+    <div style="flex:1;aspect-ratio:.78;border-radius:12px;background:#fff;border:1px solid rgba(22,19,15,.1);display:flex;align-items:center;justify-content:center;font:600 18px Manrope,sans-serif;color:#16130F">9</div>
+    <div style="flex:1;aspect-ratio:.78;border-radius:12px;background:#fff;border:1.5px solid #16130F;display:flex;align-items:center;justify-content:center"><span style="width:1.5px;height:18px;background:oklch(0.62 0.11 55)"></span></div>
+    <div style="flex:1;aspect-ratio:.78;border-radius:12px;background:#fff;border:1px solid rgba(22,19,15,.1)"></div>
+    <div style="flex:1;aspect-ratio:.78;border-radius:12px;background:#fff;border:1px solid rgba(22,19,15,.1)"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+    <span style="font:500 11px 'IBM Plex Mono',monospace;color:#A39B90">expires in 4:52</span>
+    <span style="font:700 11.5px Manrope,sans-serif;color:#C9C3B9">Resend</span>
+  </div>
+  <div style="background:#16130F;color:#F6F4F0;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;text-align:center;margin-top:18px">Verify</div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:26px">Next · new password</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:11px">
+    <div style="display:flex;gap:8px;align-items:center;font:400 11.5px Manrope,sans-serif;color:#6B655D"><span class="ms" style="font-size:15px;color:oklch(0.58 0.11 150)">check_circle</span>8+ characters</div>
+    <div style="display:flex;gap:8px;align-items:center;font:400 11.5px Manrope,sans-serif;color:#6B655D"><span class="ms" style="font-size:15px;color:#C9C3B9">radio_button_unchecked</span>One number or symbol</div>
+    <div style="display:flex;gap:8px;align-items:center;font:400 11.5px Manrope,sans-serif;color:#6B655D"><span class="ms" style="font-size:15px;color:#C9C3B9">radio_button_unchecked</span>Not a previous password</div>
+  </div>
+  <div style="background:oklch(0.96 0.02 90);border:1px solid oklch(0.9 0.05 90);border-radius:14px;padding:12px;margin-top:20px;font:400 11px/1.5 Manrope,sans-serif;color:#4E4841">Wrong code three times and the flow pauses 60 seconds — the copy says why, never just "error".</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">22 · Verify code</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#12110F;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="display:flex;justify-content:space-between;align-items:center"><span class="ms" style="font-size:21px;color:#F2EFEA">close</span><span style="font:700 13px Manrope,sans-serif;color:#F2EFEA">Share look</span><span class="ms" style="font-size:21px;color:#F2EFEA">tune</span></div>
+  <div style="border-radius:20px;overflow:hidden;margin-top:16px;background:#F6F4F0;padding:14px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:500 8.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;color:oklch(0.55 0.11 55);white-space:nowrap">AI STYLIST</span><span style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90">24 JUL</span></div>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <div style="flex:1.5;aspect-ratio:3/4;border-radius:11px;background:repeating-linear-gradient(135deg,#EFEBE4 0 6px,#E4DFD6 6px 12px)"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px"><div style="flex:1;border-radius:11px;background:repeating-linear-gradient(135deg,#E4EAE6 0 6px,#D8E0DA 6px 12px)"></div><div style="flex:1;border-radius:11px;background:repeating-linear-gradient(135deg,#F0E8E2 0 6px,#E6DCD3 6px 12px)"></div></div>
+    </div>
+    <div style="font:400 19px/1.1 'Instrument Serif',serif;color:#16130F;margin-top:11px">Quiet linen, sharp shoes</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px"><span style="font:500 9px 'IBM Plex Mono',monospace;color:#6B655D">styled by Noor</span><span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#fff;background:#16130F;padding:5px 8px;border-radius:999px;white-space:nowrap;flex:none">96 fit</span></div>
+  </div>
+  <div style="display:flex;gap:7px;margin-top:14px"><span style="font:600 10.5px Manrope,sans-serif;color:#12110F;background:oklch(0.72 0.13 90);padding:7px 10px;border-radius:999px;white-space:nowrap">Card</span><span style="font:600 10.5px Manrope,sans-serif;color:#F2EFEA;border:1px solid rgba(255,255,255,.18);padding:7px 10px;border-radius:999px;white-space:nowrap">Story 9:16</span><span style="font:600 10.5px Manrope,sans-serif;color:#F2EFEA;border:1px solid rgba(255,255,255,.18);padding:7px 10px;border-radius:999px;white-space:nowrap">Photo</span></div>
+  <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;margin-top:14px;display:flex;justify-content:space-between;align-items:center"><div><div style="font:700 12px Manrope,sans-serif;color:#F2EFEA">Include my face</div><div style="font:400 10.5px Manrope,sans-serif;color:#8A8278;margin-top:2px">Off by default</div></div><div style="width:38px;height:22px;border-radius:99px;background:rgba(255,255,255,.16);position:relative;flex:none"><div style="position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:999px;background:#F2EFEA"></div></div></div>
+  <div style="display:flex;gap:10px;margin-top:18px;justify-content:space-between">
+    <div style="text-align:center"><div style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:20px;color:#F2EFEA">download</span></div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:6px">SAVE</div></div>
+    <div style="text-align:center"><div style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:20px;color:#F2EFEA">link</span></div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:6px">LINK</div></div>
+    <div style="text-align:center"><div style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:20px;color:#F2EFEA">chat</span></div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:6px">WHATSAPP</div></div>
+    <div style="text-align:center"><div style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:20px;color:#F2EFEA">more_horiz</span></div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:6px">MORE</div></div>
+  </div>
+  <div style="font:400 10.5px/1.5 Manrope,sans-serif;color:#6B655D;margin-top:18px">Nothing posts automatically. The card carries no brand names unless credits are switched on.</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">25 · Share a look</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="2b">
+<div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Editorial &amp; immersive — lookbook, 360° player, men's Today</div>
+<div class="dv-card" style="width:850px;padding:28px;background:#EFECE6">
+<div style="display:flex;flex-wrap:wrap;gap:22px">
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#1A1206;box-shadow:0 4px 16px rgba(22,19,15,.12);display:flex;flex-direction:column">
+  <div style="flex:none;height:224px;background:repeating-linear-gradient(160deg,#3A2C14 0 10px,#2E2210 10px 20px);position:relative">
+    <div style="position:absolute;top:44px;left:18px;font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.2em;color:oklch(0.78 0.1 90)">EID COLLECTION · 1447</div>
+    <span style="position:absolute;top:44px;right:18px;font:500 8.5px 'IBM Plex Mono',monospace;color:rgba(244,235,217,.5)">[ hero ]</span>
+    <div style="position:absolute;bottom:18px;left:18px;right:18px;font:400 32px/1.02 'Instrument Serif',serif;color:#F4EBD9">Gold hour,<br><em>softly worn</em></div>
+  </div>
+  <div style="flex:1;padding:18px">
+    <div style="font:400 12.5px/1.6 Manrope,sans-serif;color:#C9B896">Eleven looks built from what people actually own — a kurta, a waistcoat, one good shoe. Tap any look to swap in your pieces.</div>
+    <div style="display:flex;gap:9px;margin-top:16px">
+      <div style="flex:1"><div style="aspect-ratio:3/4;border-radius:12px;background:repeating-linear-gradient(135deg,#3A2C14 0 6px,#2E2210 6px 12px)"></div><div style="font:600 10.5px Manrope,sans-serif;color:#F4EBD9;margin-top:7px">01 · Ivory &amp; jasmine</div><div style="font:500 9px 'IBM Plex Mono',monospace;color:oklch(0.7 0.09 150);margin-top:3px">you own 3 of 4</div></div>
+      <div style="flex:1"><div style="aspect-ratio:3/4;border-radius:12px;background:repeating-linear-gradient(135deg,#40301A 0 6px,#332614 6px 12px)"></div><div style="font:600 10.5px Manrope,sans-serif;color:#F4EBD9;margin-top:7px">02 · Charcoal prince</div><div style="font:500 9px 'IBM Plex Mono',monospace;color:oklch(0.78 0.12 70);margin-top:3px">you own 1 of 4</div></div>
+    </div>
+    <div style="height:1px;background:rgba(244,235,217,.14);margin:16px 0"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.14em;color:#8A7A5C">11 LOOKS · 6 MIN READ</div><span class="ms" style="font-size:18px;color:#C9B896">bookmark_border</span></div>
+    <div style="background:oklch(0.72 0.13 90);color:#1A1206;font:700 13.5px Manrope,sans-serif;padding:14px;border-radius:15px;text-align:center;margin-top:16px">Style look 01 on me</div>
+  </div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">26 · Eid / wedding lookbook</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#0E0D0C;box-shadow:0 4px 16px rgba(22,19,15,.12);display:flex;flex-direction:column;padding:44px 18px 18px;box-sizing:border-box">
+  <div style="display:flex;justify-content:space-between;align-items:center"><span class="ms" style="font-size:21px;color:#F2EFEA">close</span><span style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;color:oklch(0.78 0.1 90)">360° · PRO</span><span class="ms" style="font-size:21px;color:#F2EFEA">hd</span></div>
+  <div style="flex:1;border-radius:20px;margin-top:14px;background:repeating-linear-gradient(135deg,#211E1A 0 8px,#1A1815 8px 16px);position:relative;display:flex;align-items:center;justify-content:center">
+    <div style="text-align:center"><span class="ms" style="font-size:30px;color:#6B655D">3d_rotation</span><div style="font:500 9.5px/1.6 'IBM Plex Mono',monospace;color:#8A8278;margin-top:8px">[ frame 14 / 36 ]<br>drag to rotate</div></div>
+    <div style="position:absolute;bottom:14px;left:14px;right:14px;border-radius:14px;padding:11px 13px;background:rgba(20,19,17,.6);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12)">
+      <div style="display:flex;justify-content:space-between;font:500 9px 'IBM Plex Mono',monospace;color:#B9B1A6"><span>FRONT</span><span>SIDE</span><span>BACK</span><span>SIDE</span></div>
+      <div style="height:3px;border-radius:9px;background:rgba(255,255,255,.16);margin-top:8px;position:relative"><div style="height:3px;width:39%;border-radius:9px;background:oklch(0.78 0.1 90)"></div><div style="position:absolute;left:37%;top:-5px;width:13px;height:13px;border-radius:999px;background:#F2EFEA"></div></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:14px">
+    <div style="flex:1;border-radius:13px;padding:11px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);text-align:center"><span class="ms" style="font-size:18px;color:#F2EFEA">autorenew</span><div style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:5px">AUTO-SPIN</div></div>
+    <div style="flex:1;border-radius:13px;padding:11px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);text-align:center"><span class="ms" style="font-size:18px;color:#F2EFEA">straighten</span><div style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:5px">FIT MAP</div></div>
+    <div style="flex:1;border-radius:13px;padding:11px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);text-align:center"><span class="ms" style="font-size:18px;color:#F2EFEA">compare</span><div style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:5px">A / B</div></div>
+  </div>
+  <div style="border-radius:14px;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);margin-top:12px">
+    <div style="display:flex;gap:8px;align-items:center"><span class="ms" style="font-size:16px;color:oklch(0.78 0.1 90)">auto_awesome</span><div style="font:700 12px Manrope,sans-serif;color:#F2EFEA">Back view is the weak angle</div></div>
+    <div style="font:400 11px/1.5 Manrope,sans-serif;color:#B9B1A6;margin-top:5px">The shoulder yoke pulls when you raise your arms. One size up fixes it; the sleeve then needs 1cm off.</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:12px"><div style="flex:1;background:oklch(0.78 0.1 90);color:#0E0D0C;font:700 13px Manrope,sans-serif;padding:14px;border-radius:14px;text-align:center">Save look</div><div style="width:46px;border:1px solid rgba(255,255,255,.2);border-radius:14px;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:18px;color:#F2EFEA">ios_share</span></div></div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">27 · 360° try-on player</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div><div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.62 0.11 55)">Friday · 25 July</div><div style="font:400 27px/1.05 'Instrument Serif',serif;color:#16130F;margin-top:7px">Morning,<br>Bilal</div></div>
+    <div style="display:flex;align-items:center;gap:5px;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:999px;padding:7px 10px;height:fit-content"><span class="ms" style="font-size:15px;color:#8A8278">rainy</span><span style="font:600 12px Manrope,sans-serif;color:#16130F">29°</span></div>
+  </div>
+  <div style="margin-top:16px;border-radius:22px;overflow:hidden;background:#16130F">
+    <div style="padding:14px 16px 0;display:flex;justify-content:space-between;align-items:center"><span style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;color:oklch(0.75 0.09 55)">JUMMAH · 1:30PM</span><span style="font:600 10.5px 'IBM Plex Mono',monospace;color:#F2EFEA;white-space:nowrap">93 fit</span></div>
+    <div style="display:flex;gap:6px;padding:11px 16px 0">
+      <div style="flex:1.5;aspect-ratio:3/4;border-radius:12px;background:repeating-linear-gradient(135deg,#2A2621 0 6px,#221F1A 6px 12px);display:flex;align-items:flex-end;padding:8px"><span style="font:500 8px 'IBM Plex Mono',monospace;color:#8A8278">white kurta</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px"><div style="flex:1;border-radius:12px;background:repeating-linear-gradient(135deg,#2A2621 0 6px,#221F1A 6px 12px)"></div><div style="flex:1;border-radius:12px;background:repeating-linear-gradient(135deg,#2A2621 0 6px,#221F1A 6px 12px)"></div></div>
+    </div>
+    <div style="padding:13px 16px 16px">
+      <div style="font:400 22px/1.1 'Instrument Serif',serif;color:#F6F4F0">White kurta, camel khussa</div>
+      <div style="display:flex;gap:7px;margin-top:8px"><span class="ms" style="font-size:14px;color:oklch(0.75 0.09 55);margin-top:1px">auto_awesome</span><div style="font:400 11.5px/1.45 Manrope,sans-serif;color:#B9B1A6">Light rain at noon — white reads right for Jummah.</div></div>
+      <div style="display:flex;gap:8px;margin-top:13px"><div style="flex:1;background:#F6F4F0;color:#16130F;font:700 12.5px Manrope,sans-serif;padding:12px;border-radius:13px;text-align:center">Try on</div><div style="width:42px;border:1.5px solid rgba(246,244,240,.25);border-radius:13px;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:16px;color:#F6F4F0">refresh</span></div></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:9px;margin-top:12px">
+    <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:18px;padding:13px"><span class="ms" style="font-size:20px;color:oklch(0.42 0.06 262)">content_cut</span><div style="font:700 12.5px Manrope,sans-serif;color:#16130F;margin-top:6px">Beard &amp; fit</div></div>
+    <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:18px;padding:13px"><span class="ms" style="font-size:20px;color:oklch(0.62 0.11 55)">watch</span><div style="font:700 12.5px Manrope,sans-serif;color:#16130F;margin-top:6px">Finish it</div></div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:16px">Shalwar kameez · 9 in closet</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">28 · Men's Today variant</div>
+<div style="font:400 11px/1.5 Manrope,sans-serif;color:#8A8278;margin-top:5px;max-width:250px">Same system, different weighting: Eastern-first, grooming surfaced, no colour-season language.</div>
+</div>
+
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Try next: "turn <a class="dv-oid" href="#2b">2b</a>'s lookbook into a full editorial flow" · "make the men's variant interactive in <a class="dv-oid" href="#1c">1c</a>" · "full dark pass on every screen in <a class="dv-oid" href="#1d">1d</a>"</p>
+</section>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">AI Stylist — foundation, core-loop prototype, screen library</span></div>
+
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Assumptions, IA &amp; navigation — read me first</div>
+<div class="dv-card" style="width:760px;padding:36px 40px;background:#F6F4F0">
+  <div style="font:400 12px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.62 0.11 55)">Design brief · v1</div>
+  <h1 style="font:400 52px/1.02 'Instrument Serif',serif;color:#16130F;margin:14px 0 0;letter-spacing:-.01em">AI Stylist</h1>
+  <p style="font:400 17px/1.6 Manrope,sans-serif;color:#4E4841;margin:14px 0 0;max-width:56ch;text-wrap:pretty">A wardrobe that thinks. The app answers one question every morning — <em style="font-family:'Instrument Serif',serif;font-size:19px;font-style:italic">what do I wear?</em> — and everything else (closet, try-on, shopping) exists to make that answer better.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:34px">
+    <div>
+      <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;padding-bottom:10px;border-bottom:1px solid rgba(22,19,15,.1)">Decisions I made for you</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+        <div style="font:400 14px/1.55 Manrope,sans-serif;color:#4E4841"><strong style="color:#16130F">Hero feature:</strong> Today's Outfit. One confident daily pick, generated overnight from closet + weather + calendar.</div>
+        <div style="font:400 14px/1.55 Manrope,sans-serif;color:#4E4841"><strong style="color:#16130F">AI presence:</strong> named but quiet — <em>Noor</em>. No mascot, no chat bubbles on the home screen; it speaks through confidence scores and one line of reasoning per suggestion.</div>
+        <div style="font:400 14px/1.55 Manrope,sans-serif;color:#4E4841"><strong style="color:#16130F">Navigation:</strong> 5 tabs — Today · Closet · Try-On (raised) · Shop · You. Chat lives as a persistent pill, reachable from any tab.</div>
+        <div style="font:400 14px/1.55 Manrope,sans-serif;color:#4E4841"><strong style="color:#16130F">Monetization:</strong> free tier with soft limits (3 generations/day, 2 try-ons/week). Pro upsell appears at the moment of exhaustion, never before value.</div>
+        <div style="font:400 14px/1.55 Manrope,sans-serif;color:#4E4841"><strong style="color:#16130F">Theme:</strong> light-first bone/ink palette, dark mode specified in the token table and shown on Try-On.</div>
+        <div style="font:400 14px/1.55 Manrope,sans-serif;color:#4E4841"><strong style="color:#16130F">Try-on rendering:</strong> labeled generation placeholders with real progress states — I don't fake photoreal output. Drop your renders into the slots.</div>
+      </div>
+    </div>
+    <div>
+      <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;padding-bottom:10px;border-bottom:1px solid rgba(22,19,15,.1)">Information architecture</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;font:500 12.5px/1.4 'IBM Plex Mono',monospace;color:#4E4841">
+        <div style="padding:9px 12px;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:8px"><span style="color:oklch(0.62 0.11 55)">01</span> &nbsp;Today &nbsp;<span style="color:#A39B90">→ outfit · rate my fit · calendar · weather</span></div>
+        <div style="padding:9px 12px;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:8px"><span style="color:oklch(0.62 0.11 55)">02</span> &nbsp;Closet &nbsp;<span style="color:#A39B90">→ add · details · stats · laundry · packing</span></div>
+        <div style="padding:9px 12px;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:8px"><span style="color:oklch(0.62 0.11 55)">03</span> &nbsp;Try-On &nbsp;<span style="color:#A39B90">→ own clothes · store clothes · saved looks</span></div>
+        <div style="padding:9px 12px;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:8px"><span style="color:oklch(0.62 0.11 55)">04</span> &nbsp;Shop &nbsp;<span style="color:#A39B90">→ match feed · Eastern edit · product · wishlist</span></div>
+        <div style="padding:9px 12px;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:8px"><span style="color:oklch(0.62 0.11 55)">05</span> &nbsp;You &nbsp;<span style="color:#A39B90">→ style profile · settings · Pro · help</span></div>
+        <div style="padding:9px 12px;background:#16130F;color:#F6F4F0;border-radius:8px">✦ &nbsp;Noor &nbsp;<span style="color:#A39B90">→ global chat overlay, context-aware</span></div>
+      </div>
+      <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;padding-bottom:10px;border-bottom:1px solid rgba(22,19,15,.1);margin-top:26px">First-run journey</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px;font:500 11px/1 'IBM Plex Mono',monospace;color:#4E4841">
+        <span style="padding:6px 9px;background:rgba(22,19,15,.06);border-radius:5px">Splash</span><span style="color:#B9B1A6">→</span>
+        <span style="padding:6px 9px;background:rgba(22,19,15,.06);border-radius:5px">3× Onboarding</span><span style="color:#B9B1A6">→</span>
+        <span style="padding:6px 9px;background:rgba(22,19,15,.06);border-radius:5px">Auth</span><span style="color:#B9B1A6">→</span>
+        <span style="padding:6px 9px;background:oklch(0.62 0.11 55);color:#fff;border-radius:5px">Scan (3 photos)</span><span style="color:#B9B1A6">→</span>
+        <span style="padding:6px 9px;background:rgba(22,19,15,.06);border-radius:5px">Style profile</span><span style="color:#B9B1A6">→</span>
+        <span style="padding:6px 9px;background:rgba(22,19,15,.06);border-radius:5px">Add 5 items</span><span style="color:#B9B1A6">→</span>
+        <span style="padding:6px 9px;background:#16130F;color:#fff;border-radius:5px">First outfit</span>
+      </div>
+      <p style="font:400 13px/1.55 Manrope,sans-serif;color:#6B655D;margin:14px 0 0">Time to first value target: <strong style="color:#16130F">under 3 minutes</strong>. Closet upload is batch-first (multi-select camera roll, AI tags in background) so the user is never asked to label anything.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Design system — tokens, type, components</div>
+<div class="dv-card" style="width:760px;padding:36px 40px">
+  <h2 style="font:400 34px/1.05 'Instrument Serif',serif;color:#16130F;margin:0">Design system</h2>
+  <p style="font:400 14px/1.55 Manrope,sans-serif;color:#6B655D;margin:8px 0 0;max-width:60ch">Warm bone paper, ink text, one clay accent doing all the work. Colours are authored in <code style="font-family:'IBM Plex Mono',monospace;font-size:12.5px">oklch</code> so light and dark share hue and chroma and only shift lightness — the Flutter theme can be generated from one table.</p>
+
+  <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin:30px 0 12px">Colour · light / dark</div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+    <div><div style="height:56px;border-radius:8px;background:oklch(0.62 0.11 55);border:1px solid rgba(0,0,0,.06)"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">primary</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">.62 .11 55<br>dark .70 .11 55</div></div>
+    <div><div style="height:56px;border-radius:8px;background:oklch(0.42 0.06 262);border:1px solid rgba(0,0,0,.06)"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">secondary</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">.42 .06 262<br>dark .68 .07 262</div></div>
+    <div><div style="height:56px;border-radius:8px;background:oklch(0.72 0.13 90);border:1px solid rgba(0,0,0,.06)"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">accent</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">.72 .13 90<br>gold, sparing</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#F6F4F0;border:1px solid rgba(0,0,0,.1)"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">background</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">#F6F4F0<br>dark #12110F</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#FFFFFF;border:1px solid rgba(0,0,0,.1)"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">surface</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">#FFFFFF<br>dark #1C1A17</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#16130F"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">text</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">#16130F<br>dark #F2EFEA</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#6B655D"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">text-muted</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">#6B655D<br>dark #A39B90</div></div>
+    <div><div style="height:56px;border-radius:8px;background:oklch(0.58 0.11 150)"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">success</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">perfect match</div></div>
+    <div><div style="height:56px;border-radius:8px;background:oklch(0.72 0.13 70)"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">warning</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">good match</div></div>
+    <div><div style="height:56px;border-radius:8px;background:oklch(0.56 0.16 25)"></div><div style="font:600 11px/1.5 'IBM Plex Mono',monospace;color:#16130F;margin-top:6px">error</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278">poor match</div></div>
+  </div>
+  <div style="display:flex;gap:4px;margin-top:12px">
+    <div style="flex:1;height:22px;border-radius:4px 0 0 4px;background:#FBFAF8"></div>
+    <div style="flex:1;height:22px;background:#F0EDE7"></div>
+    <div style="flex:1;height:22px;background:#E2DED6"></div>
+    <div style="flex:1;height:22px;background:#C9C3B9"></div>
+    <div style="flex:1;height:22px;background:#A39B90"></div>
+    <div style="flex:1;height:22px;background:#6B655D"></div>
+    <div style="flex:1;height:22px;background:#3B372F"></div>
+    <div style="flex:1;height:22px;border-radius:0 4px 4px 0;background:#16130F"></div>
+  </div>
+  <div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278;margin-top:5px">neutral 50 → 900 · hue 55, chroma ≤ .012 (never a pure grey)</div>
+
+  <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:34px;margin-top:34px">
+    <div>
+      <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-bottom:14px">Type · Instrument Serif + Manrope</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div><div style="font:400 40px/1 'Instrument Serif',serif;color:#16130F">Display 40/40</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">Instrument Serif · hero numbers, outfit names</div></div>
+        <div><div style="font:700 26px/1.15 Manrope,sans-serif;color:#16130F;letter-spacing:-.02em">Heading 26/30 · 700</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">screen titles</div></div>
+        <div><div style="font:600 18px/1.3 Manrope,sans-serif;color:#16130F">Title 18/24 · 600</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">card headers, sheet titles</div></div>
+        <div><div style="font:400 15px/1.55 Manrope,sans-serif;color:#4E4841">Body 15/23 · 400 — the reading size for reasoning, chat and product copy.</div></div>
+        <div><div style="font:500 12px/1.4 Manrope,sans-serif;color:#6B655D">Caption 12/17 · 500 — metadata, timestamps, worn-counts</div></div>
+        <div><div style="font:700 15px/1 Manrope,sans-serif;color:#16130F;letter-spacing:.01em">Button 15 · 700</div><div style="font:400 10px/1.4 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">min hit target 48dp</div></div>
+        <div><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.62 0.11 55)">Overline 11 · mono · .14em</div></div>
+      </div>
+    </div>
+    <div>
+      <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-bottom:14px">Components</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button style="border:none;background:#16130F;color:#F6F4F0;font:700 14px Manrope,sans-serif;padding:14px 22px;border-radius:14px;cursor:pointer" style-hover="background:#2C2721">Primary</button>
+          <button style="background:transparent;color:#16130F;font:700 14px Manrope,sans-serif;padding:13px 20px;border-radius:14px;border:1.5px solid rgba(22,19,15,.18);cursor:pointer" style-hover="border-color:#16130F">Secondary</button>
+          <button style="border:none;background:oklch(0.62 0.11 55);color:#fff;font:700 14px Manrope,sans-serif;padding:14px 20px;border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:7px" style-hover="background:oklch(0.55 0.11 55)"><span class="ms" style="font-size:18px">auto_awesome</span>Generate</button>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <span style="font:600 12px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:8px 13px;border-radius:999px">Chip</span>
+          <span style="font:600 12px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:8px 13px;border-radius:999px">Selected</span>
+          <span style="font:600 11px 'IBM Plex Mono',monospace;color:oklch(0.45 0.11 150);background:oklch(0.94 0.04 150);padding:7px 11px;border-radius:999px">94 · perfect</span>
+          <span style="font:600 11px 'IBM Plex Mono',monospace;color:oklch(0.48 0.13 70);background:oklch(0.95 0.05 85);padding:7px 11px;border-radius:999px">71 · good</span>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:14px 16px">
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#A39B90">Input · label</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span class="ms" style="font-size:19px;color:#A39B90">mail</span><span style="font:400 15px Manrope,sans-serif;color:#16130F">hello@aistylist.app</span><span style="width:1.5px;height:19px;background:oklch(0.62 0.11 55);margin-left:-6px"></span></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:stretch">
+          <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:12px">
+            <div style="height:54px;border-radius:9px;background:repeating-linear-gradient(135deg,#EFEBE4 0 6px,#E4DFD6 6px 12px)"></div>
+            <div style="font:600 12px Manrope,sans-serif;color:#16130F;margin-top:8px">Closet card</div>
+            <div style="font:500 10.5px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:2px">worn 12 ·  ♥</div>
+          </div>
+          <div style="flex:1;border-radius:14px;padding:12px;background:rgba(255,255,255,.55);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 22px rgba(22,19,15,.07)">
+            <div style="font:600 12px Manrope,sans-serif;color:#16130F">Glass sheet</div>
+            <div style="font:400 11.5px/1.45 Manrope,sans-serif;color:#6B655D;margin-top:4px">Used only over imagery — try-on controls, camera overlays.</div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:9px">
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#A39B90">Skeleton loader</div>
+          <div style="height:11px;border-radius:6px;width:70%;background:linear-gradient(90deg,#EFEBE4 0,#F8F6F2 40%,#EFEBE4 80%);background-size:320px 100%;animation:shimmer 1.5s linear infinite"></div>
+          <div style="height:11px;border-radius:6px;width:45%;background:linear-gradient(90deg,#EFEBE4 0,#F8F6F2 40%,#EFEBE4 80%);background-size:320px 100%;animation:shimmer 1.5s linear infinite"></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:14px;text-align:center">
+            <span class="ms" style="font-size:26px;color:#C9C3B9">checkroom</span>
+            <div style="font:600 12.5px Manrope,sans-serif;color:#16130F;margin-top:6px">Empty state</div>
+            <div style="font:400 11px/1.4 Manrope,sans-serif;color:#6B655D;margin-top:3px">Nothing here yet — add five things and Noor starts styling.</div>
+          </div>
+          <div style="flex:1;background:oklch(0.97 0.02 25);border:1px solid oklch(0.88 0.06 25);border-radius:14px;padding:14px;text-align:center">
+            <span class="ms" style="font-size:26px;color:oklch(0.56 0.16 25)">cloud_off</span>
+            <div style="font:600 12.5px Manrope,sans-serif;color:oklch(0.42 0.14 25);margin-top:6px">Error state</div>
+            <div style="font:400 11px/1.4 Manrope,sans-serif;color:oklch(0.5 0.1 25);margin-top:3px">Couldn't reach the stylist. Retry.</div>
+          </div>
+        </div>
+      </div>
+      <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin:26px 0 10px">Grid &amp; motion</div>
+      <div style="font:400 12.5px/1.65 Manrope,sans-serif;color:#4E4841">Spacing 4 · 8 · 12 · 16 · 24 · 32 · 48. Screen gutter 20dp. Radii 10 / 14 / 20 / 28 / full. Elevation is one soft shadow <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">0 6 22 rgba(22,19,15,.07)</code>, never stacked. Motion: 180ms standard, 320ms sheets, 520ms AI reveals, all <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">easeOutCubic</code>; AI thinking uses a breathing glow, never a spinner.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1c">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Core-loop prototype — tap through Today · Closet · Try-On · Shop · You · Noor</div>
+<div style="display:flex;gap:26px;align-items:flex-start">
+<div class="dv-card" style="width:462px;padding:30px;background:#EFECE6;display:flex;justify-content:center">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="height:100%;display:flex;flex-direction:column;background:#F6F4F0;font-family:Manrope,sans-serif;overflow:hidden">
+
+  <sc-if value="{{ isToday }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;overflow:auto;padding:62px 20px 108px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between">
+      <div>
+        <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.62 0.11 55)">Thursday · 24 July</div>
+        <div style="font:400 34px/1.05 'Instrument Serif',serif;color:#16130F;margin-top:8px">Good morning,<br>Zara</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:999px;padding:8px 12px">
+        <span class="ms" style="font-size:17px;color:oklch(0.72 0.13 90)">clear_day</span>
+        <span style="font:600 13px Manrope,sans-serif;color:#16130F">34°</span>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;border-radius:26px;overflow:hidden;background:#16130F;position:relative;box-shadow:0 10px 30px rgba(22,19,15,.14)">
+      <div style="padding:18px 20px 0;display:flex;align-items:center;justify-content:space-between">
+        <div style="font:500 10.5px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.75 0.09 55)">Today's outfit</div>
+        <div style="display:flex;align-items:center;gap:5px"><span class="ms" style="font-size:15px;color:oklch(0.72 0.13 90)">verified</span><span style="font:600 11.5px 'IBM Plex Mono',monospace;color:#F2EFEA">96 fit</span></div>
+      </div>
+      <div style="display:flex;gap:8px;padding:14px 20px 0">
+        <div style="flex:1.5;aspect-ratio:3/4;border-radius:14px;background:repeating-linear-gradient(135deg,#2A2621 0 7px,#221F1A 7px 14px);display:flex;align-items:flex-end;padding:10px"><span style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278">linen shirt</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div style="flex:1;border-radius:14px;background:repeating-linear-gradient(135deg,#2A2621 0 7px,#221F1A 7px 14px);display:flex;align-items:flex-end;padding:9px"><span style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278">trousers</span></div>
+          <div style="flex:1;border-radius:14px;background:repeating-linear-gradient(135deg,#2A2621 0 7px,#221F1A 7px 14px);display:flex;align-items:flex-end;padding:9px"><span style="font:500 9px 'IBM Plex Mono',monospace;color:#8A8278">loafers</span></div>
+        </div>
+      </div>
+      <div style="padding:16px 20px 20px">
+        <div style="font:400 25px/1.1 'Instrument Serif',serif;color:#F6F4F0">Quiet linen, sharp shoes</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-top:9px">
+          <span class="ms" style="font-size:15px;color:oklch(0.75 0.09 55);margin-top:1px">auto_awesome</span>
+          <div style="font:400 12.5px/1.5 Manrope,sans-serif;color:#B9B1A6">34° and a 2pm client review — breathable, but the leather keeps it formal. Your olive trousers haven't been worn in 3 weeks.</div>
+        </div>
+        <div style="display:flex;gap:9px;margin-top:16px">
+          <button onClick="{{ goTryOn }}" style="flex:1;border:none;background:#F6F4F0;color:#16130F;font:700 13.5px Manrope,sans-serif;padding:14px;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px" style-hover="background:#fff"><span class="ms" style="font-size:17px">visibility</span>Try on</button>
+          <button onClick="{{ shuffle }}" style="border:1.5px solid rgba(246,244,240,.25);background:transparent;color:#F6F4F0;font:700 13.5px Manrope,sans-serif;padding:13px 16px;border-radius:14px;cursor:pointer" style-hover="border-color:#F6F4F0"><span class="ms" style="font-size:17px">refresh</span></button>
+          <button onClick="{{ wearIt }}" style="border:1.5px solid rgba(246,244,240,.25);background:transparent;color:#F6F4F0;font:700 13.5px Manrope,sans-serif;padding:13px 16px;border-radius:14px;cursor:pointer" style-hover="border-color:#F6F4F0"><span class="ms" style="font-size:17px">{{ wearIcon }}</span></button>
+        </div>
+        <div style="font:500 11px/1.4 'IBM Plex Mono',monospace;color:#8A8278;margin-top:10px">{{ genNote }}</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <div onClick="{{ goRate }}" style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:20px;padding:15px;cursor:pointer" style-hover="border-color:rgba(22,19,15,.2)">
+        <span class="ms" style="font-size:22px;color:oklch(0.62 0.11 55)">photo_camera</span>
+        <div style="font:700 13.5px Manrope,sans-serif;color:#16130F;margin-top:8px">Rate my fit</div>
+        <div style="font:400 11.5px/1.4 Manrope,sans-serif;color:#6B655D;margin-top:2px">Selfie → score in 4s</div>
+      </div>
+      <div onClick="{{ goChat }}" style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:20px;padding:15px;cursor:pointer" style-hover="border-color:rgba(22,19,15,.2)">
+        <span class="ms" style="font-size:22px;color:oklch(0.42 0.06 262)">forum</span>
+        <div style="font:700 13.5px Manrope,sans-serif;color:#16130F;margin-top:8px">Ask Noor</div>
+        <div style="font:400 11.5px/1.4 Manrope,sans-serif;color:#6B655D;margin-top:2px">"I have a mehndi Friday"</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:26px">
+      <div style="font:700 17px Manrope,sans-serif;color:#16130F">This week</div>
+      <span style="font:600 12px Manrope,sans-serif;color:oklch(0.55 0.11 55)">Calendar</span>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:12px;overflow:auto;padding-bottom:4px">
+      <sc-for list="{{ week }}" as="d" hint-placeholder-count="4">
+      <div style="flex:none;width:96px;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:16px;padding:11px">
+        <div style="font:600 10.5px 'IBM Plex Mono',monospace;color:#A39B90">{{ d.day }}</div>
+        <div style="height:62px;border-radius:10px;margin-top:8px;background:repeating-linear-gradient(135deg,#EFEBE4 0 6px,#E4DFD6 6px 12px)"></div>
+        <div style="font:600 11.5px/1.3 Manrope,sans-serif;color:#16130F;margin-top:7px">{{ d.event }}</div>
+      </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:24px;background:oklch(0.96 0.02 90);border:1px solid oklch(0.9 0.05 90);border-radius:20px;padding:16px;display:flex;gap:12px;align-items:center">
+      <span class="ms" style="font-size:22px;color:oklch(0.58 0.12 90)">local_laundry_service</span>
+      <div style="flex:1">
+        <div style="font:700 13px Manrope,sans-serif;color:#16130F">3 items in the laundry basket</div>
+        <div style="font:400 11.5px Manrope,sans-serif;color:#6B655D;margin-top:2px">Excluded from today's suggestions</div>
+      </div>
+      <span class="ms" style="font-size:18px;color:#A39B90">chevron_right</span>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isCloset }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow:auto;padding:62px 20px 108px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font:700 27px Manrope,sans-serif;color:#16130F;letter-spacing:-.02em">Closet</div>
+      <div style="display:flex;gap:8px">
+        <div style="width:40px;height:40px;border-radius:999px;background:#fff;border:1px solid rgba(22,19,15,.08);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:19px;color:#16130F">search</span></div>
+        <div onClick="{{ openAdd }}" style="width:40px;height:40px;border-radius:999px;background:#16130F;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="ms" style="font-size:20px;color:#F6F4F0">add</span></div>
+      </div>
+    </div>
+    <div style="font:500 11.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:6px">{{ closetCount }} items · 4 unworn this season</div>
+
+    <div style="display:flex;gap:7px;margin-top:16px;overflow:auto;padding-bottom:4px">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+      <div onClick="{{ c.pick }}" style="flex:none;font:600 12.5px Manrope,sans-serif;padding:9px 14px;border-radius:999px;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.name }}</div>
+      </sc-for>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px">
+      <sc-for list="{{ items }}" as="it" hint-placeholder-count="6">
+      <div style="background:#fff;border:1px solid rgba(22,19,15,.07);border-radius:18px;padding:10px;animation:riseIn .32s ease-out both">
+        <div style="aspect-ratio:1;border-radius:12px;position:relative;background:{{ it.swatch }}">
+          <div onClick="{{ it.fav }}" style="position:absolute;top:7px;right:7px;width:28px;height:28px;border-radius:999px;background:rgba(255,255,255,.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="ms" style="font-size:16px;color:{{ it.favColor }}">{{ it.favIcon }}</span></div>
+          <span style="position:absolute;bottom:7px;left:8px;font:500 8.5px 'IBM Plex Mono',monospace;color:rgba(22,19,15,.45)">{{ it.slot }}</span>
+        </div>
+        <div style="font:600 13px Manrope,sans-serif;color:#16130F;margin-top:9px">{{ it.name }}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px">
+          <span style="font:500 10.5px 'IBM Plex Mono',monospace;color:#A39B90">worn {{ it.worn }}×</span>
+          <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:{{ it.tagFg }};background:{{ it.tagBg }};padding:4px 7px;border-radius:999px">{{ it.tag }}</span>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isTryOn }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow:auto;padding:62px 20px 108px;background:#12110F">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font:700 27px Manrope,sans-serif;color:#F2EFEA;letter-spacing:-.02em">Try-on studio</div>
+      <span style="font:600 10.5px 'IBM Plex Mono',monospace;color:oklch(0.75 0.09 55);border:1px solid rgba(255,255,255,.16);padding:6px 9px;border-radius:999px">{{ tryLeft }} left</span>
+    </div>
+    <div style="margin-top:16px;border-radius:24px;overflow:hidden;position:relative;background:repeating-linear-gradient(135deg,#211E1A 0 8px,#1A1815 8px 16px);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center">
+      <sc-if value="{{ tryIdle }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;padding:0 34px">
+        <span class="ms" style="font-size:34px;color:#6B655D">accessibility_new</span>
+        <div style="font:500 10.5px/1.6 'IBM Plex Mono',monospace;color:#8A8278;margin-top:10px">[ your body scan · front view ]<br>drop render here</div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ tryBusy }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center">
+        <div style="width:70px;height:70px;border-radius:999px;margin:0 auto;background:radial-gradient(circle,oklch(0.7 0.11 55) 0%,rgba(180,113,63,0) 70%);animation:pulseGlow 1.5s ease-in-out infinite"></div>
+        <div style="font:600 12.5px Manrope,sans-serif;color:#F2EFEA;margin-top:14px">Fitting the kurta to your frame</div>
+        <div style="font:500 10.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:5px">step 2 of 3 · draping fabric</div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ tryDone }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#2E2A24 0 8px,#262219 8px 16px);display:flex;flex-direction:column;justify-content:flex-end;padding:16px">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;color:#A39B90;position:absolute;top:16px;left:16px">[ generated try-on · front ]</div>
+        <div style="border-radius:16px;padding:13px 15px;background:rgba(28,26,23,.62);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="ms" style="font-size:16px;color:oklch(0.72 0.13 90)">auto_awesome</span>
+            <div style="font:700 13px Manrope,sans-serif;color:#F2EFEA">Reads well on you — 91</div>
+          </div>
+          <div style="font:400 11.5px/1.5 Manrope,sans-serif;color:#B9B1A6;margin-top:5px">The ivory lifts your skin tone. Shorten the sleeve by 1cm and swap to the khussa.</div>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <sc-for list="{{ views }}" as="v" hint-placeholder-count="3">
+      <div style="flex:1;text-align:center;font:600 12px Manrope,sans-serif;padding:11px;border-radius:12px;background:{{ v.bg }};color:{{ v.fg }};border:1px solid rgba(255,255,255,.12)">{{ v.name }}</div>
+      </sc-for>
+    </div>
+    <div style="font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:24px">Dress the model</div>
+    <div style="display:flex;gap:9px;margin-top:11px;overflow:auto;padding-bottom:4px">
+      <sc-for list="{{ tryItems }}" as="t" hint-placeholder-count="4">
+      <div style="flex:none;width:78px">
+        <div style="aspect-ratio:1;border-radius:14px;background:{{ t.swatch }};border:2px solid {{ t.ring }}"></div>
+        <div style="font:600 10.5px/1.3 Manrope,sans-serif;color:#B9B1A6;margin-top:6px;text-align:center">{{ t.name }}</div>
+      </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:22px">
+      <button onClick="{{ runTryOn }}" style="flex:1;border:none;background:oklch(0.7 0.11 55);color:#12110F;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px" style-hover="background:oklch(0.76 0.11 55)"><span class="ms" style="font-size:18px">auto_awesome</span>{{ tryCta }}</button>
+      <button style="border:1.5px solid rgba(255,255,255,.2);background:transparent;color:#F2EFEA;font:700 14px Manrope,sans-serif;padding:14px 17px;border-radius:15px;cursor:pointer"><span class="ms" style="font-size:18px">ios_share</span></button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isShop }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow:auto;padding:62px 20px 108px">
+    <div style="font:700 27px Manrope,sans-serif;color:#16130F;letter-spacing:-.02em">Matched for you</div>
+    <div style="font:500 11.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:6px">ranked by body fit, skin tone &amp; budget ≤ PKR 12k</div>
+    <div style="display:flex;gap:7px;margin-top:16px;overflow:auto;padding-bottom:4px">
+      <div style="flex:none;font:600 12.5px Manrope,sans-serif;padding:9px 14px;border-radius:999px;background:#16130F;color:#F6F4F0">Eastern edit</div>
+      <div style="flex:none;font:600 12.5px Manrope,sans-serif;padding:9px 14px;border-radius:999px;background:#fff;color:#16130F;border:1px solid rgba(22,19,15,.1)">Western</div>
+      <div style="flex:none;font:600 12.5px Manrope,sans-serif;padding:9px 14px;border-radius:999px;background:#fff;color:#16130F;border:1px solid rgba(22,19,15,.1)">Wedding</div>
+      <div style="flex:none;font:600 12.5px Manrope,sans-serif;padding:9px 14px;border-radius:999px;background:#fff;color:#16130F;border:1px solid rgba(22,19,15,.1)">Under 5k</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+      <sc-for list="{{ products }}" as="p" hint-placeholder-count="3">
+      <div style="background:#fff;border:1px solid rgba(22,19,15,.07);border-radius:20px;padding:12px;display:flex;gap:13px">
+        <div style="width:96px;flex:none;border-radius:14px;background:{{ p.swatch }}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div>
+              <div style="font:500 10px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#A39B90">{{ p.brand }}</div>
+              <div style="font:600 14.5px/1.25 Manrope,sans-serif;color:#16130F;margin-top:4px">{{ p.name }}</div>
+            </div>
+            <div onClick="{{ p.like }}" style="cursor:pointer"><span class="ms" style="font-size:19px;color:{{ p.likeColor }}">{{ p.likeIcon }}</span></div>
+          </div>
+          <div style="display:flex;gap:5px;margin-top:9px">
+            <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:{{ p.mFg }};background:{{ p.mBg }};padding:5px 8px;border-radius:999px">{{ p.score }} · {{ p.label }}</span>
+            <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:5px 8px;border-radius:999px">colour {{ p.color }}</span>
+            <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:5px 8px;border-radius:999px">fit {{ p.fit }}</span>
+          </div>
+          <div style="font:400 11.5px/1.45 Manrope,sans-serif;color:#6B655D;margin-top:8px">{{ p.why }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:9px">
+            <span style="font:700 15px Manrope,sans-serif;color:#16130F">{{ p.price }}</span>
+            <span onClick="{{ goTryOn }}" style="font:700 11.5px Manrope,sans-serif;color:oklch(0.55 0.11 55);cursor:pointer">Try on →</span>
+          </div>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isYou }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow:auto;padding:62px 20px 108px">
+    <div style="display:flex;gap:14px;align-items:center">
+      <div style="width:66px;height:66px;border-radius:999px;background:repeating-linear-gradient(135deg,#EFEBE4 0 6px,#E4DFD6 6px 12px);border:1px solid rgba(22,19,15,.08)"></div>
+      <div>
+        <div style="font:700 21px Manrope,sans-serif;color:#16130F;letter-spacing:-.01em">Zara Ahmed</div>
+        <div style="font:500 11.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:3px">Lahore · profile 92% complete</div>
+      </div>
+    </div>
+    <div style="margin-top:18px;background:#16130F;border-radius:22px;padding:18px 20px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.75 0.09 55)">Style profile</div>
+        <span style="font:600 11px 'IBM Plex Mono',monospace;color:#8A8278">rescan</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 10px;margin-top:14px">
+        <sc-for list="{{ profile }}" as="f" hint-placeholder-count="6">
+        <div>
+          <div style="font:500 10px 'IBM Plex Mono',monospace;color:#8A8278">{{ f.k }}</div>
+          <div style="font:400 19px/1.1 'Instrument Serif',serif;color:#F6F4F0;margin-top:3px">{{ f.v }}</div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.07);border-radius:18px;padding:14px"><div style="font:400 26px/1 'Instrument Serif',serif;color:#16130F">128</div><div style="font:500 10.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">items</div></div>
+      <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.07);border-radius:18px;padding:14px"><div style="font:400 26px/1 'Instrument Serif',serif;color:#16130F">41</div><div style="font:500 10.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">outfits worn</div></div>
+      <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.07);border-radius:18px;padding:14px"><div style="font:400 26px/1 'Instrument Serif',serif;color:oklch(0.55 0.11 55)">88</div><div style="font:500 10.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">avg score</div></div>
+    </div>
+    <div style="margin-top:12px;border-radius:20px;padding:18px;background:linear-gradient(140deg,oklch(0.72 0.13 90) 0%,oklch(0.62 0.11 55) 100%)">
+      <div style="font:400 23px/1.1 'Instrument Serif',serif;color:#1A1509">Stylist Pro</div>
+      <div style="font:400 12.5px/1.5 Manrope,sans-serif;color:rgba(26,21,9,.75);margin-top:6px">Unlimited generations, 360° try-on, wedding lookbooks, priority Noor.</div>
+      <button style="border:none;background:#16130F;color:#F6F4F0;font:700 13px Manrope,sans-serif;padding:12px 18px;border-radius:12px;margin-top:13px;cursor:pointer">PKR 1,200 / mo</button>
+    </div>
+    <div style="margin-top:12px;background:#fff;border:1px solid rgba(22,19,15,.07);border-radius:20px;overflow:hidden">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+      <div style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(22,19,15,.06)">
+        <span class="ms" style="font-size:20px;color:#6B655D">{{ r.icon }}</span>
+        <div style="flex:1;font:600 14px Manrope,sans-serif;color:#16130F">{{ r.name }}</div>
+        <span style="font:500 11px 'IBM Plex Mono',monospace;color:#A39B90">{{ r.meta }}</span>
+        <span class="ms" style="font-size:18px;color:#C9C3B9">chevron_right</span>
+      </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding-top:56px">
+    <div style="display:flex;align-items:center;gap:11px;padding:10px 20px 12px;border-bottom:1px solid rgba(22,19,15,.07)">
+      <div onClick="{{ goToday }}" style="cursor:pointer"><span class="ms" style="font-size:22px;color:#16130F">arrow_back</span></div>
+      <div style="width:32px;height:32px;border-radius:999px;background:radial-gradient(circle at 35% 30%,oklch(0.78 0.1 90),oklch(0.55 0.11 55))"></div>
+      <div style="flex:1"><div style="font:700 15px Manrope,sans-serif;color:#16130F">Noor</div><div style="font:500 10.5px 'IBM Plex Mono',monospace;color:oklch(0.55 0.11 150)">knows your 128 items</div></div>
+    </div>
+    <div style="flex:1;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ chat }}" as="m" hint-placeholder-count="3">
+      <div style="align-self:{{ m.align }};max-width:80%;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }};border-radius:{{ m.radius }};padding:12px 14px;font:400 13.5px/1.5 Manrope,sans-serif;animation:riseIn .3s ease-out both">{{ m.text }}</div>
+      </sc-for>
+      <sc-if value="{{ chatBusy }}" hint-placeholder-val="{{ false }}">
+      <div style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:12px 14px">
+        <div style="width:22px;height:22px;border-radius:999px;background:radial-gradient(circle,oklch(0.7 0.11 55) 0%,rgba(180,113,63,0) 70%);animation:pulseGlow 1.3s ease-in-out infinite"></div>
+        <span style="font:500 11.5px 'IBM Plex Mono',monospace;color:#8A8278">reading your closet…</span>
+      </div>
+      </sc-if>
+      <sc-if value="{{ chatCards }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:9px;align-self:flex-start;width:100%">
+        <sc-for list="{{ suggested }}" as="s" hint-placeholder-count="3">
+        <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:16px;padding:9px">
+          <div style="aspect-ratio:3/4;border-radius:10px;background:{{ s.swatch }}"></div>
+          <div style="font:600 11.5px/1.3 Manrope,sans-serif;color:#16130F;margin-top:7px">{{ s.name }}</div>
+          <div style="font:600 9.5px 'IBM Plex Mono',monospace;color:oklch(0.45 0.11 150);margin-top:3px">{{ s.score }}</div>
+        </div>
+        </sc-for>
+      </div>
+      </sc-if>
+    </div>
+    <div style="padding:10px 20px 14px;border-top:1px solid rgba(22,19,15,.07);background:#F6F4F0">
+      <div style="display:flex;gap:7px;overflow:auto;padding-bottom:9px">
+        <sc-for list="{{ prompts }}" as="q" hint-placeholder-count="3">
+        <div onClick="{{ q.send }}" style="flex:none;font:600 11.5px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:8px 12px;border-radius:999px;white-space:nowrap;cursor:pointer" style-hover="border-color:#16130F">{{ q.text }}</div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:9px;align-items:center;background:#fff;border:1px solid rgba(22,19,15,.1);border-radius:999px;padding:6px 6px 6px 16px">
+        <input value="{{ input }}" onChange="{{ onInput }}" placeholder="Ask Noor anything…" style="flex:1;border:none;outline:none;background:transparent;font:400 14px Manrope,sans-serif;color:#16130F" />
+        <div onClick="{{ send }}" style="width:38px;height:38px;flex:none;border-radius:999px;background:#16130F;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="ms" style="font-size:19px;color:#F6F4F0">arrow_upward</span></div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isRate }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow:auto;padding:62px 20px 108px">
+    <div onClick="{{ goToday }}" style="cursor:pointer"><span class="ms" style="font-size:23px;color:#16130F">arrow_back</span></div>
+    <div style="font:700 27px Manrope,sans-serif;color:#16130F;letter-spacing:-.02em;margin-top:12px">Outfit rating</div>
+    <div style="margin-top:16px;display:flex;gap:12px">
+      <div style="flex:1;aspect-ratio:3/4;border-radius:20px;background:repeating-linear-gradient(135deg,#EFEBE4 0 7px,#E4DFD6 7px 14px);display:flex;align-items:flex-end;padding:12px"><span style="font:500 9.5px 'IBM Plex Mono',monospace;color:#8A8278">[ your selfie ]</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#16130F;border-radius:20px;padding:16px">
+        <div style="font:400 62px/1 'Instrument Serif',serif;color:#F6F4F0">84</div>
+        <div style="font:500 10px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.75 0.09 55);margin-top:6px">overall</div>
+        <div style="width:100%;height:1px;background:rgba(255,255,255,.12);margin:14px 0"></div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ scores }}" as="s" hint-placeholder-count="3">
+          <div>
+            <div style="display:flex;justify-content:space-between;font:600 10.5px 'IBM Plex Mono',monospace;color:#B9B1A6"><span>{{ s.k }}</span><span>{{ s.v }}</span></div>
+            <div style="height:4px;border-radius:99px;background:rgba(255,255,255,.12);margin-top:5px"><div style="height:4px;border-radius:99px;width:{{ s.w }};background:oklch(0.72 0.13 90)"></div></div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+      <sc-for list="{{ tips }}" as="t" hint-placeholder-count="3">
+      <div style="background:#fff;border:1px solid rgba(22,19,15,.07);border-radius:18px;padding:14px;display:flex;gap:11px">
+        <span class="ms" style="font-size:20px;color:{{ t.color }}">{{ t.icon }}</span>
+        <div><div style="font:700 13px Manrope,sans-serif;color:#16130F">{{ t.title }}</div><div style="font:400 12px/1.5 Manrope,sans-serif;color:#6B655D;margin-top:3px">{{ t.body }}</div></div>
+      </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ showAdd }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:80;background:rgba(22,19,15,.42);display:flex;align-items:flex-end">
+    <div style="width:100%;background:#F6F4F0;border-radius:28px 28px 0 0;padding:12px 20px 34px;animation:riseIn .3s ease-out both">
+      <div style="width:40px;height:4px;border-radius:99px;background:#D6D0C6;margin:0 auto 16px"></div>
+      <div style="font:700 19px Manrope,sans-serif;color:#16130F">Add to closet</div>
+      <div style="font:400 12.5px/1.5 Manrope,sans-serif;color:#6B655D;margin-top:5px">Pick up to 20 photos. Noor removes backgrounds, names each piece and tags fabric, colour and formality.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+        <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:18px;padding:16px"><span class="ms" style="font-size:24px;color:oklch(0.62 0.11 55)">photo_library</span><div style="font:700 13.5px Manrope,sans-serif;color:#16130F;margin-top:9px">Camera roll</div><div style="font:400 11px Manrope,sans-serif;color:#6B655D;margin-top:2px">Batch upload</div></div>
+        <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:18px;padding:16px"><span class="ms" style="font-size:24px;color:oklch(0.42 0.06 262)">photo_camera</span><div style="font:700 13.5px Manrope,sans-serif;color:#16130F;margin-top:9px">Shoot now</div><div style="font:400 11px Manrope,sans-serif;color:#6B655D;margin-top:2px">Guided frame</div></div>
+        <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:18px;padding:16px"><span class="ms" style="font-size:24px;color:#6B655D">receipt_long</span><div style="font:700 13.5px Manrope,sans-serif;color:#16130F;margin-top:9px">From receipt</div><div style="font:400 11px Manrope,sans-serif;color:#6B655D;margin-top:2px">Scan an order</div></div>
+        <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:18px;padding:16px"><span class="ms" style="font-size:24px;color:#6B655D">link</span><div style="font:700 13.5px Manrope,sans-serif;color:#16130F;margin-top:9px">Paste a link</div><div style="font:400 11px Manrope,sans-serif;color:#6B655D;margin-top:2px">Store page</div></div>
+      </div>
+      <button onClick="{{ closeAdd }}" style="width:100%;border:none;background:#16130F;color:#F6F4F0;font:700 14.5px Manrope,sans-serif;padding:16px;border-radius:16px;margin-top:16px;cursor:pointer">Continue</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:70;padding:8px 14px 26px;background:rgba(246,244,240,.82);backdrop-filter:blur(18px);border-top:1px solid rgba(22,19,15,.07);display:flex;align-items:flex-end">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+    <div onClick="{{ t.go }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 0">
+      <div style="width:44px;height:{{ t.h }};border-radius:999px;background:{{ t.pill }};display:flex;align-items:center;justify-content:center;margin-bottom:{{ t.lift }}"><span class="ms" style="font-size:{{ t.size }};color:{{ t.color }}">{{ t.icon }}</span></div>
+      <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:{{ t.color }}">{{ t.name }}</span>
+    </div>
+    </sc-for>
+  </div>
+</div>
+</x-import>
+</div>
+
+<div class="dv-card" style="width:270px;padding:22px;background:#F6F4F0">
+  <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278">Try these</div>
+  <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px;font:400 12.5px/1.5 Manrope,sans-serif;color:#4E4841">
+    <div><strong style="color:#16130F">Tab bar</strong> — five destinations, Try-On raised. Icons are Material Symbols Rounded throughout.</div>
+    <div><strong style="color:#16130F">Shuffle</strong> the daily outfit — the free-tier counter decrements and the reasoning line changes.</div>
+    <div><strong style="color:#16130F">Ask Noor</strong> — tap a prompt chip; the thinking glow runs, then outfit cards come back inline.</div>
+    <div><strong style="color:#16130F">Try-On</strong> — dark by default. Hit Generate to watch the three-step fitting state.</div>
+    <div><strong style="color:#16130F">Closet +</strong> — opens the batch-upload sheet. Filters are live.</div>
+    <div><strong style="color:#16130F">Rate my fit</strong> — from the Today screen, second card.</div>
+  </div>
+  <div style="height:1px;background:rgba(22,19,15,.1);margin:18px 0"></div>
+  <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278">AI interaction rules</div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px;font:400 12px/1.5 Manrope,sans-serif;color:#4E4841">
+    <div>1 · Every AI output carries a number <em>and</em> one sentence of why.</div>
+    <div>2 · Never a spinner. Thinking is a breathing glow with a named step.</div>
+    <div>3 · Always an escape hatch: shuffle, edit, or "not this".</div>
+    <div>4 · Confidence below 70 downgrades the copy from "wear this" to "worth trying".</div>
+    <div>5 · Nothing auto-posts, auto-buys, or auto-deletes.</div>
+  </div>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="dv-opt" id="1d" style="margin-top:32px">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Screen library — the remaining 20 screens at working fidelity</div>
+<div class="dv-card" style="width:1616px;padding:30px 30px 34px;background:#EFECE6">
+<div style="display:flex;flex-wrap:wrap;gap:22px">
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#16130F;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="text-align:center">
+    <div style="width:54px;height:54px;border-radius:999px;margin:0 auto;background:radial-gradient(circle at 35% 30%,oklch(0.78 0.1 90),oklch(0.55 0.11 55));animation:pulseGlow 2.4s ease-in-out infinite"></div>
+    <div style="font:400 30px/1 'Instrument Serif',serif;color:#F6F4F0;margin-top:18px">AI Stylist</div>
+    <div style="font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;text-transform:uppercase;color:#8A8278;margin-top:10px">dress with certainty</div>
+  </div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">01 · Splash</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="flex:1;background:repeating-linear-gradient(135deg,#E7E4EE 0 9px,#DCD8E6 9px 18px);position:relative">
+    <span style="position:absolute;bottom:14px;left:16px;font:500 9px 'IBM Plex Mono',monospace;color:rgba(22,19,15,.4)">[ hero: two people, mixed east/west ]</span>
+  </div>
+  <div style="padding:22px 20px 30px">
+    <div style="display:flex;gap:5px"><span style="width:18px;height:3px;border-radius:9px;background:#16130F"></span><span style="width:6px;height:3px;border-radius:9px;background:#D6D0C6"></span><span style="width:6px;height:3px;border-radius:9px;background:#D6D0C6"></span></div>
+    <div style="font:400 27px/1.1 'Instrument Serif',serif;color:#16130F;margin-top:14px">Your closet,<br>finally understood</div>
+    <div style="font:400 12.5px/1.5 Manrope,sans-serif;color:#6B655D;margin-top:8px">Photograph what you own. Noor learns your shape, tone and taste — then dresses you.</div>
+    <div style="display:flex;gap:9px;align-items:center;margin-top:18px">
+      <div style="flex:1;background:#16130F;color:#F6F4F0;font:700 13px Manrope,sans-serif;padding:14px;border-radius:14px;text-align:center">Next</div>
+      <div style="font:600 12px Manrope,sans-serif;color:#8A8278">Skip</div>
+    </div>
+  </div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">02 · Onboarding 1/3</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 20px 20px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:400 30px/1.05 'Instrument Serif',serif;color:#16130F">Welcome back</div>
+  <div style="font:400 12.5px Manrope,sans-serif;color:#6B655D;margin-top:6px">Your closet is where you left it.</div>
+  <div style="background:#fff;border:1px solid rgba(22,19,15,.1);border-radius:14px;padding:12px 14px;margin-top:20px"><div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#A39B90">EMAIL</div><div style="font:400 13.5px Manrope,sans-serif;color:#16130F;margin-top:4px">zara@studio.pk</div></div>
+  <div style="background:#fff;border:1.5px solid #16130F;border-radius:14px;padding:12px 14px;margin-top:10px"><div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#A39B90">PASSWORD</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font:400 13.5px Manrope,sans-serif;color:#16130F;letter-spacing:.14em">••••••••</span><span class="ms" style="font-size:17px;color:#A39B90">visibility_off</span></div></div>
+  <div style="font:600 11.5px Manrope,sans-serif;color:oklch(0.55 0.11 55);margin-top:11px;text-align:right">Forgot password?</div>
+  <div style="background:#16130F;color:#F6F4F0;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;text-align:center;margin-top:14px">Log in</div>
+  <div style="display:flex;align-items:center;gap:9px;margin-top:20px"><span style="flex:1;height:1px;background:rgba(22,19,15,.1)"></span><span style="font:500 9.5px 'IBM Plex Mono',monospace;color:#A39B90">OR</span><span style="flex:1;height:1px;background:rgba(22,19,15,.1)"></span></div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.12);border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;font:700 12.5px Manrope,sans-serif;color:#16130F"><span style="width:16px;height:16px;border-radius:999px;background:conic-gradient(#EA4335,#FBBC05,#34A853,#4285F4)"></span>Continue with Google</div>
+    <div style="background:#16130F;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;font:700 12.5px Manrope,sans-serif;color:#F6F4F0"><span style="width:13px;height:13px;border-radius:4px;background:#F6F4F0;display:inline-block"></span>Continue with Apple</div>
+  </div>
+  <div style="font:400 11.5px Manrope,sans-serif;color:#6B655D;text-align:center;margin-top:18px">New here? <span style="color:#16130F;font-weight:700">Create account</span></div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">03 · Login</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 20px 20px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:400 30px/1.05 'Instrument Serif',serif;color:#16130F">Create account</div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.1);border-radius:14px;padding:12px 14px"><div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#A39B90">FULL NAME</div><div style="font:400 13.5px Manrope,sans-serif;color:#16130F;margin-top:4px">Zara Ahmed</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.1);border-radius:14px;padding:12px 14px"><div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#A39B90">EMAIL</div><div style="font:400 13.5px Manrope,sans-serif;color:#16130F;margin-top:4px">zara@studio.pk</div></div>
+    <div style="background:#fff;border:1px solid oklch(0.56 0.16 25);border-radius:14px;padding:12px 14px"><div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#A39B90">PASSWORD</div><div style="font:400 13.5px Manrope,sans-serif;color:#16130F;margin-top:4px;letter-spacing:.14em">•••••</div></div>
+    <div style="display:flex;gap:6px;align-items:center;font:500 10.5px Manrope,sans-serif;color:oklch(0.5 0.14 25)"><span class="ms" style="font-size:14px">error</span>8 characters minimum</div>
+    <div style="display:flex;gap:4px;margin-top:2px"><span style="flex:1;height:3px;border-radius:9px;background:oklch(0.56 0.16 25)"></span><span style="flex:1;height:3px;border-radius:9px;background:#E2DED6"></span><span style="flex:1;height:3px;border-radius:9px;background:#E2DED6"></span></div>
+  </div>
+  <div style="display:flex;gap:9px;align-items:flex-start;margin-top:18px"><span class="ms" style="font-size:18px;color:#16130F">check_box</span><div style="font:400 11px/1.45 Manrope,sans-serif;color:#6B655D">I agree to the Terms and to Noor analysing my photos on-device.</div></div>
+  <div style="background:#16130F;color:#F6F4F0;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;text-align:center;margin-top:16px">Create account</div>
+  <div style="background:oklch(0.96 0.02 90);border:1px solid oklch(0.9 0.05 90);border-radius:14px;padding:12px;margin-top:16px;font:400 11px/1.45 Manrope,sans-serif;color:#4E4841"><strong>Privacy:</strong> body photos never leave the device unencrypted, and can be deleted while keeping your style profile.</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">04 · Signup</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 20px 20px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.62 0.11 55)">Step 1 of 4</div>
+  <div style="font:400 26px/1.1 'Instrument Serif',serif;color:#16130F;margin-top:10px">How do you dress?</div>
+  <div style="font:400 12px/1.5 Manrope,sans-serif;color:#6B655D;margin-top:7px">Pick as many as feel true. You can change this any time.</div>
+  <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:16px">
+    <span style="font:600 11.5px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:9px 12px;border-radius:999px;white-space:nowrap">Eastern formal</span>
+    <span style="font:600 11.5px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:9px 12px;border-radius:999px;white-space:nowrap">Minimal</span>
+    <span style="font:600 11.5px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:9px 12px;border-radius:999px;white-space:nowrap">Smart casual</span>
+    <span style="font:600 11.5px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:9px 12px;border-radius:999px;white-space:nowrap">Streetwear</span>
+    <span style="font:600 11.5px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:9px 12px;border-radius:999px;white-space:nowrap">Bold colour</span>
+    <span style="font:600 11.5px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:9px 12px;border-radius:999px;white-space:nowrap">Modest</span>
+    <span style="font:600 11.5px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:9px 12px;border-radius:999px;white-space:nowrap">Athleisure</span>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8A8278;margin-top:24px">Typical week</div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:12px;display:flex;justify-content:space-between;font:600 12.5px Manrope,sans-serif;color:#16130F"><span>Office days</span><span style="color:#8A8278">5</span></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:12px;display:flex;justify-content:space-between;font:600 12.5px Manrope,sans-serif;color:#16130F"><span>Events / month</span><span style="color:#8A8278">3</span></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:12px;display:flex;justify-content:space-between;font:600 12.5px Manrope,sans-serif;color:#16130F"><span>Monthly budget</span><span style="color:#8A8278">PKR 12k</span></div>
+  </div>
+  <div style="background:#16130F;color:#F6F4F0;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;text-align:center;margin-top:18px">Continue</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">05 · Profile setup</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#12110F;padding:44px 20px 20px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.75 0.09 55)">Step 2 of 4 · scan</div>
+  <div style="font:400 26px/1.1 'Instrument Serif',serif;color:#F2EFEA;margin-top:10px">Three photos</div>
+  <div style="font:400 12px/1.5 Manrope,sans-serif;color:#A39B90;margin-top:7px">Plain wall, daylight, arms relaxed. Analysis happens on-device.</div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+    <div style="display:flex;gap:11px;align-items:center;background:#1C1A17;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:11px">
+      <div style="width:52px;height:64px;border-radius:10px;background:repeating-linear-gradient(135deg,#2A2621 0 6px,#221F1A 6px 12px)"></div>
+      <div style="flex:1"><div style="font:700 12.5px Manrope,sans-serif;color:#F2EFEA">Face</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:oklch(0.68 0.11 150);margin-top:3px">captured · sharp</div></div>
+      <span class="ms" style="font-size:19px;color:oklch(0.68 0.11 150)">check_circle</span>
+    </div>
+    <div style="display:flex;gap:11px;align-items:center;background:#1C1A17;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:11px">
+      <div style="width:52px;height:64px;border-radius:10px;background:repeating-linear-gradient(135deg,#2A2621 0 6px,#221F1A 6px 12px)"></div>
+      <div style="flex:1"><div style="font:700 12.5px Manrope,sans-serif;color:#F2EFEA">Full body</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:oklch(0.75 0.13 70);margin-top:3px">retake · knees cropped</div></div>
+      <span class="ms" style="font-size:19px;color:oklch(0.75 0.13 70)">replay</span>
+    </div>
+    <div style="display:flex;gap:11px;align-items:center;background:transparent;border:1.5px dashed rgba(255,255,255,.2);border-radius:16px;padding:11px">
+      <div style="width:52px;height:64px;border-radius:10px;border:1px dashed rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:20px;color:#6B655D">add</span></div>
+      <div style="flex:1"><div style="font:700 12.5px Manrope,sans-serif;color:#F2EFEA">Side view</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:3px">optional · improves fit by 12%</div></div>
+    </div>
+  </div>
+  <div style="border-radius:16px;padding:13px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);margin-top:16px;font:400 11px/1.5 Manrope,sans-serif;color:#B9B1A6">Height and weight can be typed instead of measured — accuracy improves fit scores, nothing is required.</div>
+  <div style="background:oklch(0.7 0.11 55);color:#12110F;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;text-align:center;margin-top:16px">Analyse me</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">06 · Upload photos</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#12110F;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="text-align:center;padding:0 26px">
+    <div style="width:76px;height:76px;border-radius:999px;margin:0 auto;background:radial-gradient(circle,oklch(0.7 0.11 55) 0%,rgba(180,113,63,0) 70%);animation:pulseGlow 1.6s ease-in-out infinite"></div>
+    <div style="font:400 22px/1.15 'Instrument Serif',serif;color:#F2EFEA;margin-top:20px">Reading your proportions</div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-top:22px;text-align:left">
+      <div style="display:flex;gap:8px;align-items:center;font:500 10.5px 'IBM Plex Mono',monospace;color:oklch(0.68 0.11 150)"><span class="ms" style="font-size:14px">check</span>face landmarks · 68 points</div>
+      <div style="display:flex;gap:8px;align-items:center;font:500 10.5px 'IBM Plex Mono',monospace;color:oklch(0.68 0.11 150)"><span class="ms" style="font-size:14px">check</span>skin tone · warm neutral</div>
+      <div style="display:flex;gap:8px;align-items:center;font:500 10.5px 'IBM Plex Mono',monospace;color:#F2EFEA"><span class="ms" style="font-size:14px">autorenew</span>shoulder : waist ratio</div>
+      <div style="display:flex;gap:8px;align-items:center;font:500 10.5px 'IBM Plex Mono',monospace;color:#6B655D"><span class="ms" style="font-size:14px">circle</span>colour season</div>
+    </div>
+    <div style="height:3px;border-radius:9px;background:rgba(255,255,255,.12);margin-top:24px"><div style="height:3px;width:62%;border-radius:9px;background:oklch(0.72 0.13 90)"></div></div>
+    <div style="font:500 10px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:9px">about 6 seconds</div>
+  </div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">07 · Analysis in progress</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.62 0.11 55)">Your style profile</div>
+  <div style="font:400 25px/1.1 'Instrument Serif',serif;color:#16130F;margin-top:9px">Warm neutral,<br>rectangle frame</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:10px"><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90">FACE</div><div style="font:400 17px/1 'Instrument Serif',serif;color:#16130F;margin-top:4px">Oval</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:10px"><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90">BODY</div><div style="font:400 17px/1 'Instrument Serif',serif;color:#16130F;margin-top:4px">Rectangle</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:10px"><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90">HAIR</div><div style="font:400 17px/1 'Instrument Serif',serif;color:#16130F;margin-top:4px">Dark brown</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:10px"><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90">EYES</div><div style="font:400 17px/1 'Instrument Serif',serif;color:#16130F;margin-top:4px">Hazel</div></div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8A8278;margin-top:18px">Your palette</div>
+  <div style="display:flex;gap:5px;margin-top:9px">
+    <span style="flex:1;height:34px;border-radius:8px;background:#F2E8D8"></span><span style="flex:1;height:34px;border-radius:8px;background:#8E7A54"></span><span style="flex:1;height:34px;border-radius:8px;background:#4E5B44"></span><span style="flex:1;height:34px;border-radius:8px;background:#A8452F"></span><span style="flex:1;height:34px;border-radius:8px;background:#2C2A26"></span>
+  </div>
+  <div style="font:400 11px/1.5 Manrope,sans-serif;color:#6B655D;margin-top:9px">Avoid icy pastels and pure black next to the face — they drain the golden undertone.</div>
+  <div style="background:#16130F;border-radius:16px;padding:13px;margin-top:14px">
+    <div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:oklch(0.75 0.09 55)">SILHOUETTE ADVICE</div>
+    <div style="font:400 11.5px/1.5 Manrope,sans-serif;color:#B9B1A6;margin-top:6px">Define the waist: belted kurtas, waistcoats, tucked shirts. Avoid boxy crops.</div>
+  </div>
+  <div style="background:#16130F;color:#F6F4F0;font:700 13.5px Manrope,sans-serif;padding:14px;border-radius:15px;text-align:center;margin-top:14px">Build my closet</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">08 · Analysis results</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;box-shadow:0 4px 16px rgba(22,19,15,.12);display:flex;flex-direction:column">
+  <div style="height:220px;background:repeating-linear-gradient(135deg,#EFEBE4 0 9px,#E4DFD6 9px 18px);position:relative">
+    <div style="position:absolute;top:44px;left:16px;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:18px;color:#16130F">arrow_back</span></div>
+    <span style="position:absolute;bottom:12px;left:16px;font:500 9px 'IBM Plex Mono',monospace;color:rgba(22,19,15,.4)">[ item shot · bg removed ]</span>
+  </div>
+  <div style="flex:1;padding:16px 18px">
+    <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#A39B90">Kurta · Sapphire</div>
+    <div style="font:700 18px Manrope,sans-serif;color:#16130F;margin-top:5px">Ivory linen kurta</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px">
+      <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:5px 8px;border-radius:999px">linen</span>
+      <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:5px 8px;border-radius:999px">ivory</span>
+      <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:5px 8px;border-radius:999px">semi-formal</span>
+      <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:5px 8px;border-radius:999px">summer</span>
+      <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:oklch(0.45 0.11 55);background:oklch(0.95 0.03 55);padding:5px 8px;border-radius:999px">auto-tagged</span>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:10px"><div style="font:400 19px/1 'Instrument Serif',serif;color:#16130F">6</div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:3px">TIMES WORN</div></div>
+      <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:10px"><div style="font:400 19px/1 'Instrument Serif',serif;color:#16130F">18 Mar</div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:3px">LAST WORN</div></div>
+    </div>
+    <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:16px">Pairs well with</div>
+    <div style="display:flex;gap:8px;margin-top:9px">
+      <div style="flex:1;aspect-ratio:1;border-radius:11px;background:repeating-linear-gradient(135deg,#E4EAE6 0 6px,#D8E0DA 6px 12px)"></div>
+      <div style="flex:1;aspect-ratio:1;border-radius:11px;background:repeating-linear-gradient(135deg,#F0E8E2 0 6px,#E6DCD3 6px 12px)"></div>
+      <div style="flex:1;aspect-ratio:1;border-radius:11px;background:repeating-linear-gradient(135deg,#E7E4EE 0 6px,#DCD8E6 6px 12px)"></div>
+      <div style="flex:1;aspect-ratio:1;border-radius:11px;background:#F0EDE7;display:flex;align-items:center;justify-content:center;font:600 10px 'IBM Plex Mono',monospace;color:#8A8278">+9</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <div style="flex:1;background:#16130F;color:#F6F4F0;font:700 12.5px Manrope,sans-serif;padding:13px;border-radius:14px;text-align:center">Style this</div>
+      <div style="width:44px;background:#fff;border:1px solid rgba(22,19,15,.12);border-radius:14px;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:18px;color:#16130F">local_laundry_service</span></div>
+      <div style="width:44px;background:#fff;border:1px solid rgba(22,19,15,.12);border-radius:14px;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:18px;color:#16130F">more_horiz</span></div>
+    </div>
+  </div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">09 · Clothing details</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:700 20px Manrope,sans-serif;color:#16130F;letter-spacing:-.01em">Generate an outfit</div>
+  <div style="font:400 11.5px Manrope,sans-serif;color:#6B655D;margin-top:5px">Tell Noor the occasion. It only uses what you own.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:14px">
+    <div style="background:#16130F;color:#F6F4F0;border-radius:13px;padding:11px"><span class="ms" style="font-size:17px;color:oklch(0.78 0.1 90)">business_center</span><div style="font:700 11.5px Manrope,sans-serif;margin-top:6px">Office</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:11px"><span class="ms" style="font-size:17px;color:#6B655D">celebration</span><div style="font:700 11.5px Manrope,sans-serif;color:#16130F;margin-top:6px">Wedding</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:11px"><span class="ms" style="font-size:17px;color:#6B655D">fitness_center</span><div style="font:700 11.5px Manrope,sans-serif;color:#16130F;margin-top:6px">Gym</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:11px"><span class="ms" style="font-size:17px;color:#6B655D">flight</span><div style="font:700 11.5px Manrope,sans-serif;color:#16130F;margin-top:6px">Travel</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:11px"><span class="ms" style="font-size:17px;color:#6B655D">school</span><div style="font:700 11.5px Manrope,sans-serif;color:#16130F;margin-top:6px">University</div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:11px"><span class="ms" style="font-size:17px;color:#6B655D">mosque</span><div style="font:700 11.5px Manrope,sans-serif;color:#16130F;margin-top:6px">Eid</div></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:18px"><span>Formality</span><span style="color:#16130F">smart casual</span></div>
+  <div style="height:4px;border-radius:9px;background:#E2DED6;margin-top:10px;position:relative"><div style="height:4px;width:58%;border-radius:9px;background:#16130F"></div><div style="position:absolute;left:56%;top:-6px;width:16px;height:16px;border-radius:999px;background:#fff;border:2px solid #16130F"></div></div>
+  <div style="display:flex;gap:7px;margin-top:18px">
+    <span style="font:600 11px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:8px 11px;border-radius:999px">Eastern</span>
+    <span style="font:600 11px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:8px 11px;border-radius:999px">Western</span>
+    <span style="font:600 11px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:8px 11px;border-radius:999px">Fusion</span>
+  </div>
+  <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:12px;margin-top:16px;display:flex;justify-content:space-between;align-items:center">
+    <div><div style="font:700 12px Manrope,sans-serif;color:#16130F">Include new buys</div><div style="font:400 10.5px Manrope,sans-serif;color:#6B655D;margin-top:2px">Mix shop items in</div></div>
+    <div style="width:40px;height:23px;border-radius:99px;background:#16130F;position:relative"><div style="position:absolute;right:3px;top:3px;width:17px;height:17px;border-radius:999px;background:#fff"></div></div>
+  </div>
+  <div style="background:oklch(0.62 0.11 55);color:#fff;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;text-align:center;margin-top:18px">Generate 5 outfits</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">10 · Outfit generator</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:700 20px Manrope,sans-serif;color:#16130F;letter-spacing:-.01em">Product</div>
+  <div style="height:170px;border-radius:18px;background:repeating-linear-gradient(135deg,#F0E8E2 0 9px,#E6DCD3 9px 18px);margin-top:12px;position:relative">
+    <span style="position:absolute;bottom:10px;left:12px;font:500 9px 'IBM Plex Mono',monospace;color:rgba(22,19,15,.4)">[ product photo 1/5 ]</span>
+    <div style="position:absolute;top:10px;right:10px;font:600 9.5px 'IBM Plex Mono',monospace;color:#fff;background:oklch(0.5 0.11 150);padding:5px 8px;border-radius:999px">94 · perfect</div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#A39B90;margin-top:12px">Sapphire</div>
+  <div style="font:700 16.5px/1.25 Manrope,sans-serif;color:#16130F;margin-top:4px">Ivory chikankari kurta</div>
+  <div style="display:flex;align-items:baseline;gap:8px;margin-top:7px"><span style="font:700 17px Manrope,sans-serif;color:#16130F">PKR 6,490</span><span style="font:500 12px Manrope,sans-serif;color:#A39B90;text-decoration:line-through">8,990</span></div>
+  <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:12px;margin-top:12px">
+    <div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#A39B90">WHY IT MATCHES</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-top:9px">
+      <div><div style="display:flex;justify-content:space-between;font:600 10px 'IBM Plex Mono',monospace;color:#6B655D"><span>COLOUR</span><span>96</span></div><div style="height:3px;border-radius:9px;background:#E2DED6;margin-top:4px"><div style="height:3px;width:96%;border-radius:9px;background:oklch(0.58 0.11 150)"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font:600 10px 'IBM Plex Mono',monospace;color:#6B655D"><span>BODY FIT</span><span>91</span></div><div style="height:3px;border-radius:9px;background:#E2DED6;margin-top:4px"><div style="height:3px;width:91%;border-radius:9px;background:oklch(0.58 0.11 150)"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font:600 10px 'IBM Plex Mono',monospace;color:#6B655D"><span>WARDROBE FIT</span><span>88</span></div><div style="height:3px;border-radius:9px;background:#E2DED6;margin-top:4px"><div style="height:3px;width:88%;border-radius:9px;background:oklch(0.58 0.11 150)"></div></div></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;margin-top:12px"><span style="font:600 11px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:8px 12px;border-radius:11px">M</span><span style="font:600 11px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.12);padding:8px 12px;border-radius:11px">L</span><span style="font:600 11px Manrope,sans-serif;color:#C9C3B9;background:#F0EDE7;padding:8px 12px;border-radius:11px">XL</span><span style="font:500 10px 'IBM Plex Mono',monospace;color:oklch(0.55 0.11 55);align-self:center;margin-left:4px">M fits you</span></div>
+  <div style="display:flex;gap:8px;margin-top:14px">
+    <div style="flex:1;background:#16130F;color:#F6F4F0;font:700 12.5px Manrope,sans-serif;padding:14px;border-radius:14px;text-align:center">Try it on</div>
+    <div style="flex:1;background:#fff;border:1.5px solid #16130F;color:#16130F;font:700 12.5px Manrope,sans-serif;padding:13px;border-radius:14px;text-align:center">Buy</div>
+  </div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">11 · Product details</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:700 20px Manrope,sans-serif;color:#16130F">Wishlist</div><span style="font:500 10px 'IBM Plex Mono',monospace;color:#8A8278">14 items</span></div>
+  <div style="background:#16130F;border-radius:16px;padding:13px;margin-top:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:oklch(0.75 0.09 55)">BUDGET THIS MONTH</span><span style="font:400 17px 'Instrument Serif',serif;color:#F6F4F0">7.4k / 12k</span></div>
+    <div style="height:4px;border-radius:9px;background:rgba(255,255,255,.14);margin-top:9px"><div style="height:4px;width:62%;border-radius:9px;background:oklch(0.72 0.13 90)"></div></div>
+    <div style="font:400 10.5px Manrope,sans-serif;color:#B9B1A6;margin-top:8px">Two of these drop in price historically before Eid — Noor will tell you.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:9px;display:flex;gap:10px;align-items:center">
+      <div style="width:46px;height:56px;border-radius:10px;background:repeating-linear-gradient(135deg,#EFEBE4 0 6px,#E4DFD6 6px 12px)"></div>
+      <div style="flex:1"><div style="font:600 12px Manrope,sans-serif;color:#16130F">Ivory chikankari</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:oklch(0.45 0.11 150);margin-top:3px">94 · price dropped 28%</div></div>
+      <span style="font:700 11.5px Manrope,sans-serif;color:#16130F">6,490</span>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:9px;display:flex;gap:10px;align-items:center">
+      <div style="width:46px;height:56px;border-radius:10px;background:repeating-linear-gradient(135deg,#E7E4EE 0 6px,#DCD8E6 6px 12px)"></div>
+      <div style="flex:1"><div style="font:600 12px Manrope,sans-serif;color:#16130F">Charcoal waistcoat</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:3px">78 · in stock</div></div>
+      <span style="font:700 11.5px Manrope,sans-serif;color:#16130F">4,200</span>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:9px;display:flex;gap:10px;align-items:center;opacity:.55">
+      <div style="width:46px;height:56px;border-radius:10px;background:repeating-linear-gradient(135deg,#E4EAE6 0 6px,#D8E0DA 6px 12px)"></div>
+      <div style="flex:1"><div style="font:600 12px Manrope,sans-serif;color:#16130F">Sage shalwar set</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:oklch(0.5 0.14 25);margin-top:3px">sold out · notify me</div></div>
+      <span style="font:700 11.5px Manrope,sans-serif;color:#16130F">5,100</span>
+    </div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:18px">Noor suggests instead</div>
+  <div style="background:oklch(0.96 0.02 90);border:1px solid oklch(0.9 0.05 90);border-radius:14px;padding:12px;margin-top:10px;font:400 11px/1.5 Manrope,sans-serif;color:#4E4841">You already own three ivory pieces. Spending the 6.5k on a mid-tone olive would unlock 11 new outfits instead of 4.</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">12 · Wishlist</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:700 20px Manrope,sans-serif;color:#16130F">Calendar</div>
+  <div style="font:400 11.5px Manrope,sans-serif;color:#6B655D;margin-top:4px">Plan a look against what's coming.</div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:14px">
+    <div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90;text-align:center">M</div><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90;text-align:center">T</div><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90;text-align:center">W</div><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90;text-align:center">T</div><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90;text-align:center">F</div><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90;text-align:center">S</div><div style="font:500 8.5px 'IBM Plex Mono',monospace;color:#A39B90;text-align:center">S</div>
+    <div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:#16130F"></div><div style="aspect-ratio:1;border-radius:8px;background:oklch(0.9 0.06 90)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div>
+    <div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:oklch(0.9 0.06 90)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div><div style="aspect-ratio:1;border-radius:8px;background:#fff;border:1px solid rgba(22,19,15,.06)"></div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.62 0.11 55);margin-top:18px">Friday 25 · mehndi</div>
+  <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:16px;padding:12px;margin-top:10px;display:flex;gap:11px">
+    <div style="width:58px;height:74px;border-radius:11px;background:repeating-linear-gradient(135deg,#F0E8E2 0 6px,#E6DCD3 6px 12px)"></div>
+    <div style="flex:1"><div style="font:600 13px Manrope,sans-serif;color:#16130F">Ivory &amp; gold</div><div style="font:400 10.5px/1.45 Manrope,sans-serif;color:#6B655D;margin-top:4px">Planned 6 days ahead. Dry-clean reminder set for Wednesday.</div><div style="font:600 10px 'IBM Plex Mono',monospace;color:oklch(0.45 0.11 150);margin-top:6px">outfit locked</div></div>
+  </div>
+  <div style="background:#fff;border:1px dashed rgba(22,19,15,.16);border-radius:16px;padding:14px;margin-top:10px;text-align:center">
+    <span class="ms" style="font-size:20px;color:#A39B90">event</span>
+    <div style="font:600 11.5px Manrope,sans-serif;color:#16130F;margin-top:5px">Mon 28 · board review</div>
+    <div style="font:400 10.5px Manrope,sans-serif;color:#6B655D;margin-top:3px">No outfit planned — plan it</div>
+  </div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">13 · Calendar</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:700 20px Manrope,sans-serif;color:#16130F">Packing planner</div>
+  <div style="display:flex;gap:7px;margin-top:10px"><span style="font:600 10.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:6px 9px;border-radius:999px">Dubai</span><span style="font:600 10.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:6px 9px;border-radius:999px">4 nights</span><span style="font:600 10.5px 'IBM Plex Mono',monospace;color:#6B655D;background:#F0EDE7;padding:6px 9px;border-radius:999px">38° dry</span></div>
+  <div style="background:#16130F;border-radius:16px;padding:14px;margin-top:12px">
+    <div style="font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:oklch(0.75 0.09 55)">CAPSULE · 11 ITEMS → 9 OUTFITS</div>
+    <div style="display:flex;gap:5px;margin-top:11px">
+      <div style="flex:1;aspect-ratio:1;border-radius:8px;background:repeating-linear-gradient(135deg,#2A2621 0 5px,#221F1A 5px 10px)"></div><div style="flex:1;aspect-ratio:1;border-radius:8px;background:repeating-linear-gradient(135deg,#2A2621 0 5px,#221F1A 5px 10px)"></div><div style="flex:1;aspect-ratio:1;border-radius:8px;background:repeating-linear-gradient(135deg,#2A2621 0 5px,#221F1A 5px 10px)"></div><div style="flex:1;aspect-ratio:1;border-radius:8px;background:repeating-linear-gradient(135deg,#2A2621 0 5px,#221F1A 5px 10px)"></div><div style="flex:1;aspect-ratio:1;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font:600 9px 'IBM Plex Mono',monospace;color:#8A8278">+7</div>
+    </div>
+    <div style="font:400 10.5px/1.5 Manrope,sans-serif;color:#B9B1A6;margin-top:10px">Everything shares the ivory–olive–camel base, so any top works with any bottom.</div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:16px">Day by day</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:11px;display:flex;justify-content:space-between;align-items:center"><div><div style="font:600 12px Manrope,sans-serif;color:#16130F">Day 1 · arrival</div><div style="font:400 10.5px Manrope,sans-serif;color:#6B655D;margin-top:2px">Linen shirt · stone chinos</div></div><span class="ms" style="font-size:16px;color:oklch(0.58 0.11 150)">check_circle</span></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:11px;display:flex;justify-content:space-between;align-items:center"><div><div style="font:600 12px Manrope,sans-serif;color:#16130F">Day 2 · client dinner</div><div style="font:400 10.5px Manrope,sans-serif;color:#6B655D;margin-top:2px">Charcoal kurta · khussa</div></div><span class="ms" style="font-size:16px;color:oklch(0.58 0.11 150)">check_circle</span></div>
+    <div style="background:#fff;border:1px dashed rgba(22,19,15,.16);border-radius:13px;padding:11px;display:flex;justify-content:space-between;align-items:center"><div><div style="font:600 12px Manrope,sans-serif;color:#16130F">Day 3 · free</div><div style="font:400 10.5px Manrope,sans-serif;color:#A39B90;margin-top:2px">Nothing assigned</div></div><span class="ms" style="font-size:16px;color:#C9C3B9">add</span></div>
+  </div>
+  <div style="background:#16130F;color:#F6F4F0;font:700 13px Manrope,sans-serif;padding:14px;border-radius:14px;text-align:center;margin-top:14px">Export packing list</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">14 · Packing planner</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:700 20px Manrope,sans-serif;color:#16130F">Wardrobe stats</div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:11px"><div style="font:400 21px/1 'Instrument Serif',serif;color:#16130F">128</div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:4px">ITEMS</div></div>
+    <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:11px"><div style="font:400 21px/1 'Instrument Serif',serif;color:oklch(0.48 0.13 70)">19</div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:4px">NEVER WORN</div></div>
+    <div style="flex:1;background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:11px"><div style="font:400 21px/1 'Instrument Serif',serif;color:#16130F">PKR 61</div><div style="font:500 9px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:4px">COST / WEAR</div></div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:18px">Most worn</div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+    <div style="display:flex;gap:9px;align-items:center"><div style="width:34px;height:42px;border-radius:8px;background:repeating-linear-gradient(135deg,#EFEBE4 0 6px,#E4DFD6 6px 12px)"></div><div style="flex:1"><div style="font:600 11.5px Manrope,sans-serif;color:#16130F">Indigo jeans</div><div style="height:3px;border-radius:9px;background:#E2DED6;margin-top:5px"><div style="height:3px;width:100%;border-radius:9px;background:#16130F"></div></div></div><span style="font:600 10px 'IBM Plex Mono',monospace;color:#6B655D">30×</span></div>
+    <div style="display:flex;gap:9px;align-items:center"><div style="width:34px;height:42px;border-radius:8px;background:repeating-linear-gradient(135deg,#E7E4EE 0 6px,#DCD8E6 6px 12px)"></div><div style="flex:1"><div style="font:600 11.5px Manrope,sans-serif;color:#16130F">White oxford</div><div style="height:3px;border-radius:9px;background:#E2DED6;margin-top:5px"><div style="height:3px;width:70%;border-radius:9px;background:#16130F"></div></div></div><span style="font:600 10px 'IBM Plex Mono',monospace;color:#6B655D">21×</span></div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:18px">Dead stock · 19 items</div>
+  <div style="background:oklch(0.96 0.02 90);border:1px solid oklch(0.9 0.05 90);border-radius:14px;padding:12px;margin-top:10px">
+    <div style="font:400 11px/1.5 Manrope,sans-serif;color:#4E4841">The camel khussa has been worn once in 8 months. Noor can build three outfits around it, or you can list it for resale.</div>
+    <div style="display:flex;gap:7px;margin-top:11px"><span style="font:700 10.5px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:8px 11px;border-radius:10px">Style it</span><span style="font:700 10.5px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.12);padding:8px 11px;border-radius:10px">Resell</span></div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:16px">Colour balance</div>
+  <div style="display:flex;gap:3px;margin-top:9px"><span style="flex:4;height:26px;border-radius:6px 0 0 6px;background:#2C2A26"></span><span style="flex:3;height:26px;background:#F2E8D8"></span><span style="flex:2;height:26px;background:#4E5B44"></span><span style="flex:1;height:26px;background:#A8452F"></span><span style="flex:1;height:26px;border-radius:0 6px 6px 0;background:#8E7A54"></span></div>
+  <div style="font:400 10.5px Manrope,sans-serif;color:#6B655D;margin-top:7px">61% neutral. One saturated piece would widen your range more than another black.</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">15 · Smart wardrobe stats</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:700 20px Manrope,sans-serif;color:#16130F">Laundry</div>
+  <div style="font:400 11.5px Manrope,sans-serif;color:#6B655D;margin-top:4px">Items in the basket are hidden from suggestions.</div>
+  <div style="display:flex;gap:7px;margin-top:14px;align-items:center"><span style="font:600 11px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:8px 12px;border-radius:999px;white-space:nowrap">Basket 3</span><span style="font:600 11px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:7px 10px;border-radius:999px;white-space:nowrap">Dry-clean</span><span style="font:600 11px Manrope,sans-serif;color:#16130F;background:#fff;border:1px solid rgba(22,19,15,.1);padding:7px 10px;border-radius:999px;white-space:nowrap">Clean</span></div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center"><div style="width:40px;height:48px;border-radius:9px;background:repeating-linear-gradient(135deg,#EFEBE4 0 6px,#E4DFD6 6px 12px)"></div><div style="flex:1"><div style="font:600 12px Manrope,sans-serif;color:#16130F">White oxford shirt</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:3px">worn yesterday · cold wash</div></div><span class="ms" style="font-size:19px;color:#16130F">check_box</span></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center"><div style="width:40px;height:48px;border-radius:9px;background:repeating-linear-gradient(135deg,#E4EAE6 0 6px,#D8E0DA 6px 12px)"></div><div style="flex:1"><div style="font:600 12px Manrope,sans-serif;color:#16130F">Olive trousers</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:3px">2 wears · 30°</div></div><span class="ms" style="font-size:19px;color:#16130F">check_box</span></div>
+    <div style="background:#fff;border:1px solid oklch(0.88 0.06 25);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center"><div style="width:40px;height:48px;border-radius:9px;background:repeating-linear-gradient(135deg,#F0E8E2 0 6px,#E6DCD3 6px 12px)"></div><div style="flex:1"><div style="font:600 12px Manrope,sans-serif;color:#16130F">Silk dupatta</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:oklch(0.5 0.14 25);margin-top:3px">dry-clean only · needed Friday</div></div><span class="ms" style="font-size:19px;color:oklch(0.56 0.16 25)">priority_high</span></div>
+  </div>
+  <div style="background:#16130F;border-radius:16px;padding:13px;margin-top:14px">
+    <div style="font:700 12.5px Manrope,sans-serif;color:#F6F4F0">Drop off by Wednesday</div>
+    <div style="font:400 10.5px/1.5 Manrope,sans-serif;color:#B9B1A6;margin-top:5px">The dupatta is in Friday's planned mehndi outfit. Reminder set for 6pm Tuesday.</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:14px"><div style="flex:1;background:#fff;border:1.5px solid #16130F;color:#16130F;font:700 12.5px Manrope,sans-serif;padding:13px;border-radius:14px;text-align:center">Mark all clean</div><div style="width:46px;background:#fff;border:1px solid rgba(22,19,15,.12);border-radius:14px;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:19px;color:#16130F">alarm</span></div></div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">16 · Laundry tracking</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:700 20px Manrope,sans-serif;color:#16130F">Notifications</div><span style="font:600 10px 'IBM Plex Mono',monospace;color:oklch(0.55 0.11 55)">Mark read</span></div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:16px">Today</div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+    <div style="background:#16130F;border-radius:15px;padding:12px;display:flex;gap:10px"><span class="ms" style="font-size:19px;color:oklch(0.78 0.1 90)">wb_twilight</span><div style="flex:1"><div style="font:700 12px Manrope,sans-serif;color:#F6F4F0">Today's outfit is ready</div><div style="font:400 10.5px/1.45 Manrope,sans-serif;color:#B9B1A6;margin-top:3px">Built for 34° and your 2pm review.</div><div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:5px">06:00</div></div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:15px;padding:12px;display:flex;gap:10px"><span class="ms" style="font-size:19px;color:oklch(0.58 0.11 150)">sell</span><div style="flex:1"><div style="font:700 12px Manrope,sans-serif;color:#16130F">Wishlist price drop</div><div style="font:400 10.5px/1.45 Manrope,sans-serif;color:#6B655D;margin-top:3px">Ivory chikankari kurta down 28% at Sapphire.</div><div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:5px">09:12</div></div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:15px;padding:12px;display:flex;gap:10px"><span class="ms" style="font-size:19px;color:oklch(0.62 0.11 55)">local_laundry_service</span><div style="flex:1"><div style="font:700 12px Manrope,sans-serif;color:#16130F">Dry-clean reminder</div><div style="font:400 10.5px/1.45 Manrope,sans-serif;color:#6B655D;margin-top:3px">The silk dupatta is needed Friday.</div><div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#A39B90;margin-top:5px">11:40</div></div></div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:18px">Earlier</div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:15px;padding:12px;display:flex;gap:10px;opacity:.7"><span class="ms" style="font-size:19px;color:#8A8278">insights</span><div style="flex:1"><div style="font:700 12px Manrope,sans-serif;color:#16130F">Your July recap</div><div style="font:400 10.5px/1.45 Manrope,sans-serif;color:#6B655D;margin-top:3px">41 outfits, avg score 88 — up 6 points.</div></div></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:15px;padding:12px;display:flex;gap:10px;opacity:.7"><span class="ms" style="font-size:19px;color:#8A8278">checkroom</span><div style="flex:1"><div style="font:700 12px Manrope,sans-serif;color:#16130F">12 items tagged</div><div style="font:400 10.5px/1.45 Manrope,sans-serif;color:#6B655D;margin-top:3px">Your last upload finished processing.</div></div></div>
+  </div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">17 · Notifications</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:700 20px Manrope,sans-serif;color:#16130F">Settings</div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:16px">Appearance</div>
+  <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;padding:5px;margin-top:9px;display:flex;gap:4px">
+    <span style="flex:1;text-align:center;font:700 11.5px Manrope,sans-serif;color:#F6F4F0;background:#16130F;padding:9px;border-radius:10px">Light</span>
+    <span style="flex:1;text-align:center;font:700 11.5px Manrope,sans-serif;color:#6B655D;padding:9px">Dark</span>
+    <span style="flex:1;text-align:center;font:700 11.5px Manrope,sans-serif;color:#6B655D;padding:9px">System</span>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:18px">Region &amp; fashion</div>
+  <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;margin-top:9px;overflow:hidden">
+    <div style="padding:12px 13px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,.06);font:600 12px Manrope,sans-serif;color:#16130F"><span>Language</span><span style="color:#8A8278;font-weight:500">English · اردو</span></div>
+    <div style="padding:12px 13px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,.06);font:600 12px Manrope,sans-serif;color:#16130F"><span>Units</span><span style="color:#8A8278;font-weight:500">cm / kg</span></div>
+    <div style="padding:12px 13px;display:flex;justify-content:space-between;align-items:center;font:600 12px Manrope,sans-serif;color:#16130F"><span>Eastern-first feed</span><div style="width:38px;height:22px;border-radius:99px;background:#16130F;position:relative"><div style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:999px;background:#fff"></div></div></div>
+  </div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:18px">Privacy</div>
+  <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:14px;margin-top:9px;overflow:hidden">
+    <div style="padding:12px 13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(22,19,15,.06);font:600 12px Manrope,sans-serif;color:#16130F"><span>On-device analysis</span><div style="width:38px;height:22px;border-radius:99px;background:#16130F;position:relative"><div style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:999px;background:#fff"></div></div></div>
+    <div style="padding:12px 13px;display:flex;justify-content:space-between;align-items:center;font:600 12px Manrope,sans-serif;color:#16130F"><span>Body photos</span><span style="font:600 11px Manrope,sans-serif;color:oklch(0.5 0.14 25)">Delete</span></div>
+  </div>
+  <div style="font:400 10.5px/1.5 Manrope,sans-serif;color:#6B655D;margin-top:12px">Deleting photos keeps your measurements and style profile — outfits keep working.</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">18 · Settings</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#12110F;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.75 0.09 55)">You've used 3 of 3 today</div>
+  <div style="font:400 27px/1.1 'Instrument Serif',serif;color:#F2EFEA;margin-top:10px">Stylist Pro</div>
+  <div style="font:400 11.5px/1.5 Manrope,sans-serif;color:#A39B90;margin-top:7px">The free tier is a taste. Pro is the wardrobe running itself.</div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+    <div style="display:flex;gap:9px;align-items:flex-start"><span class="ms" style="font-size:16px;color:oklch(0.72 0.13 90)">check</span><div style="font:400 11.5px/1.4 Manrope,sans-serif;color:#F2EFEA">Unlimited outfit generation</div></div>
+    <div style="display:flex;gap:9px;align-items:flex-start"><span class="ms" style="font-size:16px;color:oklch(0.72 0.13 90)">check</span><div style="font:400 11.5px/1.4 Manrope,sans-serif;color:#F2EFEA">Unlimited try-on, incl. store items</div></div>
+    <div style="display:flex;gap:9px;align-items:flex-start"><span class="ms" style="font-size:16px;color:oklch(0.72 0.13 90)">check</span><div style="font:400 11.5px/1.4 Manrope,sans-serif;color:#F2EFEA">Wedding &amp; Eid lookbooks, 7-day planning</div></div>
+    <div style="display:flex;gap:9px;align-items:flex-start"><span class="ms" style="font-size:16px;color:oklch(0.72 0.13 90)">check</span><div style="font:400 11.5px/1.4 Manrope,sans-serif;color:#F2EFEA">Price tracking across 40+ Pakistani brands</div></div>
+  </div>
+  <div style="display:flex;gap:9px;margin-top:18px">
+    <div style="flex:1;border:1.5px solid oklch(0.72 0.13 90);border-radius:16px;padding:13px;position:relative">
+      <div style="position:absolute;top:-9px;left:11px;font:600 8.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:#12110F;background:oklch(0.72 0.13 90);padding:3px 6px;border-radius:5px">SAVE 33%</div>
+      <div style="font:500 9px 'IBM Plex Mono',monospace;color:#A39B90">YEARLY</div>
+      <div style="font:400 21px/1 'Instrument Serif',serif;color:#F2EFEA;margin-top:5px">9,600</div>
+      <div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">PKR 800/mo</div>
+    </div>
+    <div style="flex:1;border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:13px">
+      <div style="font:500 9px 'IBM Plex Mono',monospace;color:#A39B90">MONTHLY</div>
+      <div style="font:400 21px/1 'Instrument Serif',serif;color:#F2EFEA;margin-top:5px">1,200</div>
+      <div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#8A8278;margin-top:4px">PKR/mo</div>
+    </div>
+  </div>
+  <div style="background:oklch(0.7 0.11 55);color:#12110F;font:700 14px Manrope,sans-serif;padding:15px;border-radius:15px;text-align:center;margin-top:16px">Start 7 days free</div>
+  <div style="font:400 10px/1.5 Manrope,sans-serif;color:#6B655D;text-align:center;margin-top:10px">Cancel any time. Restore purchase · Terms</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">19 · Subscription</div>
+</div>
+
+<div>
+<div style="width:250px;height:648px;border-radius:30px;overflow:hidden;background:#F6F4F0;padding:44px 18px 18px;box-sizing:border-box;box-shadow:0 4px 16px rgba(22,19,15,.12)">
+  <div style="font:700 20px Manrope,sans-serif;color:#16130F">Help centre</div>
+  <div style="background:#fff;border:1px solid rgba(22,19,15,.1);border-radius:999px;padding:11px 15px;margin-top:12px;display:flex;gap:9px;align-items:center"><span class="ms" style="font-size:17px;color:#A39B90">search</span><span style="font:400 12.5px Manrope,sans-serif;color:#A39B90">Search help</span></div>
+  <div style="font:500 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;margin-top:18px">Popular</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:12px;display:flex;justify-content:space-between;align-items:center;font:600 12px Manrope,sans-serif;color:#16130F"><span>How do I take a good body photo?</span><span class="ms" style="font-size:16px;color:#C9C3B9">chevron_right</span></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:12px;display:flex;justify-content:space-between;align-items:center;font:600 12px Manrope,sans-serif;color:#16130F"><span>Noor tagged an item wrong</span><span class="ms" style="font-size:16px;color:#C9C3B9">chevron_right</span></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:12px;display:flex;justify-content:space-between;align-items:center;font:600 12px Manrope,sans-serif;color:#16130F"><span>Where are my photos stored?</span><span class="ms" style="font-size:16px;color:#C9C3B9">chevron_right</span></div>
+    <div style="background:#fff;border:1px solid rgba(22,19,15,.08);border-radius:13px;padding:12px;display:flex;justify-content:space-between;align-items:center;font:600 12px Manrope,sans-serif;color:#16130F"><span>Cancel or pause Pro</span><span class="ms" style="font-size:16px;color:#C9C3B9">chevron_right</span></div>
+  </div>
+  <div style="background:#16130F;border-radius:16px;padding:14px;margin-top:16px">
+    <div style="font:700 13px Manrope,sans-serif;color:#F6F4F0">Still stuck?</div>
+    <div style="font:400 11px/1.5 Manrope,sans-serif;color:#B9B1A6;margin-top:5px">Ask Noor first — it can see your account state. A human replies within 6 hours.</div>
+    <div style="display:flex;gap:8px;margin-top:12px"><span style="font:700 11px Manrope,sans-serif;color:#12110F;background:oklch(0.72 0.13 90);padding:9px 12px;border-radius:10px">Ask Noor</span><span style="font:700 11px Manrope,sans-serif;color:#F6F4F0;border:1px solid rgba(255,255,255,.2);padding:9px 12px;border-radius:10px">Email us</span></div>
+  </div>
+  <div style="font:400 10.5px/1.5 Manrope,sans-serif;color:#8A8278;margin-top:14px">v1.0.0 (build 118) · Lahore, PK</div>
+</div>
+<div style="font:600 11px 'IBM Plex Mono',monospace;color:#6B655D;margin-top:9px">20 · Help centre</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1e" style="margin-top:32px">
+<div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Handoff — responsive, accessibility, motion, Flutter</div>
+<div class="dv-card" style="width:1616px;padding:34px 40px">
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:30px">
+  <div>
+    <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;padding-bottom:10px;border-bottom:1px solid rgba(22,19,15,.1)">Responsive</div>
+    <div style="font:400 12.5px/1.65 Manrope,sans-serif;color:#4E4841;margin-top:12px">Base 390dp. Below 360dp the closet grid drops to a single column and the outfit hero loses its side stack. 600dp+ (foldables, tablets) the tab bar becomes a <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">NavigationRail</code> and Closet → Details becomes a two-pane master/detail. All type uses <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">MediaQuery.textScaler</code> up to 200% — cards grow, never clip. Safe areas respected top and bottom; the glass tab bar adds <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">viewPadding.bottom</code>.</div>
+  </div>
+  <div>
+    <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;padding-bottom:10px;border-bottom:1px solid rgba(22,19,15,.1)">Accessibility</div>
+    <div style="font:400 12.5px/1.65 Manrope,sans-serif;color:#4E4841;margin-top:12px">Body text passes 4.5:1 (#4E4841 on #F6F4F0 = 7.9:1); the clay accent is never used for body copy under 16px. Match quality is never colour-only — every badge carries its number and word. Hit targets ≥48dp. Every AI card exposes a semantics label combining score plus reasoning. Motion respects <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">disableAnimations</code> — the thinking glow becomes a static dot. RTL mirrored for Urdu, with Noto Nastaliq Urdu swapped in for headings.</div>
+  </div>
+  <div>
+    <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;padding-bottom:10px;border-bottom:1px solid rgba(22,19,15,.1)">Motion</div>
+    <div style="font:400 12.5px/1.65 Manrope,sans-serif;color:#4E4841;margin-top:12px">Tab switch: fade-through 180ms. Outfit reveal: cards rise 10dp staggered 40ms, 520ms total. Try-on generation: three named steps, breathing glow at 1.5s, result cross-fades over 400ms. Sheets: 320ms <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">easeOutCubic</code> with a scrim fade. Score numbers count up over 700ms. Favourite tap: 120ms scale 0.9→1.06→1. Nothing bounces, nothing loops longer than 2s.</div>
+  </div>
+  <div>
+    <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278;padding-bottom:10px;border-bottom:1px solid rgba(22,19,15,.1)">Flutter notes</div>
+    <div style="font:400 12.5px/1.65 Manrope,sans-serif;color:#4E4841;margin-top:12px">Material 3 with a hand-authored <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">ColorScheme</code> from the token table (don't use <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">fromSeed</code> — it drifts the warm neutrals). Shell: <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">StatefulShellRoute</code> in go_router, five branches. Closet: <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">SliverGrid</code> + <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">cached_network_image</code>, <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">Hero</code> to Details. Glass: <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">BackdropFilter</code> only on the tab bar and try-on overlay — it's expensive. Type: <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">google_fonts</code> Manrope + Instrument Serif, bundled not fetched. Icons: <code style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">material_symbols_icons</code> rounded. Skeletons ship as real widgets, not a shimmer package wrapper.</div>
+  </div>
+</div>
+<div style="height:1px;background:rgba(22,19,15,.1);margin:26px 0"></div>
+<div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A8278">Not designed yet — say the word</div>
+<div style="font:400 13px/1.6 Manrope,sans-serif;color:#4E4841;margin-top:10px;max-width:110ch">Full dark-mode pass on every screen · the lookbook as a scrollable editorial flow · saved-looks library · store-connection and brand onboarding.</div>
+</div>
+</div>
+
+<p class="dv-next">Try next: "build out the remaining screens as a gallery" · "show me 3 directions for the Today screen" · "make the whole thing dark-first"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1700,&quot;height&quot;:1200}}">
+const SW = ['repeating-linear-gradient(135deg,#EFEBE4 0 6px,#E4DFD6 6px 12px)','repeating-linear-gradient(135deg,#E7E4EE 0 6px,#DCD8E6 6px 12px)','repeating-linear-gradient(135deg,#E4EAE6 0 6px,#D8E0DA 6px 12px)','repeating-linear-gradient(135deg,#F0E8E2 0 6px,#E6DCD3 6px 12px)'];
+
+const WEEK = [
+  { day: 'FRI 25', event: 'Mehndi · Gulberg' }, { day: 'SAT 26', event: 'Brunch' },
+  { day: 'SUN 27', event: 'Rest day' }, { day: 'MON 28', event: 'Board review' }
+];
+const PROFILE = [
+  { k: 'FACE SHAPE', v: 'Oval' }, { k: 'BODY SHAPE', v: 'Rectangle' },
+  { k: 'SKIN TONE', v: 'Warm neutral' }, { k: 'UNDERTONE', v: 'Golden' },
+  { k: 'HEIGHT', v: '5′6″' }, { k: 'BEST NEUTRALS', v: 'Ivory · olive' }
+];
+const ROWS = [
+  { icon: 'insights', name: 'Wardrobe stats', meta: '128' },
+  { icon: 'local_laundry_service', name: 'Laundry', meta: '3' },
+  { icon: 'luggage', name: 'Packing planner', meta: 'Dubai' },
+  { icon: 'notifications', name: 'Notifications', meta: '' },
+  { icon: 'settings', name: 'Settings', meta: '' },
+  { icon: 'help', name: 'Help centre', meta: '' }
+];
+const SCORES = [{ k: 'COLOUR', v: 88, w: '88%' }, { k: 'FIT', v: 79, w: '79%' }, { k: 'OCCASION', v: 91, w: '91%' }];
+const TIPS = [
+  { icon: 'palette', color: 'oklch(0.62 0.11 55)', title: 'Warm up the neutral', body: 'Swap the cool grey scarf for your camel one — it sits closer to your undertone.' },
+  { icon: 'straighten', color: 'oklch(0.42 0.06 262)', title: 'Shorten the break', body: 'A single cuff on the trouser reads sharper at your height.' },
+  { icon: 'watch', color: 'oklch(0.58 0.12 90)', title: 'One accessory short', body: 'A gold-tone watch would finish this without competing with the shirt.' }
+];
+const SUGGESTED = [
+  { name: 'Ivory kurta set', score: '94 match', swatch: SW[0] },
+  { name: 'Sage shalwar', score: '87 match', swatch: SW[2] },
+  { name: 'Rose kameez', score: '81 match', swatch: SW[3] }
+];
+const TRYITEMS = [
+  { name: 'Ivory kurta', swatch: SW[0], ring: 'oklch(0.7 0.11 55)' },
+  { name: 'Shalwar', swatch: SW[2], ring: 'rgba(255,255,255,.14)' },
+  { name: 'Waistcoat', swatch: SW[1], ring: 'rgba(255,255,255,.14)' },
+  { name: 'Khussa', swatch: SW[3], ring: 'rgba(255,255,255,.14)' }
+];
+const RAW = [
+  { name: 'Ivory linen kurta', worn: 6, tag: 'eastern', cat: 'Eastern', slot: 'kurta' },
+  { name: 'Olive trousers', worn: 12, tag: 'office', cat: 'Bottoms', slot: 'trousers' },
+  { name: 'Black waistcoat', worn: 3, tag: 'formal', cat: 'Eastern', slot: 'waistcoat' },
+  { name: 'White oxford shirt', worn: 21, tag: 'staple', cat: 'Tops', slot: 'shirt' },
+  { name: 'Tan leather loafers', worn: 18, tag: 'shoes', cat: 'Shoes', slot: 'loafers' },
+  { name: 'Silk dupatta', worn: 2, tag: 'eastern', cat: 'Eastern', slot: 'dupatta' },
+  { name: 'Indigo straight jeans', worn: 30, tag: 'casual', cat: 'Bottoms', slot: 'jeans' },
+  { name: 'Camel khussa', worn: 1, tag: 'unworn', cat: 'Shoes', slot: 'khussa' }
+];
+const TAGCOL = { unworn: ['oklch(0.48 0.13 70)', 'oklch(0.95 0.05 85)'], eastern: ['oklch(0.45 0.11 55)', 'oklch(0.95 0.03 55)'] };
+const CATS = ['All', 'Tops', 'Bottoms', 'Eastern', 'Shoes', 'Accessories'];
+const TABDEF = [
+  ['today', 'Today', 'wb_twilight'], ['closet', 'Closet', 'checkroom'],
+  ['tryon', 'Try-On', 'auto_awesome'], ['shop', 'Shop', 'shopping_bag'], ['you', 'You', 'person']
+];
+const PRODRAW = [
+  { brand: 'Sapphire', name: 'Ivory chikankari kurta', price: 'PKR 6,490', score: 94, label: 'perfect', color: 'A', fit: 'A', why: 'Ivory against your warm-neutral tone; straight cut suits your rectangle frame.' },
+  { brand: 'Khaadi', name: 'Charcoal waistcoat', price: 'PKR 4,200', score: 78, label: 'good', color: 'B+', fit: 'A−', why: 'Layers over three kurtas you already own. Shoulders may need taking in.' },
+  { brand: 'Outfitters', name: 'Washed denim jacket', price: 'PKR 8,900', score: 46, label: 'poor', color: 'C', fit: 'C+', why: 'Boxy through the waist and the wash flattens your skin tone.' }
+];
+const MC = { perfect: ['oklch(0.45 0.11 150)', 'oklch(0.94 0.04 150)'], good: ['oklch(0.48 0.13 70)', 'oklch(0.95 0.05 85)'], poor: ['oklch(0.46 0.14 25)', 'oklch(0.95 0.04 25)'] };
+const NOTES = [
+  'generated 04:12 · 3 of 3 free generations left today',
+  'reshuffled · olive swapped for indigo · 2 left today',
+  'reshuffled · softer palette for the heat · 1 left today',
+  'free generations used — Pro unlocks unlimited'
+];
+const PROMPTS = ['I have a mehndi Friday', 'What colour suits me?', 'Suggest shoes'];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'today', cat: 'All', favs: { 2: true, 5: true }, likes: {},
+    gens: 3, worn: false, look: 0, showAdd: false, try: 'idle', view: 'Front',
+    input: '', chatStage: 0,
+    chat: [{ r: 'ai', t: "Morning. Two things on your calendar today — the client review at 2pm and dinner after. Want one outfit that carries both?" }]
+  };
+
+  _h = {};
+  h(key, fn) { return this._h[key] || (this._h[key] = fn); }
+
+  go = (s) => this.setState({ screen: s });
+  goToday = () => this.go('today');
+  goTryOn = () => this.go('tryon');
+  goChat = () => this.go('chat');
+  goRate = () => this.go('rate');
+  openAdd = () => this.setState({ showAdd: true });
+  closeAdd = () => this.setState({ showAdd: false });
+  wearIt = () => this.setState(p => ({ worn: !p.worn }));
+  shuffle = () => this.setState(p => ({ look: Math.min(p.look + 1, 3) }));
+  sendCurrent = () => this.send();
+  onInput = (e) => this.setState({ input: e.target.value });
+
+  runTryOn = () => {
+    if (this.state.try === 'busy') return;
+    this.setState({ try: 'busy' });
+    setTimeout(() => this.setState({ try: 'done' }), 2200);
+  };
+
+  send = (text) => {
+    const t = text || this.state.input;
+    if (!t) return;
+    this.setState(s => ({ chat: [...s.chat, { r: 'me', t }], input: '', chatStage: 1 }));
+    setTimeout(() => this.setState(s => ({
+      chatStage: 2,
+      chat: [...s.chat, { r: 'ai', t: "Three from your closet that work for a mehndi — the ivory kurta reads best against your skin tone, and you haven't worn it since March." }]
+    })), 1600);
+  };
+
+  renderVals() {
+    const s = this.state;
+    const cat = s.cat;
+    const items = RAW.map((it, i) => {
+      const fav = !!s.favs[i];
+      const c = TAGCOL[it.tag] || ['#6B655D', '#F0EDE7'];
+      return {
+        ...it, swatch: SW[i % 4],
+        favIcon: fav ? 'favorite' : 'favorite_border',
+        favColor: fav ? 'oklch(0.56 0.16 25)' : '#A39B90',
+        tagFg: c[0], tagBg: c[1],
+        fav: this.h('fav' + i, () => this.setState(p => ({ favs: { ...p.favs, [i]: !p.favs[i] } })))
+      };
+    }).filter(it => cat === 'All' || it.cat === cat);
+
+    const cats = CATS.map(n => ({
+      name: n,
+      bg: n === cat ? '#16130F' : '#fff', fg: n === cat ? '#F6F4F0' : '#16130F',
+      bd: n === cat ? '#16130F' : 'rgba(22,19,15,.1)',
+      pick: this.h('cat' + n, () => this.setState({ cat: n }))
+    }));
+
+    const tabs = TABDEF.map(([k, name, icon]) => {
+      const on = s.screen === k || (k === 'today' && (s.screen === 'chat' || s.screen === 'rate'));
+      const center = k === 'tryon';
+      return {
+        name, icon, go: this.h('tab' + k, () => this.go(k)),
+        h: center ? '44px' : '30px',
+        size: center ? '23px' : '22px',
+        lift: center ? '4px' : '0px',
+        pill: center ? '#16130F' : (on ? 'rgba(22,19,15,.07)' : 'transparent'),
+        color: center ? (on ? 'oklch(0.78 0.1 90)' : '#F6F4F0') : (on ? '#16130F' : '#A39B90')
+      };
+    });
+    tabs[2].color = s.screen === 'tryon' ? 'oklch(0.78 0.1 90)' : '#F6F4F0';
+
+    const products = PRODRAW.map((p, i) => {
+      const liked = !!s.likes[i];
+      return {
+        ...p, swatch: SW[(i + 1) % 4],
+        mFg: MC[p.label][0], mBg: MC[p.label][1],
+        likeIcon: liked ? 'bookmark' : 'bookmark_border',
+        likeColor: liked ? 'oklch(0.55 0.11 55)' : '#C9C3B9',
+        like: this.h('like' + i, () => this.setState(pr => ({ likes: { ...pr.likes, [i]: !pr.likes[i] } })))
+      };
+    });
+
+    const chat = s.chat.map(m => m.r === 'me'
+      ? { text: m.t, align: 'flex-end', bg: '#16130F', fg: '#F6F4F0', bd: '#16130F', radius: '18px 18px 6px 18px' }
+      : { text: m.t, align: 'flex-start', bg: '#fff', fg: '#16130F', bd: 'rgba(22,19,15,.08)', radius: '18px 18px 18px 6px' });
+
+    return {
+      isToday: s.screen === 'today', isCloset: s.screen === 'closet', isTryOn: s.screen === 'tryon',
+      isShop: s.screen === 'shop', isYou: s.screen === 'you', isChat: s.screen === 'chat', isRate: s.screen === 'rate',
+      goToday: this.goToday, goTryOn: this.goTryOn, goChat: this.goChat, goRate: this.goRate,
+      tabs, items, cats, products, chat,
+      closetCount: 128,
+      showAdd: s.showAdd,
+      openAdd: this.openAdd,
+      closeAdd: this.closeAdd,
+      wearIt: this.wearIt,
+      wearIcon: s.worn ? 'check_circle' : 'bookmark_border',
+      shuffle: this.shuffle,
+      genNote: NOTES[s.look],
+      week: WEEK,
+      tryIdle: s.try === 'idle', tryBusy: s.try === 'busy', tryDone: s.try === 'done',
+      tryCta: s.try === 'done' ? 'Save this look' : 'Generate try-on',
+      tryLeft: s.try === 'done' ? '1 try-on' : '2 try-ons',
+      runTryOn: this.runTryOn,
+      views: ['Front', 'Side', '360°'].map(n => ({
+        name: n,
+        bg: n === s.view ? 'rgba(255,255,255,.14)' : 'transparent',
+        fg: n === '360°' ? '#6B655D' : (n === s.view ? '#F2EFEA' : '#A39B90')
+      })),
+      tryItems: TRYITEMS,
+      profile: PROFILE,
+      rows: ROWS,
+      scores: SCORES,
+      tips: TIPS,
+      chatBusy: s.chatStage === 1,
+      chatCards: s.chatStage === 2,
+      suggested: SUGGESTED,
+      prompts: PROMPTS.map(text => ({ text, send: this.h('p' + text, () => this.send(text)) })),
+      input: s.input,
+      onInput: this.onInput,
+      send: this.sendCurrent
+    };
+  }
+}
+</script>
+</body>
+</html>

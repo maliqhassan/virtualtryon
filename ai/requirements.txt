@@ -1,0 +1,22 @@
+# CPU wheels by default. For CUDA builds, install torch/torchvision first from
+# https://pytorch.org/get-started/locally/ (pick the CUDA version matching the
+# host driver), then `pip install -r requirements.txt --no-deps` for the rest,
+# or drop the extra-index-url in below and pin to a CUDA build explicitly.
+torch>=2.5,<3.0
+torchvision>=0.20,<1.0
+
+diffusers>=0.31,<1.0
+transformers>=4.46,<5.0
+accelerate>=1.1,<2.0
+safetensors>=0.4,<1.0
+huggingface-hub>=0.26,<1.0
+
+opencv-python-headless>=4.10,<5.0
+mediapipe>=0.10,<1.0
+
+pillow>=11.0,<12.0
+numpy>=1.26,<2.0
+
+pydantic>=2.9,<3.0
+pydantic-settings>=2.5,<3.0
+python-dotenv>=1.0,<2.0

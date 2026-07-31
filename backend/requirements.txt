@@ -1,0 +1,38 @@
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.32,<1.0
+
+sqlalchemy>=2.0,<3.0
+alembic>=1.13,<2.0
+asyncpg>=0.29,<1.0
+psycopg2-binary>=2.9,<3.0
+
+pydantic>=2.9,<3.0
+pydantic-settings>=2.5,<3.0
+
+redis>=5.0,<6.0
+
+python-dotenv>=1.0,<2.0
+python-multipart>=0.0.9
+
+gunicorn>=23.0,<24.0
+
+# MediaPipe diagnostic analysis (ADR 0007 — narrow exception to ADR 0004,
+# runs in-process here instead of over HTTP to root ai/). Pinned to match
+# ai/requirements.txt's existing versions so both services stay in lockstep.
+# numpy's range is wider than ai/requirements.txt's <2.0 pin on purpose:
+# ai/'s Docker image runs Python 3.11 (numpy 1.26 has a wheel there), but
+# this host's backend/.venv runs Python 3.13, which has no numpy<2.0 wheel
+# and fails building from source (no C compiler on this machine). The <2.2
+# upper bound is a verified-working ceiling, not an arbitrary one: numpy
+# 2.5.1's bundled type stubs use PEP 695 `type` statements that break mypy
+# under this project's `python_version = "3.11"` target; numpy 2.1.3 does
+# not hit that and was confirmed clean (`mypy` passes) during this feature's
+# implementation.
+opencv-python-headless>=4.10,<5.0
+mediapipe>=0.10,<1.0
+numpy>=1.26,<2.2
+
+# Saved Looks image validation (app/services/saved_looks.py) — previously
+# only a transitive dependency of mediapipe; now imported directly, so it's
+# pinned explicitly rather than relying on another package's dependency tree.
+pillow>=11.0,<12.0
