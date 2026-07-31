@@ -1,35 +1,26 @@
-export type TryOnJobStatus = 'pending' | 'processing' | 'completed' | 'failed';
-
-export type TryOnStepId = 'reading_measurements' | 'draping_fabric' | 'matching_light';
+/** Mirrors backend/app/models/inference_job.py's InferenceJobStatus exactly
+ * (queued, not the old mock's `pending`) — this is the real backend's
+ * vocabulary now, not a placeholder. */
+export type TryOnJobStatus = 'queued' | 'processing' | 'completed' | 'failed';
 
 /**
- * The generated try-on output. `imageUri` is null in mock mode — the
- * results screen renders a labeled placeholder instead of a real image.
- * Once real AI generation exists (docs/roadmap Milestone 12), the mock
- * service is replaced by one that populates a real `imageUri` and sets
- * `isMock: false`; the results screen's rendering already branches on
- * `imageUri` being present, so no screen changes are needed for that swap.
+ * Mirrors backend/app/schemas/inference_job.py's InferenceJobResponse —
+ * only the fields this app currently uses (no `profileId`/`userImageStorageKey`,
+ * nothing consumes them yet). No `stepId`/`progress`/`result` — the real
+ * backend has no fine-grained stage tracking or generation output to bind
+ * those to (Stage 1 never runs AI); inventing them would be fake data, not
+ * a UI nicety. `generatedImageUrl` is the one real analogue to the old
+ * mock's `result.imageUri` — null until a future worker actually generates
+ * something.
  */
-export type TryOnResult = {
-  imageUri: string | null;
-  isMock: boolean;
-  mockCaption: string | null;
-  reasoning: string;
-};
-
-// Mirrors the shape planned for the real endpoints in
-// docs/roadmap/phase-a-core-loop.md Milestone 4
-// (`POST /api/v1/tryon` creates a job, `GET /api/v1/tryon/:id` polls it).
 export type TryOnJob = {
   id: string;
+  garmentId: string | null;
+  generatedImageUrl: string | null;
   status: TryOnJobStatus;
-  stepId: TryOnStepId | null;
-  stepIndex: number; // 0-based; -1 before processing starts
-  stepCount: number;
-  progress: number; // 0-100
   errorMessage: string | null;
+  startedAt: string | null;
   completedAt: string | null;
-  result: TryOnResult | null; // populated only once status === 'completed'
 };
 
 export type CreateTryOnJobInput = {

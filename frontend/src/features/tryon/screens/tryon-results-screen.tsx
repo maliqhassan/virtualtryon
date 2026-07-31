@@ -83,11 +83,13 @@ export function TryOnResultsScreen() {
     );
   }
 
-  if (job.status !== 'completed' || !job.result) {
+  if (job.status !== 'completed') {
     // Reachable only via a direct/stale link to a job that's still running —
     // normal in-app navigation only arrives here once completed. Points
     // back at processing rather than trying to resume watching this
-    // specific (possibly long-gone) job id.
+    // specific (possibly long-gone) job id. Unreachable today by the
+    // in-app flow (no worker ever reaches `completed`), same as this
+    // screen's own useEffect redirect — kept correct for once one exists.
     return (
       <AppScaffold>
         <Text className="text-2xl font-bold text-ink-primary">Still processing</Text>
@@ -100,8 +102,6 @@ export function TryOnResultsScreen() {
       </AppScaffold>
     );
   }
-
-  const { result } = job;
 
   return (
     <AppScaffold>
@@ -118,9 +118,8 @@ export function TryOnResultsScreen() {
       <View className="mt-md">
         {compareMode === 'after' ? (
           <ResultCanvas
-            uri={result.imageUri}
-            placeholderCaption={result.mockCaption ?? undefined}
-            caption={result.reasoning}
+            uri={job.generatedImageUrl}
+            placeholderCaption="Generated image not available"
           />
         ) : (
           <ResultCanvas

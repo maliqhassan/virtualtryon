@@ -2,6 +2,950 @@
 
 Last updated: 2026-07-31
 
+## Phase: 23 — Worker runner infrastructure (Sprint 4 Stage 6)
+
+Gives `WorkerService.run_once()` (Stage 5) somewhere to actually execute
+continuously: `WorkerRunner` (new, `app/worker/worker_runner.py`) loops
+it on a configurable interval, `app/worker/__main__.py` is the CLI
+entrypoint (`python -m app.worker`), and a new `worker` service in
+`docker-compose.yml` runs it as its own container — genuinely separate
+from `backend`, per ADR 0005's already-stated model, not wired into
+FastAPI's own process (that was explicitly ruled out by ADR 0005: "not
+FastAPI's `BackgroundTasks`... which is exactly what ADR 0002 already said
+not to couple"). No `CatVTON`, no model download, `AIInferenceClient`
+untouched, `MediaPipe` untouched — confirmed by scope.
+
+**The approved alternative to volume-mounting root `ai/`, done properly**:
+`ai/pyproject.toml` gained real packaging metadata (`[build-system]`,
+`[project]` name `virtualtryon-ai`, `[tool.setuptools.packages.find]`),
+making its existing `src` package (already the name `ai/`'s own tooling
+config treated it as) a genuine installable distribution. `backend/Dockerfile`
+now `pip install`s it during the image build (both `backend` and `worker`
+share the same Dockerfile/image), and it's `pip install -e`'d into the
+local `.venv` too — so `from src.models.inference_client import ...`
+resolves identically everywhere (local dev, `backend` container, `worker`
+container) via a real installed package, no runtime `sys.path` hack
+(removed entirely from `inference_client_provider.py`) and no volume
+mount. This also required changing `backend`'s own `docker-compose.yml`
+build context from `./backend` to the repo root (`context: ., dockerfile:
+backend/Dockerfile`) so the build can reach root `ai/` at all — a new root
+`.dockerignore` was added alongside this (previously only `backend/.dockerignore`
+existed, scoped to the old, narrower context).
+
+**Structured iteration logging required extending Stage 5's own return
+values, not just adding logging** — `WorkerService.run_once()` returned a
+bare `int` (jobs attempted); logging "found/processed/failed" as distinct
+numbers needed a richer result. `JobProcessor.process_single_job()` now
+returns the job's resulting `InferenceJobStatus | None` (`None` = nothing
+to do — job not found), and `WorkerService.run_once()` aggregates these
+into a new `WorkerRunResult` dataclass (`jobs_found`/`jobs_processed`/
+`jobs_failed`/`jobs_completed`). This changes those two files' return
+*types*, not their responsibilities or their dependencies — `WorkerService`
+still has zero knowledge of `WorkerRunner`, satisfying "keep `WorkerService`
+completely independent from the runner" as a one-way dependency, not as
+"never touch this file again."
+
+**Two real infrastructure bugs found only by actually building and running
+the containers, not by writing config and assuming it would work:**
+
+1. **A fresh named Docker volume defaults to root ownership.** The new
+   `storage_uploads` volume (shared between `backend` and `worker`, so the
+   worker can read files `backend` wrote — see below) was mounted at
+   `/app/storage/uploads`, but that directory never existed in the image
+   at build time (only created at runtime, by `app/main.py`'s own
+   `mkdir`) — so Docker initialized the volume owned by `root`, and the
+   container (running as `appuser`) got `PermissionError` on every upload,
+   discovered directly (a real `500` with a full traceback), not
+   hypothesized. Fixed: `backend/Dockerfile` now creates
+   `storage/uploads` (owned by `appuser`, via the existing `chown -R`)
+   *before* the volume is ever first mounted there — Docker copies a new
+   volume's initial ownership from whatever the image already has at that
+   path, so this makes a brand-new volume writable from the first boot.
+2. **`backend` and `worker` are genuinely separate container filesystems**
+   — obvious in hindsight, found by watching a real job fail with the
+   *wrong* reason (`FileNotFoundError` instead of the real CatVTON
+   message) the first time the new `worker` container tried to read a
+   file `backend` had written. `backend` never had persistent/shared
+   storage before this stage (its uploads lived only in its own
+   container's ephemeral layer) — this was never a problem while only one
+   container ever touched those files. Fixed with a new shared named
+   volume (`storage_uploads:/app/storage/uploads`), mounted into both
+   `backend` and `worker`.
+
+**A real, if minor, side effect of fixing #2 above — disclosed directly,
+not smoothed over**: adding the shared volume to `backend` required
+rebuilding and recreating its container. `backend` had never had
+persistent storage before, so its previously-uploaded files existed only
+in the old container's now-discarded writable layer — recreating it lost
+them. Three pre-existing garment rows (`Flowral double shirt`, `Garment
+grey shirt`, `Sirt floweral` — generic-looking manual test data, not
+anything this session created) now have `image_url` values pointing at
+files that no longer exist anywhere; confirmed unrecoverable (the old
+container is gone, no dangling volume or layer holds them). Their DB rows
+are intact, only the underlying image files are gone — Wardrobe would now
+show a broken image for those three specifically. This is exactly the
+kind of consequence worth flagging plainly rather than folding into "test
+data cleanup," since it isn't test data.
+
+**New**: `app/worker/worker_runner.py` (`WorkerRunner` — `run()`'s
+loop, `_run_iteration()` for one pass with broad exception recovery,
+interruptible sleep via `contextlib.suppress(TimeoutError)` around
+`asyncio.wait_for` on a shutdown `asyncio.Event`), `app/worker/__main__.py`
+(registers `SIGINT`/`SIGTERM` handlers calling `request_shutdown()`;
+degrades gracefully — a logged warning, not a crash — on platforms where
+`asyncio`'s signal handling isn't supported, i.e. local Windows dev;
+Linux, the real deployment target, supports both). **Modified**:
+`app/core/config.py` (+`WORKER_POLL_INTERVAL_SECONDS: float = 5.0`),
+`app/worker/job_processor.py`/`worker_service.py` (richer return types,
+above), `app/worker/inference_client_provider.py` (dropped the `sys.path`
+hack), `backend/Dockerfile`, `docker-compose.yml` (root build context,
+new `worker` service, new `storage_uploads` volume shared with `backend`),
+`ai/pyproject.toml` (packaging metadata). New: root `.dockerignore`.
+`tests/test_worker_runner.py` (4 cases: a real queued job processed via
+`_run_iteration()`; exception recovery via a patched `WorkerService`
+raising; `request_shutdown()` stopping the loop promptly against a
+deliberately long poll interval; the same for a shutdown requested mid-sleep).
+
+**Verified for real, twice — as a directly-callable class, and as an
+actual separate running container:**
+- 52/52 backend `pytest` (48 pre-existing + 4 new), `black`/`ruff`/`mypy`
+  clean.
+- Built and ran the real `worker` Docker image (`docker compose build
+  worker` → `up -d worker`), confirmed it logs a real structured
+  iteration on its own schedule with zero jobs queued
+  (`jobs_found=0 jobs_processed=0 jobs_failed=0 jobs_completed=0`).
+- Created a real job via `curl` against the live `backend` and, without
+  running any script or touching the worker at all, watched it get
+  picked up automatically within one poll interval and transition to
+  `failed` with the genuine `CatVTONInferenceClient` message and both
+  timestamps set — the first time this project's AI job pipeline has run
+  fully unattended, end to end, from HTTP request to worker completion.
+- `docker stop` (a real `SIGTERM`) against the running `worker` container:
+  logs show `"worker runner stopped"` within ~1.2 seconds — the
+  interruptible sleep working for real, not just in a unit test, well
+  under the 5-second poll interval it would otherwise have waited out.
+- All test-created rows/files (across `garments`/`user_photos`/
+  `inference_jobs` and two orphaned files in the shared volume) cleaned up
+  directly; the three real, pre-existing garments' now-broken image
+  references were identified and left as-is (nothing to clean up — the
+  rows are real, only their files are gone, per the disclosure above).
+
+### Reviews
+
+**Code review**: `WorkerRunner`'s split between `_run_iteration()` (one
+pass, broad exception recovery) and `run()` (the loop, checking shutdown
+both between iterations and during the sleep) makes both independently
+testable without an actual multi-second wait in the test suite.
+
+**Architecture review**: dependency direction confirmed one-way —
+`WorkerRunner` imports `WorkerService`; nothing under `worker_service.py`/
+`job_processor.py`/`inference_worker.py` imports or knows about
+`worker_runner.py` at all. The runner contains zero job-processing logic
+of its own (no repository, no DB query, no `InferenceWorker` reference),
+satisfying "the runner must only orchestrate execution." `backend` and
+`worker` sharing one Dockerfile/image (different `command:` only) means
+there's exactly one place that installs dependencies or builds the `ai/`
+package — no drift possible between what each container can import.
+
+**Security review**: no HTTP surface for this layer, same trusted-
+infrastructure posture as Stage 5. The `worker` service has no exposed
+port in `docker-compose.yml` (unlike `backend`'s `8000:8000`) — it isn't
+reachable from outside the compose network at all. Signal handlers only
+ever call `request_shutdown()` (a no-argument, idempotent method) — no
+signal-driven code path takes external input or does anything a
+compromised signal sender could turn into more than "stop a bit early."
+
+**Known gaps and technical debt, stated honestly**:
+- **The three real garments' broken image files, disclosed above** — not
+  fixed (unrecoverable), but not hidden either.
+- **No real scheduling/locking still** — `WorkerRunner` is one process
+  polling alone; running two `worker` replicas would double-process
+  queued jobs, same gap Stage 5 already named, now inherited unchanged.
+- **`storage_uploads` is a local named volume** — fine for one Docker
+  host, not a real multi-host storage story; matches this project's
+  already-repo-wide "local disk now, S3-compatible deferred on purpose"
+  decision (`docs/roadmap/README.md`'s cross-cutting decision #3), not a
+  new gap.
+- **No health check on the `worker` service** in `docker-compose.yml`
+  (unlike `postgres`/`redis`, which have one) — `restart: unless-stopped`
+  means Docker restarts it if the process exits, but nothing actively
+  probes "is it actually still polling." Not built, since nothing asked
+  for it and the runner's own exception-recovery already covers the more
+  likely failure mode (a bad iteration, not a hung process).
+- No rate limiting (repo-wide gap, restated — still no HTTP surface for
+  it to apply to here).
+
+## Phase: 22 — AI inference worker layer (Sprint 4 Stage 4, backend only)
+
+Implements the layer ADR 0008 deferred: something that actually reads a
+`queued` `InferenceJob` and advances it, replacing "jobs remain queued
+forever" with a real (if currently-always-failing) attempt. Three classes
+under a new `backend/app/worker/` package: `InferenceWorker` (low-level
+adapter — job's stored images → `AIInferenceRequest` → `AIInferenceClient.infer()`
+→ result/failure, no DB knowledge at all), `JobProcessor` (one job's full
+lifecycle: fetch → `mark_processing` → attempt → `mark_failed`, calling
+only the existing, unchanged `app/services/inference_jobs.py` functions —
+never mutates a row itself), `WorkerService` (the outer entrypoint —
+`run_once()` processes every currently-queued job; `process_single_job(job_id)`
+processes one, added specifically so a future real queue consumer can
+dispatch by id without this layer being redesigned around it). No
+inference, no `CatVTON` implementation, no model download, `MediaPipe`
+untouched — confirmed by diff.
+
+**A real conflict between the requirements and the existing default
+wiring, found before writing code, not after**: `VirtualTryOnEngineRegistry.create()`
+(Phase 12) defaults every engine to `LocalStubInferenceClient`, which does
+*not* raise — it returns a real (if solid-gray placeholder) image. Routing
+the worker through that existing registry would have made every job
+"succeed" with fake content, directly violating "never fake a completed
+image, never generate placeholder images." The worker bypasses
+`VirtualTryOnEngineRegistry` entirely and is wired to `CatVTONInferenceClient`
+instead — the one `AIInferenceClient` implementation that actually raises
+`NotImplementedError` today, which is the honest behavior this layer
+exists to handle.
+
+**Approved deviation from my own proposed design, applied as directed**:
+I originally proposed a new ADR (0009) recording a narrow exception to
+ADR 0004 (root `ai/`'s `AIInferenceClient` is documented as "entirely
+internal to `ai/`"; the worker needs it directly, crossing that boundary).
+Per explicit instruction, no ADR was added — this section *is* that
+documentation instead, kept lighter-weight on purpose:
+
+- **`app/worker/inference_client_provider.py` is the only file in this
+  package that names `CatVTONInferenceClient` or reaches into root `ai/`
+  at all.** `InferenceWorker`/`JobProcessor`/`WorkerService` depend only
+  on the injected `AIInferenceClient` abstraction — swapping which
+  concrete client is active means changing this one function's body,
+  nothing that calls it.
+- **This is a temporary development arrangement, not a settled boundary.**
+  Root `ai/` has no database access of its own and was never meant to be
+  imported directly by `backend/` (ADR 0004: "always over HTTP, never a
+  direct Python import"). This import exists so the worker has something
+  real to call today, ahead of resolving that properly — e.g., a real
+  HTTP call into `ai/` once it has an inference endpoint of its own.
+- **A real, non-obvious import-path bug found and fixed while building
+  this**: root `ai/` has no top-level `__init__.py` of its own (only
+  `ai/src/__init__.py` does), so the bare name `ai` *always* resolves to
+  `backend/ai/` (Phase 8's orchestration package, which does have one) —
+  confirmed directly (`import ai; ai.__file__` → `backend/ai/__init__.py`,
+  regardless of `sys.path` order). `inference_client_provider.py` instead
+  adds `ai/`'s own directory to `sys.path` and imports `src.models...`
+  directly — matching how `ai/`'s own tooling already treats itself
+  (`ai/pyproject.toml`'s `known_first_party = ["src"]`), and confirmed
+  working via a standalone script before it was relied on anywhere real.
+- **This import path only resolves in local dev today, not inside the
+  running Docker container** — found while verifying, not assumed. Root
+  `ai/` isn't volume-mounted into the `backend` container at all (only
+  `backend/ai/`, the orchestration package, is), and `backend/app/storage/uploads`
+  isn't shared between the container and a locally-run script either
+  (confirmed directly: 11 files in the container's `/app/storage/uploads`
+  vs. 104 on the host filesystem at the time — two genuinely separate
+  directories). The worker is real and fully tested via `pytest` and a
+  standalone local script (both run entirely in one consistent local
+  process), but running it *inside* the deployed container as it exists
+  today would fail to import `ai/` at all. Making that resolve for real
+  (mounting root `ai/` into the container, or an equivalent fix) is
+  necessary infrastructure work this stage didn't include, not something
+  papered over.
+
+**A real bug found via actual execution, not hypothesized**: the first
+`pytest` run crashed outright — `InferenceWorker.attempt()` only wrapped
+the `AIInferenceClient.infer()` call in a try/except, not the image-load/
+decode step before it. A job whose `user_image_storage_key` doesn't
+resolve to a real file (a stale mock-fallback value, or — as actually
+happened, a pre-existing test fixture in `test_inference_jobs.py` that
+uses a literal placeholder string, never a real file) raised an uncaught
+`FileNotFoundError` that propagated straight out of `run_once()`'s loop,
+crashing the whole batch and leaving one earlier job stranded in
+`processing` forever (found afterward, cleaned up directly). Fixed by
+moving the image-load/decode inside the same try/except as the inference
+call — any failure in this method now cleanly fails just that one job.
+Re-verified: `run_once()` no longer crashes given a mixed batch of
+good and bad jobs.
+
+**New**: `app/worker/{__init__,inference_client_provider,inference_worker,job_processor,worker_service}.py`.
+**Modified**: `app/db/repositories/garment_repository.py` (+`get_by_id`,
+unscoped — same "for the worker's internal use" reasoning as `InferenceJobRepository.get_by_id`,
+Sprint 4 Stage 1), `app/db/repositories/inference_job_repository.py`
+(+`list_queued`, unscoped across every guest). `tests/test_worker.py` (5
+cases: a real queued→processing→failed transition with the real
+`CatVTONInferenceClient` message and both timestamps set; a missing-job-id
+no-op; the garment-deleted-after-job-created failure path; the generic-
+error-message security fix below; `run_once()` processing more than one
+queued job).
+
+**Verified for real**: 48/48 backend `pytest` (43 pre-existing + 5 new),
+`black`/`ruff`/`mypy` clean. A clean standalone local script (not just
+`pytest`'s assertions) created a real user, garment, and queued job with
+real stored image files, ran `WorkerService.process_single_job()` against
+it, and printed the real before/after state: `queued` (no timestamps, no
+error) → `failed` (both timestamps set, the genuine `CatVTONInferenceClient`
+message) — then cleaned up the user/garment/job rows and both stored
+files itself. All test data created via `curl`/`pytest` during this
+phase's verification (27 jobs, 13 user photos, 31 garments, cross-checked
+by title/timestamp against 3 rows of real, unrelated user data) removed
+directly from the dev database afterward.
+
+### Reviews
+
+**Code review**: `InferenceWorker`/`JobProcessor`/`WorkerService`'s
+three-way split matches the three names requested exactly, with a clean
+dependency direction (`WorkerService` → `JobProcessor` → `InferenceWorker`
+→ `AIInferenceClient`). The image-load bug (above) was a real gap this
+review process caught by actually running the suite, not by inspection.
+
+**Architecture review**: the worker depends on `AIInferenceClient` only,
+never `CatVTONEngine`/`CatVTONInferenceClient` outside the one factory
+function, satisfying "isolated so another inference engine can replace
+CatVTON later" concretely — replacing it means editing
+`get_inference_client()`'s single return statement. `CatVTONEngine`
+itself (root `ai/`'s `VirtualTryOnEngine` implementation) is untouched;
+this worker doesn't go through it at all, on purpose (that's the "which
+model" pluggability axis, ADR 0006 — a different concern from "how does
+the worker get *an* `AIInferenceClient` today").
+
+**Security review**: no HTTP surface, no new authz boundary — this layer
+runs as trusted internal infrastructure, deliberately unscoped across
+users (a worker processes whatever is queued, not "the current guest's").
+Confirmed the same for the two new repository methods (`get_by_id`,
+`list_queued`) — both plain, parameterized SQLAlchemy queries, no raw
+SQL, no client input reaches them at all (they take a `UUID`/nothing,
+never a request body). Grep-confirmed `app/worker/` is never imported
+from `app/api/` at all, so the unscoped queries genuinely have no
+HTTP-reachable path today.
+
+**One real finding, fixed**: a dedicated security-review pass caught that
+`InferenceWorker.attempt()` stored the *raw* exception text from a failed
+image load (`str(exc)`, e.g. `FileNotFoundError`'s message) directly into
+`InferenceJob.error_message` — which the job's own owning guest can read
+back verbatim via the existing, unchanged `GET /api/v1/inference-jobs/{id}`.
+A missing/unreadable stored file would have leaked the server's storage
+directory layout to that guest. Fixed by splitting the image-load and the
+inference-call into separate try/except blocks: load failures now log the
+full exception server-side (`logger.exception`) but return a fixed,
+generic message (`GENERIC_LOAD_FAILURE_MESSAGE`) to the job; the inference
+client's own exception text (e.g. `CatVTONInferenceClient`'s) is kept
+verbatim, since that message is authored and deliberately safe to show,
+unlike a raw filesystem error. New test
+(`test_missing_stored_file_gets_a_generic_error_message`) creates a real
+job, deletes its underlying stored file via `StorageService.delete()`,
+processes it, and asserts the returned error message is the generic one
+and contains neither "storage" nor "uploads".
+
+**Known gaps and technical debt, stated honestly**:
+- **No real scheduling or locking.** `run_once()`/`process_single_job()`
+  are directly callable Python, not wired to `arq`/Redis (ADR 0005's own
+  still-separately-scoped future work) or any process/container of their
+  own. Nothing prevents two concurrent invocations from double-processing
+  the same job — real production locking (`SELECT ... FOR UPDATE SKIP LOCKED`
+  or equivalent) is unbuilt, by explicit scope, not forgotten.
+- **The `ai/` import doesn't resolve inside the actual deployed container**
+  — see above. Needs real infrastructure work (a volume mount at minimum)
+  before this worker could run as part of the normal `docker compose`
+  stack rather than a local script.
+- **The success path is unbuilt.** `JobProcessor` logs (not crashes, not
+  silently drops) if `AIInferenceClient.infer()` ever returns a real
+  response, but doesn't persist a generated image or call `mark_completed`
+  — building that is real image-generation-pipeline territory this stage
+  was explicitly told not to implement. Unreachable today regardless,
+  since `CatVTONInferenceClient` always raises.
+- **No automated test exercises `run_once()` racing itself or a truly
+  concurrent invocation** — the "no locking" gap above is stated, not
+  separately proven to be safe or unsafe under real concurrency.
+- No rate limiting (repo-wide gap, restated — though this layer has no
+  HTTP surface for that to apply to).
+
+## Phase: 21 — UserPhoto upload (Sprint 4 Stage 3, backend + frontend)
+
+Closes the one remaining mock input in the real try-on flow: `preparePhoto()`
+was still always falling back to a fake storage-key string (no real
+endpoint existed — Phase 5's original gap, restated as a known limitation
+in every prior phase since). `POST /api/v1/user-photos` now exists, and a
+real job's `user_image_storage_key` is a genuine, backend-stored file
+reference end to end — confirmed directly in the database, not just
+inferred from a 201.
+
+**Backend**: `app/models/user_photo.py` (`UserPhoto` — `id`, `user_id` FK,
+`storage_key`, `created_at`; deliberately minimal, matching Profile's own
+precedent of building only the CRUD surface actually requested — no
+rename/list/delete operation exists here, only `create`, since nothing
+asked for more), `app/db/repositories/user_photo_repository.py` (`create`
+only, same reasoning), `app/schemas/user_photo.py` (`UserPhotoResponse`:
+`id`/`storage_key`/`image_url`/`created_at`), `app/services/user_photos.py`
+(reuses `image_validation.validate_image`/`ImageUpload` and
+`storage.get_storage_service()` completely unchanged — no duplicated
+upload/validation logic, per the explicit requirement), `app/api/v1/endpoints/user_photos.py`
+(`POST` only, mirroring Garment's exact create-endpoint shape minus the
+title/category form fields it has no use for), new Alembic migration (no
+enum this time, nothing to fix on downgrade). **Modified**:
+`app/models/__init__.py`, `app/api/v1/router.py` (mounts `/user-photos`).
+`tests/test_user_photos.py` (4 cases: success — asserting `image_url ===
+storage_key` and a real `/uploads/` prefix — bad content type, oversized
+upload, device-id issuance).
+
+**One naming design worth explaining, not just declaring**:
+`UserPhotoResponse` exposes both `storage_key` and `image_url` as
+requested, but the model stores only one column. `image_url` is a plain
+Python `@property` on the ORM model returning `self.storage_key` — the
+same underlying value under two names for two different consumers
+(`storage_key` for whatever references this photo when creating an
+`InferenceJob`; `image_url` for whatever eventually displays it), not two
+columns that could drift out of sync. `UserPhotoResponse.model_validate()`
+reads both correctly via `from_attributes=True` since a property is just
+as readable as a mapped column to Pydantic.
+
+**Frontend**: `features/user-photo/services/prepare-photo.ts` rewritten to
+mirror `prepare-garment.ts`'s exact structure — real upload attempt first,
+`BackendUnavailableError` still falls back to the same mock as before (not
+removed; the demo flow shouldn't hard-depend on backend availability any
+more than the garment flow does). `features/user-photo/types.ts`'s
+`PreparePhotoResponse` doc comment updated to state plainly that `photoId`
+now holds the backend's `storage_key`, not the `UserPhoto` row's own `id`
+— `InferenceJob.user_image_storage_key` was never given a foreign key to
+this table (`docs/decisions/0008`), so the storage key itself, not a row
+id, is the value that has to flow through. **Zero other frontend files
+touched** — traced the existing `usePreparePhoto()` hook's
+`setPreparedResult({ id: data.photoId, ... })` mapping and confirmed the
+real storage key already flows automatically through the upload-session
+store into `useTryOnJob`'s `userPhotoId` input and then into
+`createTryOnJob`'s `user_image_storage_key` field, with no code path left
+assuming the old mock shape.
+
+**Verified for real, against the live backend**: `curl` — real upload,
+`storage_key`/`image_url` identical, both real `/uploads/` paths; bad
+content-type and oversized-upload rejections still 422. Playwright, full
+client-side-navigation flow (learned from Stage 2's own navigation
+mistake, not repeated here): real photo upload (`201`, no longer the mock
+fallback) → real garment upload (`201`) → processing screen auto-starts a
+real job (`201`) → **the created `InferenceJob` row's
+`user_image_storage_key` column queried directly and confirmed to be the
+real stored path** (`/uploads/<uuid>.png`), not a `mock-<timestamp>`
+string — the actual end-to-end proof this feature exists to deliver, not
+just a passing HTTP status. 43/43 backend `pytest` (39 pre-existing + 4
+new), `black`/`ruff`/`mypy` clean. `tsc`/`expo lint`/`prettier` clean on
+the frontend. All test-created rows across three tables (12 garments, 3
+user photos, 10 inference jobs — accumulated across both the backend
+`pytest` run and the Playwright pass) cleaned up directly against the dev
+database, cross-referenced by title/timestamp against known real user
+data first.
+
+### Reviews
+
+**Code review**: the `image_url` property-not-column design is the one
+piece of new reasoning this feature needed; everything else is a close
+mirror of Garment's existing upload path. Frontend change is a single
+rewritten service function plus a doc-comment update — traced, not
+assumed, that nothing else needed touching.
+
+**Architecture review**: layering matches Garment/Saved Looks/Profile
+exactly. `UserPhoto` and `InferenceJob` remain genuinely decoupled — no
+FK between them, matching the InferenceJob design's own original
+reasoning (a plain storage-key string, specifically so it wouldn't need a
+`UserPhoto` table to exist yet). Now that one does exist, that decoupling
+is a deliberate carry-over, not an oversight — revisited below.
+
+**Security review**: dedicated sub-agent trace, no high-confidence
+findings. Filename handling confirmed safe (client-supplied filename is
+read into `ImageUpload.filename` but never used to construct a path;
+`LocalStorageProvider` always mints its own `uuid4()` filename). No SQL
+injection surface (ORM-only). No IDOR surface (confirmed by reading the
+router directly: no GET/list/update/delete route exists for this
+resource, so nothing can read a photo back across users). No mass
+assignment (`repo.create()` called with exactly two hardcoded,
+server-resolved kwargs, never a spread request payload).
+
+**The sub-agent surfaced, unprompted, the same gap flagged in scoping this
+feature — restated here plainly, not buried**: `InferenceJob` creation
+still accepts `user_image_storage_key` as an unvalidated free-form string
+— it does not check that the given key corresponds to a `UserPhoto` row
+actually owned by the calling guest (unlike `garment_id`, which *is*
+ownership-checked against the caller). A guest could submit an arbitrary
+or another guest's storage_key string and create a job referencing it.
+This was a deliberate scoping decision, not an oversight: requirement #8
+said not to modify the `InferenceJob` schema, and adding this check would
+mean modifying `app/services/inference_jobs.py`'s creation logic — beyond
+what Sprint 4 Stage 3 asked for. Flagging it explicitly rather than
+letting it look resolved just because a real `UserPhoto` table now
+exists.
+
+**Known gaps and technical debt, stated honestly**:
+- The IDOR-style gap above — `InferenceJob` doesn't cross-check
+  `user_image_storage_key` against an owned `UserPhoto` row. Worth a
+  dedicated follow-up if this feature line continues.
+- `UserPhotoRepository` has only `create` — no way to list, inspect, or
+  delete a user's uploaded photos via the API. Not requested; consistent
+  with Profile's own "build only what's asked" precedent, not an
+  inconsistency.
+- No automated frontend test coverage was added (standing gap since
+  Phase 4/5, not new here).
+- Uploaded photo files have no retention/cleanup policy — same
+  repo-wide gap already named for Saved Looks/Garment images.
+- No rate limiting (repo-wide gap, restated again).
+
+## Phase: 20 — AI inference job pipeline, Stage 2 (frontend wired to the real job API)
+
+Replaces the frontend-only mock try-on job (Phase 6's in-memory `Map`,
+`runJobProgression`'s fake 3-step timer) with real calls to Phase 19's
+backend: `POST`/`GET /api/v1/inference-jobs`. No backend, schema, or
+endpoint changes — confirmed by diff, not just by not opening those files.
+No inference, no CatVTON, no MediaPipe changes, exactly as scoped.
+
+**The mock and real contracts didn't overlap as cleanly as "swap the
+service file" implies — surfaced in the design brief, handled here as
+planned.** The mock had `status: pending|processing|completed|failed`
+plus fake `stepId`/`stepIndex`/`stepCount`/`progress` and a `result`
+object (`imageUri`/`isMock`/`mockCaption`/`reasoning`). The real backend
+has `status: queued|processing|completed|failed` (note: `queued`, matching
+Phase 19's real vocabulary, not the mock's `pending`) and none of the
+fine-grained fields — Stage 1 never built per-stage tracking. Dropped all
+of them from `features/tryon/types.ts` rather than inventing values to
+fill the old shape: `TryOnJobStatus`, `TryOnJob` (now just
+`id`/`garmentId`/`generatedImageUrl`/`status`/`errorMessage`/`startedAt`/
+`completedAt`). `TryOnStepId`/`TryOnResult` deleted outright, not
+deprecated-and-ignored.
+
+**New, bounded polling — the one behavior change beyond a straight
+swap**: `hooks/use-tryon-job-query.ts` still shares one polling query
+between the processing and results screens (Phase 7's extraction,
+unchanged in shape), but `refetchInterval` now stops after a real 10-second
+window (1 poll/second) tracked via a plain timestamp ref, not a fake
+progress simulation — with no worker to ever advance a `queued` job, the
+old unbounded interval would have polled forever for no reason. A second
+`useEffect` with its own `setTimeout` flips a `pollingTimedOut` flag at
+that same 10-second mark, purely to trigger a re-render at the right
+moment (TanStack Query's own scheduler doesn't otherwise notify anyone
+when it decides to *stop* polling) — the underlying poll itself is
+otherwise untouched and keeps running if a worker ever does start
+advancing the job mid-session. `refetch` is exposed alongside it for a
+real manual "try asking again" action, not a status simulation.
+
+**`tryon-processing-screen.tsx`**: same three-branch shape (not-ready /
+working / failed) preserved exactly, per the requirement to keep existing
+structure. Inside "working," dropped `AppProgressBar` and the fake
+percentage/step-label entirely — replaced by a bare `ThinkingIndicator`
+showing "Queued…"/"Processing…"/"Starting…" (matching how Wardrobe/Saved
+Looks/Profile already show loading state elsewhere in this app, no
+numbers anywhere) — and, once `pollingTimedOut`, the exact required
+message plus a Refresh button calling the exposed `refetch`. `processing`/
+`completed` branches (including the existing `router.replace` to Results
+on `completed`) are kept structurally present even though unreachable
+today with no worker — forward-compatible, not dead code to be removed.
+
+**`tryon-results-screen.tsx`**: minimal fix-up only, as scoped — swapped
+`job.result.imageUri`/`.reasoning`/`.mockCaption` for `job.generatedImageUrl`
+directly (no fake reasoning caption; the real backend has no such field).
+Loading/error/failed/still-processing/completed branches and the Save/
+Share/Retry buttons are otherwise untouched.
+
+**Modified**: `features/tryon/{types.ts,services/tryon-job.ts,hooks/use-tryon-job.ts,hooks/use-tryon-job-query.ts,screens/tryon-processing-screen.tsx,screens/tryon-results-screen.tsx,components/result-canvas.tsx}`
+(the last one only a stale comment referencing the deleted `TryOnResult`
+type, corrected for accuracy). Navigation (`app/tryon-processing.tsx`,
+`app/tryon-results/[jobId].tsx`, both existing `Link`s into this flow) is
+untouched, since nothing about the routes themselves changed.
+
+**Verified for real, against the live backend, with a real navigation
+mistake caught before drawing conclusions**: the first two Playwright
+passes used `page.goto()` between the photo-upload, garment-upload, and
+processing screens — each one a full page reload, which silently wiped
+the in-memory Zustand session stores (`preparedResult` for both photo and
+garment) between steps, exactly the same class of issue as this session's
+own in-memory web device-identity resets. The processing screen correctly
+showed "Almost there" (not enough inputs ready) both times — correct
+behavior given what actually happened, not a bug, but not what was being
+tested either. Corrected by driving the entire flow through in-app
+client-side navigation (clicking through, one initial page load only),
+after which the real flow worked end to end: real photo prepare (still
+mock-fallback — `POST /api/v1/uploads/user-photo` still doesn't exist, a
+pre-existing Phase 5 gap untouched by this feature) → real garment prepare
+(`POST /api/v1/garments`, `201`) → processing screen auto-starts a real
+job (`POST /api/v1/inference-jobs`, `201`) → `GET .../{id}` polls exactly
+once per second → shows "Queued…" with no fake numbers → at the 10-second
+mark, switches to the exact required message and a working Refresh button
+that re-fetches for real (confirmed via one additional live `GET`, still
+`queued`, message persists correctly rather than breaking). Zero console
+errors beyond the expected, pre-existing `404` from the still-unbuilt
+user-photo endpoint. `tsc --noEmit`, `expo lint`, `prettier --check` all
+clean. Test-created rows (1 job, 3 garments) cleaned up directly against
+the dev database afterward — cross-referenced against real user data
+found mixed in (one garment had even been renamed by real use between
+sessions) and left untouched, same discipline as every prior cleanup this
+sprint.
+
+### Reviews
+
+**Code review**: the bounded-polling implementation is the one genuinely
+new piece of logic this stage (everything else is closer to a type/shape
+swap) — it's covered by the manual verification above (real 1s cadence,
+real 10s cutoff, real Refresh) rather than an automated test, since this
+feature has no frontend test suite to add to (consistent with this app's
+standing gap, restated below, not new here).
+
+**Architecture review**: networking stayed entirely inside the existing
+services/hooks structure — no new API client, no new store, no new
+polling mechanism invented (the bounded window reuses `refetchInterval`,
+just with a real stop condition instead of none). `useTryOnJobQuery`
+remains the single shared source of truth for both screens that read a
+job, matching Phase 7's own reason for extracting it in the first place.
+
+**Security review**: no new attack surface — same `apiClient`/device-
+identity interceptor as every other feature, no new endpoint, no new
+input accepted from the user beyond what `use-tryon-job.ts` already
+passed through (`userPhotoId`/`garmentId`, unchanged shape). Worth
+restating plainly, not hiding: a real job's `user_image_storage_key` is
+still always a client-side mock string today, since no real user-photo
+upload endpoint exists — Phase 19's own already-documented gap, not
+introduced or worsened here.
+
+**Known gaps and technical debt, stated honestly**:
+- No real inference worker exists, so every real job created today stays
+  `queued` forever — this stage makes that fact visible and honest
+  instead of hiding it behind fake progress, but doesn't change the
+  underlying reality that nothing generates a try-on yet.
+- User-photo upload is still 100% mock (Phase 5's original gap) — the
+  "user photo" side of a real job is not actually backed by real stored
+  data, only the "garment" side is. Building a real upload endpoint is
+  outside this stage's scope and is a backend change this stage was
+  explicitly told not to make.
+- The Results screen's `completed`/non-`completed` branches, and the
+  processing screen's `completed`-triggered redirect, are currently
+  unreachable by any real flow — correct as written, unverifiable end to
+  end until a worker exists to actually complete a job.
+- No automated test coverage was added for the bounded-polling hook or
+  either screen — this app has no frontend test suite yet at all
+  (standing gap since Phase 4/5), not a regression introduced by this
+  feature.
+- `AppProgressBar` (Phase 5's shared component) has no remaining
+  consumer after this change — left in place rather than deleted, since
+  removing a shared component isn't this feature's call to make
+  unilaterally and nothing asked for it.
+
+## Phase: 19 — AI inference job pipeline, Stage 1 (persisted job CRUD, no inference)
+
+`InferenceJob` model, migration, repository, service, schemas, and three
+REST endpoints (`GET`/`POST /api/v1/inference-jobs`, `GET /api/v1/inference-jobs/{id}`)
+— replaces nothing yet (the frontend's mock try-on job, Phase 6, is
+untouched), but is the real, persisted, guest-scoped job entity that will
+eventually back it. No inference, no `CatVTON`, no model download, no
+change to MediaPipe or the `AIInferenceClient` abstraction (Phase 12) —
+all confirmed by scope, not just assumed.
+
+**Three overlapping, never-reconciled designs found and reconciled by
+documentation, not by picking one silently**: `docs/roadmap/phase-a-core-loop.md`
+Milestone 4 (never built) planned a `TryOnJob` model with a `user_photo_id`
+FK to a `UserPhoto` table that itself was never built (user-photo upload
+has been frontend-mock-only since Phase 3/5). `backend/ai/models/job.py`
+(Phase 8, built) is an in-memory-only `TryOnJob`/`TryOnJobStatus.PENDING`/
+`WorkflowStage` contract whose own docstring called "where job state lives"
+an open question — even though `docs/decisions/0005-async-job-processing-via-redis.md`'s
+Consequences section had already asserted the answer ("status lives in
+Postgres") without ever implementing it. **New**:
+`docs/decisions/0008-inference-job-persistence.md` records this feature as
+that deferred implementation: `InferenceJob`/`queued` (this feature's
+vocabulary) is deliberately distinct from `TryOnJob`/`pending`/`WorkflowStage`
+(Phase 8's future-worker vocabulary) — not a rename, not a merge, two
+different layers documented as such so nobody rediscovers this as
+confusion later. `docs/roadmap/phase-b-platform.md`'s Milestone 12 ADR
+earmarks bumped again (0008/0009 → 0009/0010 — the fourth time, per that
+file's own running note).
+
+**The one approved change from the original design brief, applied before
+writing any code**: `user_image_storage_key` (not `user_image_url`) —
+a backend-controlled storage reference, never an arbitrary client-supplied
+URL. Enforced two ways, not just by naming: (1) the column itself, and
+(2) `CreateInferenceJobRequest`'s Pydantic `field_validator` rejects any
+value containing `"://"`, so no absolute URL (`http://`, `https://`,
+`file://`, ...) can ever be stored, verified with a real request against
+the live backend (`422`, not silently accepted). "storage_key" over
+"path" specifically because `docs/roadmap/README.md`'s planned
+S3-compatible storage swap addresses objects by key, not path — the name
+should already read naturally once that swap happens, not need renaming
+again. `garment_id`, unlike `SavedLook`'s original image-URL-only design
+(built before `Garment` existed to FK against), **is** a real FK to
+`garments.id` — ownership re-validated at creation (404 if the referenced
+garment doesn't belong to the resolved guest), the one place this feature
+could otherwise leak whether another guest's garment id exists.
+`profile_id` is auto-attached server-side if one exists (never a
+client-supplied field — no reason a client would ever pick a *different*
+profile than its own). `started_at`/`completed_at` (both nullable) added
+per the approved brief, to support real processing-time metrics once a
+worker exists — currently only ever set by the internal
+`mark_processing`/`mark_completed`/`mark_failed` service functions, never
+by any HTTP endpoint.
+
+**New**: `app/models/inference_job.py` (`InferenceJobStatus` — a real
+Postgres enum via `StrEnum`, matching `User.auth_provider`'s precedent, not
+`Garment.category`'s open-string one, since `queued|processing|completed|failed`
+is a genuinely closed set), `app/db/repositories/inference_job_repository.py`
+(`get_by_id_for_user` for HTTP endpoints vs. `get_by_id` — unscoped, for
+the future worker's internal transition calls; documented why both exist
+rather than picking one), `app/services/inference_jobs.py`
+(`InvalidGarmentReferenceError`/`InferenceJobNotFoundError` → `404`;
+`mark_processing`/`mark_completed`/`mark_failed` take a bare `job_id`, no
+`user_id` — a trusted-infrastructure caller, not a guest request, so the
+IDOR-scoping every other lookup here uses doesn't apply to them),
+`app/schemas/inference_job.py`, `app/api/v1/endpoints/inference_jobs.py`
+(**deliberately only `GET`/`POST`** — no `PATCH`/`DELETE` exist for this
+resource at all, confirmed live against the running server: both return
+`405`, not just assumed from the missing route registration),
+`tests/test_inference_jobs.py` (12 cases — creation, the external-URL
+rejection, both IDOR checks (wrong-device create *and* wrong-device get),
+profile auto-attach with and without an existing profile, list/get
+scoping, the four-way `405` check, and the three internal transition
+functions exercised directly since they have no HTTP surface to test
+through). **Modified**: `app/models/__init__.py`, `app/api/v1/router.py`
+(mounts `/inference-jobs`).
+
+**A migration risk specifically re-verified, not just written**: this is
+the second-ever enum column in this backend (after `User.auth_provider`,
+Phase 13) — autogenerate's `downgrade()` doesn't drop the Postgres enum
+type it creates, which collided as "type already exists" on re-upgrade the
+first time this was hit (Phase 13). Added the explicit `sa.Enum(...).drop()`
+call to this migration's `downgrade()` *before* it could be hit again, then
+proved it actually works rather than assuming: ran `alembic downgrade -1`,
+confirmed the enum type was actually gone (`pg_type` query, zero rows),
+then `alembic upgrade head` again — clean, no collision.
+
+**Verified for real, against the live backend**: full flow via `curl` with
+a correctly-captured server-issued device id — external-URL storage key →
+`422`; valid create → `201`, `status=queued`, all nullable fields
+genuinely null; `GET` by id and list both return it; `PATCH`/`DELETE`
+against both the collection and the item routes → `405`; a different
+device's `GET` by id → `404`. Swagger UI confirmed loading with exactly
+three operations (`GET`/`POST`/`GET /{job_id}`) in the live OpenAPI schema
+— no fourth or fifth operation leaked in by accident. 39/39 `pytest` (27
+pre-existing + 12 new), `black`, `ruff`, `mypy` clean. All test-created
+rows (10 jobs, 12 garments, 8 profiles) deleted directly against the dev
+database afterward — cross-referenced against real, non-test data found
+mixed in (two profiles, two garments genuinely unrelated to any test
+fixture or script this session used) and left those untouched rather than
+assuming everything in the table was safe to wipe.
+
+**Known gaps, stated not hidden**: `backend/ai/`'s Phase 8 stubs
+(`job.py`/`job_queue.py`/`workflow.py`/`ai_client.py`) remain completely
+unimplemented and unconnected to `InferenceJob` — this stage doesn't wire
+them together, only documents where the connection will happen (ADR
+0008). No rate limiting (repo-wide gap, restated). No way to explicitly
+clear an optional field back to `null` via the internal transition
+methods — same inherited repository `update()` convention as every other
+feature. No `UserPhoto` model exists, so nothing yet produces a real
+`user_image_storage_key` for a live client to send — Stage 1 accepts
+whatever backend-shaped string it's given; a real user-photo upload
+endpoint is a separate, not-yet-scoped prerequisite for this to be
+genuinely end-to-end.
+
+## Phase: 18 — Profile & Measurements frontend (Sprint 3 Stage 2)
+
+Profile Screen (read-only display + entry point) and a single Edit Profile
+screen that deliberately handles both create and update — the form is
+identical either way (same seven fields), so a separate "Create Profile"
+screen would have been a near-duplicate of "Edit Profile" for no real
+benefit; `isCreating = !profile` picks the right mutation
+(`useCreateProfile`/`useUpdateProfile`) and copy ("Create Profile" vs.
+"Edit Profile", "Save" either way) at submit time. Reused unchanged:
+`apiClient`, TanStack Query, the device-identity interceptor — no new
+networking layer, no Zustand store (local `useState` for the seven form
+fields, matching the explicit instruction).
+
+**A design call made and stated, not silently guessed**: `gender`,
+`body_type`, and `preferred_fit` are plain `TextInput` fields, not fixed
+pickers like Wardrobe's `CategoryPickerModal`. This matches the backend's
+own Stage 1 decision (Phase 17: these are plain strings, no enum, because
+no authoritative options list exists in the design docs) — inventing a
+fixed picker list on the frontend would have quietly re-introduced the
+taxonomy the backend deliberately chose not to guess at.
+
+**New**: `src/features/profile/` (`types.ts` — `Profile`,
+`CreateProfileInput` (`heightCm`/`weightKg` required, matching the
+backend's own creation rule), `UpdateProfileInput` (`Partial<CreateProfileInput>`);
+`services/profile-api.ts` — snake_case DTO mapping, matching this
+codebase's established convention; `hooks/{use-profile-query,use-create-profile,use-update-profile}.ts`
+— the update hook's optimistic-update-with-rollback merges a partial
+object into the cached `Profile` directly (not a list `.map()` like
+Wardrobe/Saved Looks, since the cache here holds one object or `null`,
+never an array); `screens/{profile-screen,edit-profile-screen}.tsx`;
+`routes.ts` — no nested-index-vs-dynamic-route ambiguity to design around
+here, unlike Saved Looks/Wardrobe, since Profile is a singleton resource
+with no per-item id). New routes `src/app/profile/{index,edit}.tsx`,
+linked from home.
+
+**Verified for real, against the live backend** (Docker running; frontend
+dev server restarted fresh — `CI=1` disables Metro's watch mode, same
+restart discipline as Phase 16): headless Chromium via Playwright drove
+the complete flow on web. Empty state (fresh guest, no profile yet) →
+Create Profile (all seven fields filled, submitted, `201`) → Profile
+screen shows every field correctly → Edit (pre-filled form, two fields
+changed, submitted, `200`) → Profile screen reflects the changes →
+re-opening Edit and entering an out-of-range height (`10`) shows the
+inline "Height must be between 80 and 250 cm." error and correctly
+disables Save, without a round-trip to the backend (client-side mirror of
+the backend's own `Field(ge=80, le=250)` constraint) → forced network
+failure → error state → unblocked → Retry → real data loads (a genuinely
+new guest on this pass, since the reload reset the web in-memory device
+id — same expected behavior as Phase 16/14, not a bug). Zero console
+errors throughout. `tsc --noEmit`, `expo lint`, `prettier --check` all
+clean.
+
+**A real user's own test data found mixed in with mine, not deleted
+by mistake**: cleaning up test-created profile rows afterward (no
+`DELETE /api/v1/profile` endpoint exists, so this can't go through the
+API — same situation as Phase 17), one row (`display_name="Malik"`,
+created mid-session, matching none of this session's own test data) was
+almost swept up by an initial blanket `DELETE FROM profiles`. Caught
+before running it: cross-referenced every row's `display_name` against
+this session's own pytest fixture names and Playwright script strings,
+found seven pytest rows and one Playwright row that matched exactly, and
+one that didn't — left that one row untouched and flagged it directly
+rather than silently deleting real data on the assumption that
+"everything in the test database must be test data."
+
+**Known gap, inherited not new**: pull-to-refresh is a no-op on web —
+same `react-native-web` `RefreshControl` stub already confirmed by reading
+its source directly in Phase 16 (renders a bare `View`, discards
+`onRefresh`/`refreshing`); not re-verified here since the root cause is
+in the shared library, not this feature's code, and applies identically.
+Native platforms are unaffected.
+
+## Phase: 17 — Profile & Measurements backend (Sprint 3 Stage 1, backend only)
+
+`Profile` model, migration, repository, service, schemas, and three REST
+endpoints (`GET`/`POST`/`PATCH /api/v1/profile`) — physical measurements
+for future virtual try-on fit/sizing accuracy. Built entirely by reusing
+Garment/Saved Looks' established layering (model → repository → service →
+schemas → endpoint), the existing guest identity dependency unchanged, no
+frontend, as scoped.
+
+**A real discrepancy flagged before building, not silently resolved**:
+`docs/roadmap/phase-b-platform.md`'s Milestone 8 ("User Profile") already
+names a *different* model, `StyleProfile` — aesthetic preferences (face
+shape, skin tone, undertone, palette) for outfit recommendations, gated
+behind real Authentication (Milestone 6). This request's `Profile` is a
+distinct, narrower concept — physical measurements for try-on fit — scoped
+to the existing guest identity now, the same precedent Wardrobe already
+set (built ahead of Auth rather than blocking on it). The two models are
+kept deliberately separate, per the requester's own explicit instruction,
+and `profile.py`'s docstring states the distinction directly so it isn't
+rediscovered as confusion later.
+
+**One modification to the approved design brief, applied before
+building**: `height_cm`/`weight_kg` are required at creation
+(`CreateProfileRequest`) — every other field (`display_name`, `age`,
+`gender`, `body_type`, `preferred_fit`) stays optional, matching the
+model's own nullability. Reflected at the DB layer too: `height_cm`/
+`weight_kg` are `NOT NULL` columns (not just a request-schema check) —
+since no row can ever be created without them, and the existing
+repository `update()` convention (`if value is not None: setattr(...)`)
+can never null them back out via `PATCH` either, `NOT NULL` correctly
+states a permanent invariant, not just a creation-time rule. Same
+defense-in-depth reasoning as `Garment.title`/`category`.
+
+**New**: `app/models/profile.py` (`user_id` unique — enforces one-profile-
+per-guest at the DB level, not just an app-layer check),
+`app/db/repositories/profile_repository.py` (singular `get_by_user_id`,
+no `list_for_user` — a user has at most one profile, never many, unlike
+Garment/SavedLook), `app/services/profiles.py` (`ProfileAlreadyExistsError`
+→ `409`, `ProfileNotFoundError` → `404`), `app/schemas/profile.py`
+(`ProfileResponse`, `CreateProfileRequest`, `UpdateProfileRequest` — the
+first schemas in this codebase to use Pydantic `Field(ge=, le=)` range
+constraints, a new pattern here, not a new dependency: height 80–250cm,
+weight 20–300kg, age 0–120, all producing automatic `422`s),
+`app/api/v1/endpoints/profile.py` (`GET`/`POST`/`PATCH /api/v1/profile` —
+deliberately no `DELETE`, matching exactly what was requested and nothing
+more), `tests/test_profile.py` (10 cases, including the one-profile-
+per-guest `409`, the not-yet-created `404`, both required-fields-missing
+and out-of-range `422`s, and an IDOR check confirming a different device
+gets `null`/`404` rather than another guest's data). **Modified**:
+`app/models/__init__.py`, `app/api/v1/router.py` (mounts `/profile`).
+
+**A stale Docker image discovered, not papered over**: generating the
+migration via `docker exec virtualtryon-backend-1 alembic revision
+--autogenerate` failed outright (`Can't locate revision identified by
+'0f4fb8807ebc'`) — the running container's baked-in `/app/alembic/`
+doesn't match the host source tree at all (missing the Garment migration
+entirely, and a *different* revision id for the Saved Looks migration
+than the actual file on disk). The container's live FastAPI code hot-
+reloads correctly via a volume mount (confirmed repeatedly this session),
+but `alembic/` specifically isn't part of that mount — every migration in
+this project, including this one, has actually been generated/applied via
+`backend/.venv` connecting directly to Postgres's exposed port, never via
+`docker exec`. Confirmed the local `.venv` and the live app share the same
+database (`alembic current` matched the DB's real head; the resulting
+table was verified directly in `virtualtryon-postgres-1`). Worth fixing
+properly (rebuilding the backend image, or bind-mounting `alembic/`) at
+some point, but out of scope for this feature — noted as a known gap
+below, not silently worked around.
+
+**A testing-methodology mistake caught and corrected, not just its
+symptom**: the first curl verification pass invented its own
+`X-Device-Id` value (`profile-verify-<timestamp>`) and expected the
+server to remember it across requests — it didn't, and every call minted
+a *new* guest, making `POST` "always succeed" and `PATCH` "always 404,"
+which briefly looked like a real bug. It wasn't: guest device ids are
+server-generated only (`app/services/guest_identity.py`, unchanged) and
+correctly ignore any client-invented value, exactly as designed — the
+identical mistake (and identical false alarm) already made once earlier
+this session debugging Wardrobe on web. Corrected by capturing the
+server-issued `X-Device-Id` response header from the first request and
+resending that exact value, after which every scenario passed as
+specified.
+
+**Security review found one real bug, fixed immediately rather than left
+as a known gap**: `/security-review` was runnable this time (the repo is
+now a real git repository — see Sprint 2's closing session — whereas the
+earlier Wardrobe frontend review had to be done by hand for lack of one).
+A dedicated sub-agent traced GET/POST/PATCH end to end and found the IDOR/
+injection surface genuinely clean (every repository query scoped by a
+server-derived `user_id`, never client-supplied; parameterized SQLAlchemy
+`select()` throughout, no raw SQL; `create()`/`update()` take explicit
+named kwargs, never a raw `payload.model_dump()`, so mass-assignment
+through `id`/`user_id` isn't possible even without `extra="forbid"` on the
+schemas) — but did surface one concrete correctness bug: `create_profile`'s
+existence check is check-then-insert, not atomic. Two near-simultaneous
+`POST`s from the same guest could both pass the "does a profile already
+exist" check before either commits, and the DB's own unique constraint on
+`user_id` would then reject the second `INSERT` as an unhandled
+`IntegrityError` → `500`, instead of the clean `409` a non-racing second
+request gets. Fixed by catching `IntegrityError` around the insert and
+converting it to the same `ProfileAlreadyExistsError` → `409`. Verified
+twice: a new `pytest` case firing two real concurrent `POST`s via
+`asyncio.gather` (`[201, 409]`, never a 500), and again directly against
+the live server with two backgrounded `curl` processes hitting the same
+endpoint simultaneously — identical result.
+
+**Verified for real, against the live backend**: migration applied
+cleanly (`timezone=True` on both timestamps, no enum columns, `unique=True`
+on `user_id` — confirmed directly via `\d profiles` against the running
+Postgres container). Full manual flow via `curl`, device id handled
+correctly this time: `GET` with no profile → `200 null`; `POST` missing
+`weight_kg`/`height_cm` → `422`; `POST` with `height_cm=60` → `422`
+(range); `POST` valid → `201` with all fields; `POST` again same device →
+`409`; `GET` → the created profile; `PATCH` a subset of fields → `200`,
+`updated_at` changed, untouched fields intact; `PATCH` from a device with
+no profile → `404`; two concurrent `POST`s from the same new guest →
+exactly one `201`, one `409`, never a `500`. Swagger UI (`/api/v1/docs`)
+confirmed loading with all three operations registered in the live
+OpenAPI schema. 27/27 `pytest` (16 pre-existing + 11 new), `black`, `ruff`
+clean; `mypy` clean on every new/
+modified file. All test-created rows deleted directly against the dev
+Postgres database afterward (no `DELETE` endpoint exists for Profile by
+design, so cleanup couldn't go through the API the way Garment/Saved
+Looks' own tests do).
+
+**Known gaps, stated not hidden**: no rate limiting (repo-wide gap, named
+again). No way to explicitly clear an optional field back to `null` via
+`PATCH` — inherited from the same repository `update()` convention as
+Garment, not a new limitation. No `DELETE /api/v1/profile` — not
+requested, so not built ahead of a real need; also means no fully
+self-cleaning test suite is possible for this feature the way Garment/
+Saved Looks' tests are (each test here leaves its row in the dev database
+rather than removing it via the API, same "real local dev Postgres, no
+isolated test DB" tradeoff already named in Phase 13, just with no
+DELETE-based mitigation available this time). The running
+`virtualtryon-backend-1` Docker image's `alembic/` folder is stale
+relative to the host source tree (see above) — doesn't affect the running
+app or this feature's correctness, but should be fixed (image rebuild or
+a proper bind mount) before it causes real confusion for a future
+migration.
+
 ## Phase: 16 — Wardrobe frontend (Sprint 2 Stage 2)
 
 Wardrobe Screen (2-column grid), Add Garment screen, and Garment Details

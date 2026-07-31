@@ -36,6 +36,14 @@ class GarmentRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_id(self, garment_id: UUID) -> Garment | None:
+        """Unscoped — for the worker's internal use (app/worker/), same
+        reasoning as InferenceJobRepository.get_by_id: a worker processes a
+        specific job's already-resolved garment reference, not a
+        guest-controlled HTTP request, so IDOR scoping doesn't apply."""
+        result = await self._db.execute(select(Garment).where(Garment.id == garment_id))
+        return result.scalar_one_or_none()
+
     async def update(self, garment: Garment, **fields: Any) -> Garment:
         for key, value in fields.items():
             if value is not None:

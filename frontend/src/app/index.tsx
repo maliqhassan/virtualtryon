@@ -1,6 +1,7 @@
 import { Link } from 'expo-router';
 import { Text, View } from 'react-native';
 
+import { PROFILE_HREF } from '@/features/profile/routes';
 import { SAVED_LOOKS_HISTORY_HREF } from '@/features/saved-looks/routes';
 import { WARDROBE_HREF } from '@/features/wardrobe/routes';
 
@@ -27,6 +28,9 @@ export default function HomeScreen() {
       </Link>
       <Link href={WARDROBE_HREF} className="text-sm font-semibold text-primary">
         Open your wardrobe →
+      </Link>
+      <Link href={PROFILE_HREF} className="text-sm font-semibold text-primary">
+        Open your profile →
       </Link>
     </View>
   );

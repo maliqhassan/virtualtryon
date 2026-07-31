@@ -4,8 +4,8 @@ import { Text, View } from 'react-native';
 type ResultCanvasProps = {
   /** A real image to display. Null renders the placeholder instead — this
    * is the branch that starts rendering something real, with no changes
-   * needed here, once real AI generation exists (see TryOnResult's doc
-   * comment in ../types). */
+   * needed here, once a real inference worker populates
+   * TryOnJob.generatedImageUrl (see ../types). */
   uri: string | null;
   /** Shown inside the placeholder box when `uri` is null. */
   placeholderCaption?: string;

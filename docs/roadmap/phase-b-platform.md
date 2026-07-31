@@ -352,10 +352,10 @@ ai/src/models/style_classifier.py                     — skin tone / body shape
 ai/src/postprocessing/blend.py
 ai/src/inference/generate.py                            — replaces Milestone 4's mock_tryon.py behind the same API contract
 
-docs/decisions/0008-ai-model-selection.md               — which pretrained model(s), why, licensing review
-docs/decisions/0009-gpu-infrastructure.md                 — dev + production GPU hosting decision
+docs/decisions/0009-ai-model-selection.md               — which pretrained model(s), why, licensing review
+docs/decisions/0010-gpu-infrastructure.md                 — dev + production GPU hosting decision
 ```
-(Renumbered three times now — 0004/0005 were taken by
+(Renumbered four times now — 0004/0005 were taken by
 `docs/decisions/0004-ai-orchestration-vs-execution-boundary.md` and
 `docs/decisions/0005-async-job-processing-via-redis.md` (the AI backend
 architecture pass), then 0006 by
@@ -363,11 +363,14 @@ architecture pass), then 0006 by
 Try-On Engine pass), then 0007 by
 `docs/decisions/0007-mediapipe-inference-in-backend.md` (the MediaPipe
 integration pass — a narrow, named exception to ADR 0004 for MediaPipe
-specifically, not a reversal of it) — all three preceded this milestone.
-See `docs/architecture/ai-backend.md`, `docs/architecture/ai-tryon-engine.md`,
-and ADR 0007. Given this has now moved three times, "ai-model-selection" is
-likely to actually land as whatever the next free number is *at
-implementation time*, not necessarily 0008 — check `docs/decisions/` before
+specifically, not a reversal of it), then 0008 by
+`docs/decisions/0008-inference-job-persistence.md` (the AI inference job
+pipeline's Stage 1 — persisted job lifecycle in Postgres, no worker, no
+inference yet) — all four preceded this milestone. See
+`docs/architecture/ai-backend.md`, `docs/architecture/ai-tryon-engine.md`,
+and ADR 0007/0008. Given this has now moved four times, "ai-model-selection"
+is likely to actually land as whatever the next free number is *at
+implementation time*, not necessarily 0009 — check `docs/decisions/` before
 naming the file, don't trust this number blindly.)
 
 ### Dependencies

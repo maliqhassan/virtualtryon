@@ -1,0 +1,38 @@
+# Build context is now the repo root (backend/Dockerfile needs root ai/
+# alongside backend/ — see that Dockerfile's own top comment). Without
+# this file, Docker would send the entire monorepo (frontend/node_modules,
+# .git, every service's venv, etc.) as build context on every build.
+
+.git
+.claude/
+.vscode/
+.idea/
+
+frontend/
+design/
+docs/
+scripts/
+assets/
+
+# Root-level docs/config no image needs
+*.md
+.env
+.env.*
+!.env.example
+
+# Per-service junk — each service's own .dockerignore/.gitignore already
+# excludes these from its own image; excluded here too since the whole
+# tree is now sent as context.
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/venv/
+**/node_modules/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
+backend/storage/
+ai/models/
+ai/notebooks/
+ai/tests/

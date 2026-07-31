@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
-import { AppProgressBar } from '@/components/app-progress-bar';
 import { AppScaffold } from '@/components/app-scaffold';
 import { ThinkingIndicator } from '@/components/thinking-indicator';
 import { useGarmentSessionStore } from '@/features/garment/store/garment-session';
@@ -11,7 +10,15 @@ import { useUploadSessionStore } from '@/features/user-photo/store/upload-sessio
 
 import { ProcessingImagesRow } from '../components/processing-images-row';
 import { useTryOnJob } from '../hooks/use-tryon-job';
-import { TRYON_STEP_LABELS } from '../services/tryon-job';
+
+function describeWorkingStatus(status: 'queued' | 'processing' | undefined): string {
+  if (status === 'queued') return 'Queued…';
+  if (status === 'processing') return 'Processing…';
+  return 'Starting…';
+}
+
+const NO_WORKER_MESSAGE =
+  "Your request has been queued. AI generation isn't connected yet. This job will start automatically once the inference worker is available.";
 
 export function TryOnProcessingScreen() {
   const userImage = useUploadSessionStore((s) => s.selectedImage);
@@ -19,7 +26,7 @@ export function TryOnProcessingScreen() {
   const garmentImage = useGarmentSessionStore((s) => s.selectedImage);
   const garmentPrepared = useGarmentSessionStore((s) => s.preparedResult);
 
-  const { start, isStarting, startError, job } = useTryOnJob();
+  const { start, isStarting, startError, job, pollingTimedOut, refetchJob } = useTryOnJob();
   const hasAutoStarted = useRef(false);
 
   const bothReady = !!userPrepared && !!garmentPrepared;
@@ -41,6 +48,8 @@ export function TryOnProcessingScreen() {
       // now-stale processing screen. Object form (not a template-literal
       // string) is what Expo Router's typed routes (app.json's
       // `typedRoutes` experiment) actually type-checks for a dynamic route.
+      // Unreachable today (no worker ever moves a job to `completed`) —
+      // kept as-is so this screen is already correct once one exists.
       router.replace({ pathname: '/tryon-results/[jobId]', params: { jobId: job.id } });
     }
   }, [job]);
@@ -77,8 +86,12 @@ export function TryOnProcessingScreen() {
   }
 
   const retry = () => start({ userPhotoId: userPrepared!.id, garmentId: garmentPrepared!.id });
-  const isWorking = isStarting || !job || job.status === 'pending' || job.status === 'processing';
+  const isWorking = isStarting || !job || job.status === 'queued' || job.status === 'processing';
   const failed = !!startError || job?.status === 'failed';
+  // Bounded polling (useTryOnJobQuery) gave up after 10s with no inference
+  // worker ever advancing the job — this is not a failure, so it doesn't
+  // join `failed`; it's a distinct, honest "nothing is happening yet" state.
+  const waitingForWorker = isWorking && !isStarting && !!job && pollingTimedOut;
 
   return (
     <AppScaffold scroll={false}>
@@ -92,14 +105,19 @@ export function TryOnProcessingScreen() {
       />
 
       <View className="flex-1 items-center justify-center gap-lg">
-        {isWorking && (
-          <>
-            <ThinkingIndicator step={job?.stepId ? TRYON_STEP_LABELS[job.stepId] : 'Starting…'} />
-            <View className="w-full gap-sm">
-              <Text className="text-center text-ink-secondary">{job?.progress ?? 0}%</Text>
-              <AppProgressBar value={job?.progress ?? 0} />
-            </View>
-          </>
+        {isWorking && !waitingForWorker && (
+          <ThinkingIndicator
+            step={describeWorkingStatus(
+              job?.status === 'queued' || job?.status === 'processing' ? job.status : undefined,
+            )}
+          />
+        )}
+
+        {waitingForWorker && (
+          <View className="items-center gap-md px-lg">
+            <Text className="text-center text-ink-secondary">{NO_WORKER_MESSAGE}</Text>
+            <AppButton label="Refresh" variant="secondary" onPress={() => refetchJob()} />
+          </View>
         )}
 
         {failed && (

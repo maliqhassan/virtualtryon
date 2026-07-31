@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     # "safe to default" reasoning as MEDIAPIPE_MODEL_DIR above.
     STORAGE_UPLOADS_DIR: Path = Path("./storage/uploads")
 
+    # How often the worker runner (app/worker/worker_runner.py) polls for
+    # queued InferenceJobs. Same "safe to default" reasoning — a missing
+    # value just means "poll every 5 seconds", not a silent prod issue.
+    WORKER_POLL_INTERVAL_SECONDS: float = 5.0
+
 
 @lru_cache
 def get_settings() -> Settings:

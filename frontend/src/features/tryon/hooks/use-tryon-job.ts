@@ -7,9 +7,10 @@ import { useTryOnJobQuery } from './use-tryon-job-query';
 
 /**
  * A create-mutation feeding the shared polling query (useTryOnJobQuery) —
- * not a single mutation with a fake delay. This is the same async
- * job/poll shape the real endpoints (docs/roadmap Milestone 4) will use;
- * only createTryOnJob/getTryOnJob's implementations change when those exist.
+ * both now call the real backend (backend/app/api/v1/endpoints/inference_jobs.py,
+ * Sprint 3/4). `pollingTimedOut`/`refetch` are threaded straight through so
+ * the processing screen can show the "hasn't started yet" state and offer
+ * a manual Refresh once bounded polling gives up.
  */
 export function useTryOnJob() {
   const [jobId, setJobId] = useState<string | null>(null);
@@ -26,5 +27,7 @@ export function useTryOnJob() {
     isStarting: create.isPending,
     startError: create.error,
     job: jobQuery.data ?? null,
+    pollingTimedOut: jobQuery.pollingTimedOut,
+    refetchJob: jobQuery.refetch,
   };
 }

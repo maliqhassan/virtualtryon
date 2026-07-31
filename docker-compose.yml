@@ -43,7 +43,8 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     restart: unless-stopped
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
@@ -64,6 +65,40 @@ services:
       - ./backend/app:/app/app
       - ./backend/ai:/app/ai
       - mediapipe_models:/app/.mediapipe_models
+      - storage_uploads:/app/storage/uploads
+
+  # AI inference worker — repeatedly polls for queued InferenceJobs
+  # (app/worker/, Sprint 4 Stage 5/6). Same image as `backend` (same
+  # Dockerfile, same installed `virtualtryon-ai` package — see that
+  # Dockerfile's own comment), just a different command: no uvicorn, no
+  # exposed port, since this process serves no HTTP traffic at all. Not
+  # Redis/arq-backed yet (docs/decisions/0005's still-separately-scoped
+  # future work) — a plain polling loop, genuinely a separate deployable
+  # unit per that ADR's own model, just without a real queue behind it yet.
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      DEBUG: "true"
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-virtualtryon}:${POSTGRES_PASSWORD:-virtualtryon}@postgres:5432/${POSTGRES_DB:-virtualtryon}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${BACKEND_SECRET_KEY:-change-me}
+      WORKER_POLL_INTERVAL_SECONDS: ${WORKER_POLL_INTERVAL_SECONDS:-5}
+    volumes:
+      - ./backend/app:/app/app
+      # Shared with `backend` — the worker reads files (job photos, garment
+      # images) that `backend` wrote; without this they're two disconnected
+      # container filesystems, and every job would fail with a spurious
+      # "file not found" instead of the real CatVTON-unimplemented reason
+      # (found for real: exactly this happened before this line was added).
+      - storage_uploads:/app/storage/uploads
 
   # GPU inference service. Excluded from the default `docker compose up` via
   # the "ai" profile since most dev machines don't have an NVIDIA GPU + the
@@ -94,3 +129,4 @@ volumes:
   redis_data:
   ai_models:
   mediapipe_models:
+  storage_uploads:

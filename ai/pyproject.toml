@@ -1,3 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "virtualtryon-ai"
+version = "0.1.0"
+requires-python = ">=3.11"
+# Runtime deps intentionally not declared here — this package is only ever
+# installed alongside backend/requirements.txt (which already provides
+# Pillow/pydantic) or ai/requirements.txt (the heavier ML deps, for ai/'s
+# own service). Duplicating version pins across two requirements sources
+# risks drift, not safety; this package is metadata + package discovery
+# only, letting `src` (this project's existing top-level package name —
+# see known_first_party below) be installed as a real, importable
+# distribution instead of resolved via a runtime sys.path hack.
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
 [tool.black]
 line-length = 100
 target-version = ["py311"]
