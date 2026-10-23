@@ -14,6 +14,7 @@ import { useProductQuery } from '@/features/shop';
 import { UPGRADE_HREF, USAGE_QUERY_KEY } from '@/features/usage';
 import { useGarmentsQuery } from '@/features/wardrobe';
 import { resolveMediaUrl } from '@/lib/media-url';
+import { openExternalLink } from '@/lib/open-link';
 
 import { CompareToggle, type CompareMode } from '../components/compare-toggle';
 import { ResultCanvas } from '../components/result-canvas';
@@ -45,11 +46,14 @@ export function TryOnScreen() {
   const job = jobQuery.data ?? null;
   const productQuery = useProductQuery(job?.productId);
   // The clothing this try-on used: a wardrobe piece or a store product.
+  const wardrobeGarment = garmentsQuery.data?.find((g) => g.id === job?.garmentId);
   const garment =
-    garmentsQuery.data?.find((g) => g.id === job?.garmentId) ??
+    wardrobeGarment ??
     (productQuery.data
       ? { title: productQuery.data.title, imageUrl: productQuery.data.imageUrl }
       : null);
+  // Where to buy it: the page it was pasted from, or the sample product's link.
+  const storeUrl = wardrobeGarment?.sourceUrl ?? productQuery.data?.productUrl ?? null;
   // The photo this try-on used, falling back to the current one while loading.
   const photoUrl = job?.userImageUrl ?? (photoQuery.data ? displayUrl(photoQuery.data) : null);
   const finished = job?.status === 'completed' || job?.status === 'failed';
@@ -216,6 +220,13 @@ export function TryOnScreen() {
           <Text className="text-center text-sm text-error" accessibilityRole="alert">
             Couldn’t save this look. Please try again.
           </Text>
+        )}
+        {storeUrl && (
+          <AppButton
+            label="View in store"
+            variant="secondary"
+            onPress={() => openExternalLink(storeUrl)}
+          />
         )}
         <AppButton label="Try something else" variant="secondary" onPress={goHome} />
         <AppButton label="Share" variant="secondary" onPress={handleShare} />

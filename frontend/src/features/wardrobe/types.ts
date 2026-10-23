@@ -5,6 +5,8 @@ export type Garment = {
   color: string | null;
   season: string | null;
   imageUrl: string;
+  /** The store product page it was added from ("paste a link"); null for uploads. */
+  sourceUrl: string | null;
   createdAt: string;
   updatedAt: string;
 };

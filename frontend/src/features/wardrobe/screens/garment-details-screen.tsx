@@ -8,6 +8,7 @@ import { AppScaffold } from '@/components/app-scaffold';
 import { RenameModal } from '@/components/rename-modal';
 import { ThinkingIndicator } from '@/components/thinking-indicator';
 import { confirmDestructiveAction } from '@/lib/confirm';
+import { openExternalLink } from '@/lib/open-link';
 import { resolveMediaUrl } from '@/lib/media-url';
 
 import { CategoryPickerModal } from '../components/category-picker-modal';
@@ -92,6 +93,13 @@ export function GarmentDetailsScreen() {
       </View>
 
       <View className="mt-xl gap-md">
+        {garment.sourceUrl && (
+          <AppButton
+            label="View in store"
+            variant="dark"
+            onPress={() => openExternalLink(garment.sourceUrl as string)}
+          />
+        )}
         <AppButton label="Rename" variant="secondary" onPress={() => setIsRenaming(true)} />
         <AppButton
           label="Change Category"

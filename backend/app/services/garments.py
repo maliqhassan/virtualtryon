@@ -38,6 +38,7 @@ async def create_garment(
     color: str | None,
     season: str | None,
     image: ImageUpload,
+    source_url: str | None = None,
 ) -> GarmentResponse:
     extension = validate_image(image)
 
@@ -52,6 +53,7 @@ async def create_garment(
         color=color,
         season=season,
         image_url=image_url,
+        source_url=source_url,
     )
     logger.info("garment created: id=%s user_id=%s", garment.id, user_id)
     return _to_response(garment)

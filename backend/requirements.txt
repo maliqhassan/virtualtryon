@@ -15,6 +15,11 @@ redis>=5.0,<6.0
 python-dotenv>=1.0,<2.0
 python-multipart>=0.0.9
 
+# Fetches store product pages and photos for "paste a link" (app/services/
+# safe_fetch.py). Async, unlike requests, and lets us connect to the
+# address we checked while keeping the real host for HTTPS checks.
+httpx>=0.27,<1.0
+
 gunicorn>=23.0,<24.0
 
 # MediaPipe diagnostic analysis (ADR 0007 — narrow exception to ADR 0004,

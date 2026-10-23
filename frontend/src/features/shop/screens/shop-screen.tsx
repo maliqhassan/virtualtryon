@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/skeleton';
 import { ShopIcon } from '@/components/tab-icons';
 import { themeColors } from '@/constants/theme';
 
+import { PasteLinkCard } from '../components/paste-link-card';
 import { ProductCard } from '../components/product-card';
 import { StoreCard } from '../components/store-card';
 import { useDebouncedValue, useProductsQuery, useStoresQuery } from '../hooks/use-catalog';
@@ -57,9 +58,8 @@ function CategoryChip({
 }
 
 /**
- * Browse clothes from stores and try them on before buying. Today the
- * catalogue is a set of sample stores; real stores will connect their own
- * product feeds later.
+ * Try clothes from stores on before buying: paste a product link from any
+ * store (PasteLinkCard), or browse the sample stores below it.
  */
 export function ShopScreen() {
   const storesQuery = useStoresQuery();
@@ -92,10 +92,16 @@ export function ShopScreen() {
   const header = (
     <View>
       <ScreenHeader
-        eyebrow="Sample stores"
+        eyebrow="Any store"
         title="Shop"
         subtitle="Try clothes from stores on yourself before you buy them online."
       />
+
+      <PasteLinkCard />
+
+      <Text className="mb-sm text-xs font-bold uppercase tracking-widest text-ink-secondary">
+        Sample stores
+      </Text>
 
       <View className="mb-lg flex-row items-center rounded-full border border-border bg-surface px-lg">
         <ShopIcon color={themeColors.neutral500} size={18} />

@@ -25,6 +25,9 @@ class Garment(Base):
     color: Mapped[str | None] = mapped_column(String(50), nullable=True)
     season: Mapped[str | None] = mapped_column(String(50), nullable=True)
     image_url: Mapped[str] = mapped_column(nullable=False)
+    # The store product page it was imported from (services/link_import.py);
+    # None for photos the user uploaded. Powers "View in store".
+    source_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

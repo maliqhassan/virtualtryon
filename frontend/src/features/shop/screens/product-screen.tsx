@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Linking, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
 import { AppImage } from '@/components/app-image';
@@ -15,6 +15,7 @@ import {
 } from '@/features/tryon';
 import { UPGRADE_HREF, UsagePill, useUsageQuery } from '@/features/usage';
 import { resolveMediaUrl } from '@/lib/media-url';
+import { openExternalLink } from '@/lib/open-link';
 
 import { formatPrice } from '../format';
 import { useProductQuery } from '../hooks/use-catalog';
@@ -132,7 +133,7 @@ export function ProductScreen() {
           <AppButton
             label={`Buy at ${product.storeName}`}
             variant="secondary"
-            onPress={() => Linking.openURL(product.productUrl as string)}
+            onPress={() => openExternalLink(product.productUrl as string)}
           />
         ) : (
           <Text className="text-center text-xs text-ink-secondary">

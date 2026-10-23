@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class GarmentResponse(BaseModel):
@@ -13,8 +13,15 @@ class GarmentResponse(BaseModel):
     color: str | None
     season: str | None
     image_url: str
+    source_url: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class GarmentFromLinkRequest(BaseModel):
+    """POST /garments/from-link body: a product page link from any store."""
+
+    url: str = Field(min_length=1, max_length=2048)
 
 
 class GarmentUpdate(BaseModel):

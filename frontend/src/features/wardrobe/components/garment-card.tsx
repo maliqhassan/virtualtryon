@@ -32,7 +32,7 @@ export function GarmentCard({ garment }: GarmentCardProps) {
           {garment.title}
         </Text>
         <Text className="text-xs text-ink-secondary" numberOfLines={1}>
-          {garment.category}
+          {garment.sourceUrl ? `${garment.category} · From store` : garment.category}
         </Text>
       </View>
     </PressableScale>
