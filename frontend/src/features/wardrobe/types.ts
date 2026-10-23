@@ -7,6 +7,8 @@ export type Garment = {
   imageUrl: string;
   /** The store product page it was added from ("paste a link"); null for uploads. */
   sourceUrl: string | null;
+  /** That store's own name, e.g. "Outfitters"; null for uploads and older imports. */
+  sourceStore: string | null;
   createdAt: string;
   updatedAt: string;
 };

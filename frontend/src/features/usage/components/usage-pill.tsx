@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import type { Usage } from '../types';
 
 export function describeUsage(usage: Usage): string {
+  if (usage.unlimited) return 'Unlimited try-ons (testing)';
   if (usage.period === 'lifetime') {
     return usage.remaining > 0 ? `${usage.remaining} free try-on left` : 'Free try-on used';
   }

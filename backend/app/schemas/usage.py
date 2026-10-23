@@ -15,3 +15,5 @@ class UsageResponse(BaseModel):
     # Next reset for daily plans (midnight UTC); null for the free plan,
     # whose allowance never resets.
     resets_at: datetime | None
+    # True while try-on limits are switched off (TRYON_LIMITS_ENABLED=false).
+    unlimited: bool = False

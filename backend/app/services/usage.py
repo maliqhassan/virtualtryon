@@ -10,6 +10,7 @@ from datetime import UTC, datetime, time, timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.db.repositories.inference_job_repository import InferenceJobRepository
 from app.models.user import User
 from app.schemas.usage import UsageResponse
@@ -18,6 +19,8 @@ from app.services.plans import AllowancePeriod, get_allowance
 # Longer than any real generation takes; a job still queued after this is
 # treated as stuck and stops counting against the allowance.
 STALE_JOB_AFTER = timedelta(minutes=30)
+# Reported as "remaining" while limits are off, so every allowance check passes.
+UNLIMITED_REMAINING = 1_000_000
 
 
 class UsageLimitReachedError(Exception):
@@ -35,6 +38,16 @@ def _start_of_today_utc(now: datetime) -> datetime:
 async def get_usage(db: AsyncSession, user: User, now: datetime | None = None) -> UsageResponse:
     now = now or datetime.now(UTC)
     allowance = get_allowance(user.plan)
+    if not get_settings().TRYON_LIMITS_ENABLED:
+        return UsageResponse(
+            plan=user.plan,
+            period=allowance.period,
+            limit=UNLIMITED_REMAINING,
+            used=0,
+            remaining=UNLIMITED_REMAINING,
+            resets_at=None,
+            unlimited=True,
+        )
 
     since: datetime | None = None
     resets_at: datetime | None = None

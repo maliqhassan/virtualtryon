@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn, field_validator
+from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -64,6 +64,11 @@ class Settings(BaseSettings):
     # always fails honestly. A real provider (FASHN) is added here later.
     TRYON_PROVIDER: Literal["demo", "catvton"] = "demo"
 
+    # Off while testing: nobody runs out of try-ons and the app shows
+    # "Unlimited try-ons". Turn back on before real users and payments.
+    # Only allowed with the free demo provider (see below).
+    TRYON_LIMITS_ENABLED: bool = True
+
     # Reject user photos where MediaPipe can't see a full body (head,
     # shoulders, hips and ankles), before any paid try-on is spent on them.
     FULL_BODY_CHECK_ENABLED: bool = True
@@ -71,6 +76,13 @@ class Settings(BaseSettings):
     # Make a plain-background cut-out of every user photo (MediaPipe
     # segmentation). Can be turned off on very small servers to save memory.
     BACKGROUND_REMOVAL_ENABLED: bool = True
+
+    @model_validator(mode="after")
+    def limits_off_only_with_demo(self) -> "Settings":
+        """Unlimited try-ons on a paid provider would mean unlimited spend."""
+        if not self.TRYON_LIMITS_ENABLED and self.TRYON_PROVIDER != "demo":
+            raise ValueError("TRYON_LIMITS_ENABLED=false is only allowed with TRYON_PROVIDER=demo")
+        return self
 
 
 @lru_cache

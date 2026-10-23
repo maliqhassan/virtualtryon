@@ -34,6 +34,9 @@ services:
       # demo: try-ons return a labelled placeholder until FASHN is connected.
       - key: TRYON_PROVIDER
         value: demo
+      # Off while testing (no 1-free-try-on limit). Set to "true" before launch.
+      - key: TRYON_LIMITS_ENABLED
+        value: "false"
       - key: FULL_BODY_CHECK_ENABLED
         value: "true"
       - key: BACKGROUND_REMOVAL_ENABLED

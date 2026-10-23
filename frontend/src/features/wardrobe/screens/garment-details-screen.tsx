@@ -15,7 +15,7 @@ import { CategoryPickerModal } from '../components/category-picker-modal';
 import { useDeleteGarment } from '../hooks/use-delete-garment';
 import { useGarmentsQuery } from '../hooks/use-garments-query';
 import { useUpdateGarment } from '../hooks/use-update-garment';
-import { WARDROBE_HREF } from '../routes';
+import { WARDROBE_HREF, tryOnGarmentHref } from '../routes';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -93,10 +93,14 @@ export function GarmentDetailsScreen() {
       </View>
 
       <View className="mt-xl gap-md">
+        <AppButton
+          label="Try it on"
+          onPress={() => router.dismissTo(tryOnGarmentHref(garment.id))}
+        />
         {garment.sourceUrl && (
           <AppButton
             label="View in store"
-            variant="dark"
+            variant="secondary"
             onPress={() => openExternalLink(garment.sourceUrl as string)}
           />
         )}

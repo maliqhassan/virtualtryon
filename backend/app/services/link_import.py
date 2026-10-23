@@ -143,6 +143,7 @@ async def import_garment_from_link(
         image=image,
         # Where the page really was after redirects, unless that's absurdly long.
         source_url=page.url if len(page.url) <= MAX_URL_LENGTH else url,
+        source_store=product.store_name,
     )
     logger.info("garment imported from link: id=%s store=%s", garment.id, product.store_name)
     return garment

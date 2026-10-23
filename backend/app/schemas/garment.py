@@ -14,6 +14,7 @@ class GarmentResponse(BaseModel):
     season: str | None
     image_url: str
     source_url: str | None
+    source_store: str | None
     created_at: datetime
     updated_at: datetime
 

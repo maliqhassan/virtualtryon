@@ -9,6 +9,7 @@ type UsageDto = {
   used: number;
   remaining: number;
   resets_at: string | null;
+  unlimited?: boolean;
 };
 
 export function toUsage(dto: UsageDto): Usage {
@@ -19,6 +20,7 @@ export function toUsage(dto: UsageDto): Usage {
     used: dto.used,
     remaining: dto.remaining,
     resetsAt: dto.resets_at,
+    unlimited: dto.unlimited ?? false,
   };
 }
 

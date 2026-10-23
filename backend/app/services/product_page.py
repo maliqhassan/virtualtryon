@@ -17,6 +17,8 @@ from html.parser import HTMLParser
 from typing import Any
 from urllib.parse import urljoin, urlsplit
 
+from app.models.garment import SOURCE_STORE_MAX_LENGTH
+
 MAX_TITLE_LENGTH = 200
 
 _PRODUCT_TYPES = {"product", "productgroup"}  # Shopify describes variants as a ProductGroup
@@ -151,7 +153,9 @@ def read_product_page(page_html: str, page_url: str) -> ProductPage:
     host = (urlsplit(page_url).hostname or "").removeprefix("www.")
     store_name = _clean(parser.meta.get("og:site_name", "")) or host
     return ProductPage(
-        title=title[:MAX_TITLE_LENGTH], image_url=image_url, store_name=store_name[:100]
+        title=title[:MAX_TITLE_LENGTH],
+        image_url=image_url,
+        store_name=store_name[:SOURCE_STORE_MAX_LENGTH],
     )
 
 

@@ -6,6 +6,7 @@ from httpx import AsyncClient
 from PIL import Image
 
 import app.db.session as db_session
+from app.core.config import get_settings
 from app.db.repositories.user_repository import UserRepository
 from app.models.user import Plan
 from app.services.inference_jobs import mark_failed
@@ -66,6 +67,7 @@ async def test_new_user_has_one_free_tryon(client: AsyncClient) -> None:
         "used": 0,
         "remaining": 1,
         "resets_at": None,
+        "unlimited": False,
     }
 
 
@@ -136,3 +138,18 @@ async def test_stuck_tryon_stops_counting(client: AsyncClient) -> None:
 
     usage = (await client.get("/api/v1/usage", headers={"X-Device-Id": device_id})).json()
     assert usage["remaining"] == 1
+
+
+async def test_limits_switched_off_means_unlimited(
+    client: AsyncClient, real_allowances, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(get_settings(), "TRYON_LIMITS_ENABLED", False)
+
+    usage = (await client.get("/api/v1/usage")).json()
+
+    assert usage["unlimited"] is True
+    assert usage["remaining"] > 1000
+
+    device_id, garment_id = await _new_user_with_garment_and_photo(client)
+    for _ in range(3):  # the free plan allows 1
+        assert (await _start_tryon(client, device_id, garment_id)).status_code == 201

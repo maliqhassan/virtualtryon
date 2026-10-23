@@ -17,12 +17,14 @@ import { ScreenHeader } from '@/components/screen-header';
 import { Skeleton } from '@/components/skeleton';
 import { ShopIcon } from '@/components/tab-icons';
 import { themeColors } from '@/constants/theme';
+import { useGarmentsQuery } from '@/features/wardrobe';
 
 import { PasteLinkCard } from '../components/paste-link-card';
 import { ProductCard } from '../components/product-card';
 import { StoreCard } from '../components/store-card';
 import { useDebouncedValue, useProductsQuery, useStoresQuery } from '../hooks/use-catalog';
-import { productHref } from '../routes';
+import { groupByStore } from '../lib/group-by-store';
+import { myStoreHref, productHref } from '../routes';
 import type { Product } from '../types';
 
 const ALL = 'All';
@@ -68,6 +70,8 @@ export function ShopScreen() {
   const [searchText, setSearchText] = useState('');
   const search = useDebouncedValue(searchText.trim());
   const productsQuery = useProductsQuery(storeId, search);
+  const garmentsQuery = useGarmentsQuery();
+  const myStores = useMemo(() => groupByStore(garmentsQuery.data ?? []), [garmentsQuery.data]);
 
   const stores = storesQuery.data ?? [];
   const products = useMemo(() => productsQuery.data ?? [], [productsQuery.data]);
@@ -98,6 +102,30 @@ export function ShopScreen() {
       />
 
       <PasteLinkCard />
+
+      {myStores.length > 0 && (
+        <View className="mb-xl">
+          <Text className="mb-sm text-xs font-bold uppercase tracking-widest text-ink-secondary">
+            Your stores
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 12, paddingRight: 8 }}
+          >
+            {myStores.map((store) => (
+              <StoreCard
+                key={store.host}
+                name={store.name}
+                subtitle={`${store.garments.length} ${store.garments.length === 1 ? 'piece' : 'pieces'}`}
+                accentColor={store.accentColor}
+                selected={false}
+                onPress={() => router.push(myStoreHref(store.host))}
+              />
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       <Text className="mb-sm text-xs font-bold uppercase tracking-widest text-ink-secondary">
         Sample stores

@@ -40,13 +40,18 @@ function SectionLabel({ step, title }: { step: string; title: string }) {
  */
 export function TryOnHomeScreen() {
   const photoQuery = useMyPhotosQuery();
-  // Set when the user just added a piece from here, so it comes back selected.
-  const params = useLocalSearchParams<{ selected?: string }>();
+  // Set when another screen sends a piece here to try on (wardrobe's
+  // tryOnGarmentHref); `at` is unique per request, so a newer request wins
+  // over a piece picked earlier on this (always mounted) tab.
+  const params = useLocalSearchParams<{ selected?: string; at?: string }>();
   const garmentsQuery = useGarmentsQuery();
   const usageQuery = useUsageQuery();
   const startTryOn = useStartTryOn();
-  const [pickedGarmentId, setSelectedGarmentId] = useState<string | null>(null);
-  const selectedGarmentId = pickedGarmentId ?? params.selected ?? null;
+  const [pick, setPick] = useState<{ garmentId: string; request?: string } | null>(null);
+  const pickIsNewer = !!pick && pick.request === params.at;
+  const selectedGarmentId = pickIsNewer
+    ? pick.garmentId
+    : (params.selected ?? pick?.garmentId ?? null);
 
   const photos = photoQuery.data ?? [];
   const photo = photos.find((p) => p.angle === 'front') ?? null;
@@ -123,7 +128,7 @@ export function TryOnHomeScreen() {
             <GarmentPicker
               garments={garments}
               selectedId={selectedGarmentId}
-              onSelect={(garment) => setSelectedGarmentId(garment.id)}
+              onSelect={(garment) => setPick({ garmentId: garment.id, request: params.at })}
               onAdd={() => router.push(addGarmentHref({ returnToTryOn: true }))}
             />
             <PressableScale

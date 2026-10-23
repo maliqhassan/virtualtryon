@@ -13,6 +13,7 @@ import type { ImageValidationErrorCode, PickedImage } from '@/types';
 
 import { CategoryPickerModal } from '../components/category-picker-modal';
 import { useCreateGarment } from '../hooks/use-create-garment';
+import { tryOnGarmentHref } from '../routes';
 
 export function AddGarmentScreen() {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
@@ -51,9 +52,7 @@ export function AddGarmentScreen() {
       {
         onSuccess: (garment) =>
           // Opened from Try On: go back there with the new piece selected.
-          returnTo === 'tryon'
-            ? router.dismissTo({ pathname: '/', params: { selected: garment.id } })
-            : router.back(),
+          returnTo === 'tryon' ? router.dismissTo(tryOnGarmentHref(garment.id)) : router.back(),
       },
     );
   }, [image, category, title, createGarment, returnTo]);

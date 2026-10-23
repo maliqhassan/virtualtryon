@@ -21,6 +21,7 @@ type GarmentDto = {
   season: string | null;
   image_url: string;
   source_url: string | null;
+  source_store: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -34,6 +35,7 @@ function toGarment(dto: GarmentDto): Garment {
     season: dto.season,
     imageUrl: dto.image_url,
     sourceUrl: dto.source_url,
+    sourceStore: dto.source_store,
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,
   };

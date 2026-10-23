@@ -87,6 +87,7 @@ async def test_imports_a_product_as_a_private_wardrobe_item(client: AsyncClient,
     assert garment["title"] == "Linen Kurta"
     assert garment["category"] == "Shirts"
     assert garment["source_url"] == PRODUCT_URL
+    assert garment["source_store"] == "Example Store"
     assert garment["image_url"].startswith("/uploads/")
     # WebP was converted to something the rest of the app understands.
     stored = await client.get(garment["image_url"])
@@ -106,6 +107,7 @@ async def test_uploaded_garments_have_no_source_url(client: AsyncClient) -> None
         data={"title": "Mine", "category": "Shirts"},
     )
     assert response.json()["source_url"] is None
+    assert response.json()["source_store"] is None
 
 
 @pytest.mark.parametrize(

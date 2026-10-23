@@ -8,6 +8,8 @@ export type Usage = {
   used: number;
   remaining: number;
   resetsAt: string | null;
+  /** Limits are switched off on the server (testing). */
+  unlimited: boolean;
 };
 
 /** What the upgrade screen shows. The server decides the real limits
