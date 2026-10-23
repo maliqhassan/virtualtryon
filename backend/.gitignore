@@ -19,4 +19,4 @@ htmlcov/
 
 # Saved Looks' locally-stored images (LocalStorageProvider) — user-uploaded
 # content, never committed.
-storage/
+/storage/
