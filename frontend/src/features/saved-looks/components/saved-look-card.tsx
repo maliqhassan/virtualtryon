@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 import { AppImage } from '@/components/app-image';
 import { resolveMediaUrl } from '@/lib/media-url';
 
+import { lookDetailsHref } from '../routes';
 import type { SavedLook } from '../types';
 
 type SavedLookCardProps = {
@@ -20,8 +21,7 @@ function formatDate(iso: string): string {
 }
 
 export function SavedLookCard({ look, onToggleFavourite }: SavedLookCardProps) {
-  const openDetails = () =>
-    router.push({ pathname: '/saved-looks/detail/[lookId]', params: { lookId: look.id } });
+  const openDetails = () => router.push(lookDetailsHref(look.id));
 
   return (
     // A plain View, not a Pressable: react-native-web renders
@@ -30,7 +30,7 @@ export function SavedLookCard({ look, onToggleFavourite }: SavedLookCardProps) {
     // browser session logged a hydration warning for exactly this). The
     // favourite-toggle Pressable below is a sibling, not a descendant, of
     // the "open details" Pressables.
-    <View className="mb-md overflow-hidden rounded-xl border border-border bg-surface">
+    <View className="mb-md overflow-hidden rounded-xxl border border-border bg-surface">
       <Pressable
         onPress={openDetails}
         accessibilityRole="button"
@@ -39,7 +39,7 @@ export function SavedLookCard({ look, onToggleFavourite }: SavedLookCardProps) {
         <AppImage
           uri={resolveMediaUrl(look.generatedImageUrl)}
           accessibilityLabel={`${look.title} generated result`}
-          aspectRatio={16 / 9}
+          aspectRatio={4 / 5}
           borderRadius={0}
         />
       </Pressable>

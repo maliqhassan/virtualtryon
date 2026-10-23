@@ -7,7 +7,7 @@ app/services/guest_identity.py and docs/decisions for the full reasoning).
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.saved_look import SavedLook
@@ -38,6 +38,14 @@ class SavedLookRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_job_id_for_user(self, job_id: UUID, user_id: UUID) -> SavedLook | None:
+        result = await self._db.execute(
+            select(SavedLook).where(
+                SavedLook.inference_job_id == job_id, SavedLook.user_id == user_id
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def update(self, look: SavedLook, **fields: Any) -> SavedLook:
         for key, value in fields.items():
             if value is not None:
@@ -49,3 +57,7 @@ class SavedLookRepository:
     async def delete(self, look: SavedLook) -> None:
         await self._db.delete(look)
         await self._db.commit()
+
+    async def stage_delete_all_for_user(self, user_id: UUID) -> None:
+        """Staged only: the caller commits, so several deletes can share one transaction."""
+        await self._db.execute(delete(SavedLook).where(SavedLook.user_id == user_id))

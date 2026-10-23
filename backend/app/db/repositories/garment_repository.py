@@ -7,7 +7,7 @@ SavedLookRepository).
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.garment import Garment
@@ -55,3 +55,7 @@ class GarmentRepository:
     async def delete(self, garment: Garment) -> None:
         await self._db.delete(garment)
         await self._db.commit()
+
+    async def stage_delete_all_for_user(self, user_id: UUID) -> None:
+        """Staged only: the caller commits, so several deletes can share one transaction."""
+        await self._db.execute(delete(Garment).where(Garment.user_id == user_id))

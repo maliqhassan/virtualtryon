@@ -23,8 +23,16 @@ const BACKEND_PORT = 8000;
  * - Anywhere `hostUri` isn't available (a production build, where there's
  *   no dev server to detect at all) falls back to `EXPO_PUBLIC_API_URL`,
  *   which is what a real deployed build should be configured with anyway.
+ *
+ * An `https://` `EXPO_PUBLIC_API_URL` (the hosted backend on Render) always
+ * wins, so Expo Go on a phone can use the deployed API while Metro still
+ * runs on this machine.
  */
 export function resolveApiBaseUrl(): string {
+  if (env.EXPO_PUBLIC_API_URL.startsWith('https://')) {
+    return env.EXPO_PUBLIC_API_URL.replace(/\/+$/, '');
+  }
+
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined' && window.location?.hostname) {
       return `http://${window.location.hostname}:${BACKEND_PORT}`;

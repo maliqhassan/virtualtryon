@@ -3,6 +3,8 @@ decisions (when to create a new guest, how the device id is generated)
 belong in app/services/guest_identity.py, which calls this.
 """
 
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,3 +25,9 @@ class UserRepository:
         await self._db.commit()
         await self._db.refresh(user)
         return user
+
+    async def get_for_update(self, user_id: UUID) -> User | None:
+        """Locks the user's row until the current transaction commits, so two
+        concurrent try-on requests can't both pass the allowance check."""
+        result = await self._db.execute(select(User).where(User.id == user_id).with_for_update())
+        return result.scalar_one_or_none()

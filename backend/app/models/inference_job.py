@@ -44,6 +44,10 @@ class InferenceJob(Base):
     garment_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("garments.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    # A try-on uses either a wardrobe garment or a store product, never both.
+    product_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("products.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     profile_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True
     )

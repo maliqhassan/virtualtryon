@@ -30,6 +30,7 @@ import logging
 import threading
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 import cv2
 import mediapipe as mp
@@ -55,6 +56,14 @@ _FACE_MODEL_URL = (
 )
 
 
+# Multiclass selfie segmenter: 0 = background, 1-5 = hair/body/face/clothes/
+# accessories. Used to cut the person out of their photo (plain background).
+_SEGMENTER_MODEL_URL = (
+    "https://storage.googleapis.com/mediapipe-models/image_segmenter/"
+    "selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite"
+)
+
+
 class ImageDecodeError(ValueError):
     """Raised when the uploaded bytes aren't a decodable image."""
 
@@ -65,6 +74,10 @@ class MediaPipeService:
         self._pose_landmarker: mp_vision.PoseLandmarker | None = None
         self._face_landmarker: mp_vision.FaceLandmarker | None = None
         self._load_lock = threading.Lock()
+        # MediaPipe Tasks landmarkers aren't thread-safe; uploads run the
+        # full-body check in worker threads, so detection is serialized.
+        self._detect_lock = threading.Lock()
+        self._segmenter: mp_vision.ImageSegmenter | None = None
 
     def _ensure_model_file(self, url: str, dest: Path) -> Path:
         if dest.exists():
@@ -134,8 +147,9 @@ class MediaPipeService:
         mp_image = self._decode_image(image_bytes)
         pose_landmarker, face_landmarker = self._ensure_loaded()
 
-        pose_result = pose_landmarker.detect(mp_image)
-        face_result = face_landmarker.detect(mp_image)
+        with self._detect_lock:
+            pose_result = pose_landmarker.detect(mp_image)
+            face_result = face_landmarker.detect(mp_image)
 
         body_landmarks = [
             Landmark(x=lm.x, y=lm.y, z=lm.z, visibility=lm.visibility)
@@ -152,3 +166,33 @@ class MediaPipeService:
             body_landmarks=body_landmarks,
             face_landmarks=face_landmarks,
         )
+
+    def _ensure_segmenter(self) -> mp_vision.ImageSegmenter:
+        if self._segmenter is not None:
+            return self._segmenter
+        with self._load_lock:
+            if self._segmenter is None:
+                model_path = self._ensure_model_file(
+                    _SEGMENTER_MODEL_URL, self._model_dir / "selfie_multiclass_256x256.tflite"
+                )
+                self._segmenter = mp_vision.ImageSegmenter.create_from_options(
+                    mp_vision.ImageSegmenterOptions(
+                        base_options=mp_python.BaseOptions(model_asset_path=str(model_path)),
+                        running_mode=mp_vision.RunningMode.IMAGE,
+                        output_category_mask=True,
+                    )
+                )
+                logger.info("MediaPipe image segmenter loaded")
+        return self._segmenter
+
+    def person_mask(self, image_bytes: bytes) -> "np.ndarray[Any, np.dtype[np.bool_]]":
+        """A (height, width) boolean mask: True where the photo shows the person.
+
+        Raises `ImageDecodeError` for unreadable input."""
+        mp_image = self._decode_image(image_bytes)
+        segmenter = self._ensure_segmenter()
+        with self._detect_lock:
+            result = segmenter.segment(mp_image)
+        categories = result.category_mask.numpy_view()
+        # The mask comes back as (height, width, 1); flatten to (height, width).
+        return np.asarray(np.squeeze(categories) != 0)

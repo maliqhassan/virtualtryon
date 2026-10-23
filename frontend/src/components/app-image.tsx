@@ -7,17 +7,13 @@ export type AppImageProps = {
   aspectRatio?: number;
   borderRadius?: number;
   placeholderText?: string;
+  /** cover fills the frame (default); contain shows the whole image, e.g. a person cut-out. */
+  fit?: 'cover' | 'contain';
 };
 
 /**
- * Image-or-neutral-placeholder, extracted as a shared primitive.
- * `SourceImagesRow`'s own comment (frontend/src/features/tryon/components/source-images-row.tsx)
- * named this exact pattern's third occurrence as "a real candidate for a
- * shared AppImage primitive next time this pattern recurs" — Saved Looks'
- * cards/details screen (three images each) is that next time. The three
- * pre-existing occurrences (SourceImagesRow, ProcessingImagesRow,
- * ResultCanvas) are deliberately left as they are — retrofitting
- * already-shipped, already-reviewed components isn't this feature's job.
+ * Image-or-neutral-placeholder, the shared primitive for every image slot in
+ * the app (wardrobe tiles, saved looks, the try-on screens).
  */
 export function AppImage({
   uri,
@@ -25,6 +21,7 @@ export function AppImage({
   aspectRatio = 1,
   borderRadius = 10,
   placeholderText = 'Unavailable',
+  fit = 'cover',
 }: AppImageProps) {
   if (!uri) {
     return (
@@ -41,7 +38,7 @@ export function AppImage({
     <Image
       source={{ uri }}
       style={{ width: '100%', aspectRatio, borderRadius }}
-      contentFit="cover"
+      contentFit={fit}
       accessibilityLabel={accessibilityLabel}
     />
   );

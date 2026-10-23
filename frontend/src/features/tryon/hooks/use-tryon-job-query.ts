@@ -5,33 +5,26 @@ import { getTryOnJob } from '../services/tryon-job';
 import type { TryOnJob } from '../types';
 
 const TERMINAL_STATUSES: TryOnJob['status'][] = ['completed', 'failed'];
-const POLL_INTERVAL_MS = 1000;
-const POLL_TIMEOUT_MS = 10_000;
+// A real try-on API takes roughly 10-40 seconds per image; poll every 2s
+// for up to 2 minutes before showing the "still waiting" state.
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 120_000;
 
 /**
- * Reads (and, while not yet terminal, polls) a try-on job by id. Extracted
- * from useTryOnJob so both real consumers — the processing screen (via
- * useTryOnJob, which composes this) and the results screen (which only
- * ever reads, never creates) — share one query definition instead of two
- * near-identical ones.
- *
- * Polling is bounded, not infinite: once per second for up to 10 seconds
- * from when this hook first starts watching a given job id. With no
- * inference worker wired up yet (Sprint 4 Stage 1), a real job never
- * leaves `queued` on its own, so unbounded polling would hit the backend
- * forever for no reason. `pollingTimedOut` flips to true once that window
- * elapses without reaching a terminal status — the screen decides what to
- * show; this hook only decides when to stop asking automatically.
- * `refetch` is exposed so a screen can still manually ask again after that
- * point (a real request, not a fake status change).
+ * Reads, and while not yet finished polls, a try-on job by id. Polling is
+ * bounded: once it times out without the job finishing (for example the
+ * worker isn't running), `pollingTimedOut` turns true and the screen shows
+ * a "still waiting" state with a manual refresh (`refetch`).
  */
 export function useTryOnJobQuery(jobId: string | null) {
   const watchStartedAtRef = useRef<number | null>(null);
-  const [pollingTimedOut, setPollingTimedOut] = useState(false);
+  // Remembers *which* job timed out, so switching to another job id starts
+  // fresh without resetting state inside an effect.
+  const [timedOutJobId, setTimedOutJobId] = useState<string | null>(null);
+  const pollingTimedOut = !!jobId && timedOutJobId === jobId;
 
   useEffect(() => {
     watchStartedAtRef.current = jobId ? Date.now() : null;
-    setPollingTimedOut(false);
   }, [jobId]);
 
   const query = useQuery<TryOnJob>({
@@ -57,12 +50,8 @@ export function useTryOnJobQuery(jobId: string | null) {
     if (!jobId || !startedAt) return;
     if (status && TERMINAL_STATUSES.includes(status)) return;
 
-    const remaining = POLL_TIMEOUT_MS - (Date.now() - startedAt);
-    if (remaining <= 0) {
-      setPollingTimedOut(true);
-      return;
-    }
-    const timer = setTimeout(() => setPollingTimedOut(true), remaining);
+    const remaining = Math.max(POLL_TIMEOUT_MS - (Date.now() - startedAt), 0);
+    const timer = setTimeout(() => setTimedOutJobId(jobId), remaining);
     return () => clearTimeout(timer);
   }, [jobId, status]);
 

@@ -1,6 +1,143 @@
 # Project Status
 
-Last updated: 2026-07-31
+Last updated: 2026-10-23
+
+## Phase: 26 — Tab bar fix, photo views & background removal, Shop search, wardrobe filters
+
+**Tab bar on Android**: items were bunched at the edges because NativeWind
+classes on animated views aren't applied reliably on native.
+`PressableScale` now puts layout classes on a plain View (animated view only
+scales); tab items also get an inline `flex: 1`. Measured evenly spaced on web.
+`FadeInView` rebuilt from opacity/translate (Reanimated `entering` positions
+the view absolutely on web, which collapsed its container and made the Shop
+search bar overlap the header).
+
+**My photo**: front / side / back views (`user_photos.angle`); try-ons always
+use front; replacing a view deletes only that view's old files. Every upload
+gets a plain-background cut-out (`cutout_storage_key`) made with MediaPipe's
+selfie multiclass segmenter (`MediaPipeService.person_mask`,
+`services/photo_background.py`); failures fall back to the original photo.
+Real model download + inference verified; the cut-out quality on real
+people **not verified** (no real photo available; the cartoon test figure
+isn't detected as a person, as expected). Home "You" card shows the cut-out
+with a Front/Side/Back switcher; a true 360° view needs 3D/AI and is not built.
+New endpoint GET /user-photos (all views); POST takes an `angle` form field.
+Migration d5e6f7a8b9c0 (hand-written).
+
+**Shop search**: `q` on GET /products and /stores/{id}/products (title,
+category, store name; LIKE wildcards escaped); debounced search bar.
+**Wardrobe**: Bags category, category chips with counts. Adding a piece from
+Try On returns there with it selected.
+
+**Verified**: 84/84 backend tests (SQLite harness); frontend typecheck/lint
+clean; full web click-through incl. side view and search, no errors.
+
+## Phase: 25 — Design refresh, floating tab bar, Shop (sample stores)
+
+**Design**: Instrument Serif display titles (`@expo-google-fonts/instrument-serif`,
+loaded before the splash hides), shared `ScreenHeader`, `FadeInView`
+(staggered entrance, honours reduce motion), `PressableScale` (spring
+press feedback), `Skeleton` loaders, pill buttons with a `dark` variant,
+light haptics (`expo-haptics`) on main actions and tab presses, back
+buttons on stack screens. Same colour palette. App name/splash rebranded.
+
+**Bottom nav**: custom `FloatingTabBar` (`src/components/floating-tab-bar.tsx`):
+floating pill, animated active highlight, raised centre Try On button,
+5 tabs (Wardrobe, Shop, Try On, Looks, Account). Lifted by the real
+`insets.bottom`, so it sits above gesture, 3-button and no-bar Android
+navigation (SDK 55+ is edge-to-edge). Tab screens use `AppScaffold inTabs`
+so the bottom inset isn't applied twice. Verified on web only (insets are 0
+there); **check on a real Android phone**.
+
+**Shop**: `stores`/`products` tables (migration c4d1e2f3a7b8, hand-written),
+public read-only endpoints GET /stores, /stores/{id}/products,
+/products, /products/{id}; sample catalogue of 3 fictional stores × 6
+drawn products via `python -m app.seed_catalog` (labelled "Sample stores"
+in the app; buying disabled). Try-on jobs take `garment_id` **or**
+`product_id`; shared `services/clothing.py` resolves either for the worker
+and Save to Looks. Shop tab (store rail, category chips, product grid) and
+product page with Try it on.
+
+**Review fixes**: each try-on keeps its own copy of the user photo
+(replacing the photo no longer breaks queued/saveable try-ons); deleting the
+photo removes every copy and unsaved result image; stale queued jobs (>30
+min) are cancelled by the worker instead of run uncounted; job completion is
+one conditional UPDATE so a concurrent data deletion always wins; "Delete all
+my data" is one transaction, files removed after commit; Save to Looks copies
+off the event loop and never deletes files of a look that did get saved;
+NativeWind classes moved off animated views so changing styles re-apply.
+
+**Verified**: 80/80 backend tests on SQLite harness; ruff/black clean, mypy
+only the pre-existing redis error. Frontend typecheck, lint, prettier clean;
+full web click-through incl. Shop → product → try-on → save, no browser
+errors.
+
+**Known gaps**: free try-on can be re-obtained by dropping X-Device-Id
+(needs Firebase sign-in); full-body check fails open if MediaPipe can't
+run; both new migrations unverified against Postgres; no payments yet.
+
+## Phase: 24b — Upgraded Expo SDK 54 → 57
+
+So the app opens in the store version of Expo Go (SDK 57) on Android.
+`npx expo install expo@^57 --fix`: React Native 0.81 → 0.86.3, React 19.1 →
+19.2.3, expo-router 6 → 57, Reanimated 4.1 → 4.5, worklets 0.5 → 0.10,
+TypeScript 5.9 → 6.0. `expo-doctor`: 21/21 checks pass. Two code fixes:
+tab icon `color` typed as `ColorValue` (tab bar API changed), and
+`use-tryon-job-query.ts` no longer resets state inside an effect (new
+`react-hooks/set-state-in-effect` lint rule). Verified: typecheck, lint,
+prettier clean; full web click-through passes with no browser errors.
+Not yet run on a physical device. `npm audit` reports 35 advisories in
+transitive dependencies; not auto-fixed (`--force` would break SDK pins).
+
+## Phase: 24 — Simplified app: tabs, My Photo, one-tap try-on, plans & limits (demo AI)
+
+Rebuilt the app around one simple flow: upload one full-body photo once,
+add clothes, tap "Try it on". No AI API connected yet: a clearly labelled
+demo provider stands in until FASHN is integrated (the chosen provider; see
+the conversation's pricing comparison with Google Vertex AI Virtual Try-On).
+The user granted full control for this build and approved deleting the old
+screens.
+
+**Frontend**: 4 tabs (Try On, Wardrobe, Looks, Account) under
+`src/app/(tabs)/`; stack screens onboarding, my-photo, garment/add,
+garment/[garmentId], look/[lookId], tryon/[jobId] (processing + result in one
+screen), upgrade (plans shown, payments "coming soon"). New features:
+my-photo, usage, account, onboarding; features expose small index.ts public
+APIs for cross-feature imports. Removed: dev home, old garment-upload flow
+(duplicated Wardrobe's add), old photo upload, profile/measurements screens,
+old processing/results screens, mock-network fallback. Client image formats
+now match the server (JPEG/PNG). Fixed: ThinkingIndicator orb invisible on
+web, wardrobe grid's last odd item stretching, tab labels clipped on web.
+
+**Backend**: `users.plan` (free/pro/pro_plus) and
+`saved_looks.inference_job_id` (migration b3c9d2e4f5a6, **hand-written —
+no DB was reachable; run `alembic upgrade head` then
+`alembic revision --autogenerate` to confirm an empty diff**). Allowance
+(services/plans.py): Free 1 try-on total, Pro 2/day, Pro Plus 3/day (UTC
+reset); counted from jobs (completed, or in-flight < 30 min), enforced with a
+row lock, 402 when exhausted. POST /inference-jobs takes only garment_id; the
+server uses the caller's current photo (409 if none). New: GET /usage,
+GET/DELETE /user-photos/current (upload runs a MediaPipe full-body check;
+replacing a photo deletes the old one), POST /saved-looks/from-job (copies
+images so deleting a look can't delete wardrobe/photo files; idempotent),
+DELETE /account/data (keeps redacted job rows so the free try-on can't be
+reset). Worker now stores the generated image and completes jobs; provider
+chosen by TRYON_PROVIDER (demo | catvton).
+
+**Verified**: 72/72 backend tests passing on a SQLite copy of the suite
+(Postgres/Docker unavailable on this machine — **re-run `pytest` against
+Postgres**); MediaPipe analyze test not run (needs model download);
+ruff/black clean, mypy clean except pre-existing app/redis/client.py error.
+Frontend typecheck, lint, prettier clean. Full click-through in Expo web
+(headless Chrome, mocked API): onboarding → photo → 3 garments → try-on →
+result → save → limit → upgrade → looks → wardrobe → account → delete data,
+no browser errors.
+
+**Known gaps**: payments (Apple IAP via RevenueCat) not built; FASHN not
+connected; guest identity means a reinstall/new device gets a new free
+try-on until real sign-in exists; /uploads is served without auth
+(unguessable UUID names, pre-existing); delete-all-data runs as several
+commits, not one transaction; onboarding flag is in-memory on web.
 
 ## Phase: 23 — Worker runner infrastructure (Sprint 4 Stage 6)
 

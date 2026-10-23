@@ -9,6 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { themeColors } from '@/constants/theme';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 export type ThinkingIndicatorProps = {
@@ -53,9 +54,18 @@ export function ThinkingIndicator({ size = 70, step }: ThinkingIndicatorProps) {
 
   return (
     <View className="items-center gap-md">
+      {/* Colour via style, not className: NativeWind classes on a Reanimated
+          view don't apply on web, which left the orb invisible there. */}
       <Animated.View
-        style={[{ width: size, height: size, borderRadius: size / 2 }, animatedStyle]}
-        className="bg-primary"
+        style={[
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            backgroundColor: themeColors.primary,
+          },
+          animatedStyle,
+        ]}
       />
       <Text className="text-center text-ink-secondary" accessibilityLiveRegion="polite">
         {step}

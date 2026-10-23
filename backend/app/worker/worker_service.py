@@ -37,8 +37,9 @@ class WorkerRunResult:
 class WorkerService:
     def __init__(self, db: AsyncSession) -> None:
         self._db = db
-        inference_worker = InferenceWorker(get_inference_client(), get_storage_service())
-        self._job_processor = JobProcessor(db, inference_worker)
+        storage = get_storage_service()
+        inference_worker = InferenceWorker(get_inference_client(), storage)
+        self._job_processor = JobProcessor(db, inference_worker, storage)
 
     async def process_single_job(self, job_id: UUID) -> InferenceJobStatus | None:
         return await self._job_processor.process_single_job(job_id)

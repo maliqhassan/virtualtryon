@@ -1,4 +1,5 @@
 # SQLAlchemy models are registered here so Alembic's autogenerate can see them.
+from app.models.catalog import Product, Store
 from app.models.garment import Garment
 from app.models.inference_job import InferenceJob, InferenceJobStatus
 from app.models.profile import Profile
@@ -11,8 +12,10 @@ __all__ = [
     "Garment",
     "InferenceJob",
     "InferenceJobStatus",
+    "Product",
     "Profile",
     "SavedLook",
+    "Store",
     "User",
     "UserPhoto",
 ]

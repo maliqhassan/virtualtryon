@@ -26,6 +26,7 @@ export const GARMENT_CATEGORIES = [
   'Shorts',
   'Dresses',
   'Shoes',
+  'Bags',
   'Accessories',
   'Other',
 ] as const;

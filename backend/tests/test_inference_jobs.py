@@ -26,15 +26,24 @@ async def _create_garment(client: AsyncClient) -> tuple[dict, str]:
     return response.json(), response.headers["x-device-id"]
 
 
-async def _create_job(
-    client: AsyncClient,
-    garment_id: str,
-    device_id: str,
-    storage_key: str = "user-photos/abc123.jpg",
-) -> dict:
+async def _upload_photo(client: AsyncClient, device_id: str) -> str:
+    response = await client.post(
+        "/api/v1/user-photos",
+        files={"image": ("photo.jpg", _jpeg_bytes((200, 180, 160)), "image/jpeg")},
+        headers={"X-Device-Id": device_id},
+    )
+    assert response.status_code == 201
+    return response.json()["storage_key"]
+
+
+async def _create_job(client: AsyncClient, garment_id: str, device_id: str) -> dict:
+    """Uploads the user's photo (if not already there) and starts a job."""
+    current = await client.get("/api/v1/user-photos/current", headers={"X-Device-Id": device_id})
+    if current.json() is None:
+        await _upload_photo(client, device_id)
     response = await client.post(
         "/api/v1/inference-jobs",
-        json={"garment_id": garment_id, "user_image_storage_key": storage_key},
+        json={"garment_id": garment_id},
         headers={"X-Device-Id": device_id},
     )
     assert response.status_code == 201
@@ -43,12 +52,16 @@ async def _create_job(
 
 async def test_create_job_success(client: AsyncClient) -> None:
     garment, device_id = await _create_garment(client)
+    storage_key = await _upload_photo(client, device_id)
 
     job = await _create_job(client, garment["id"], device_id)
 
     assert job["garment_id"] == garment["id"]
     assert job["profile_id"] is None
-    assert job["user_image_storage_key"] == "user-photos/abc123.jpg"
+    # The job keeps its own copy of the photo (so replacing the photo later
+    # can't break it), not a reference to the original file.
+    assert job["user_image_storage_key"].startswith("/uploads/")
+    assert job["user_image_storage_key"] != storage_key
     assert job["generated_image_url"] is None
     assert job["status"] == "queued"
     assert job["error_message"] is None
@@ -56,24 +69,46 @@ async def test_create_job_success(client: AsyncClient) -> None:
     assert job["completed_at"] is None
 
 
-async def test_create_job_rejects_external_url(client: AsyncClient) -> None:
+async def test_create_job_ignores_client_supplied_storage_key(
+    client: AsyncClient,
+) -> None:
+    """The job always uses the caller's own current photo; a storage key in
+    the request body (old clients sent one) is ignored, so a request can't
+    point a job at a file the caller doesn't own."""
+    garment, device_id = await _create_garment(client)
+    storage_key = await _upload_photo(client, device_id)
+
+    response = await client.post(
+        "/api/v1/inference-jobs",
+        json={
+            "garment_id": garment["id"],
+            "user_image_storage_key": "/uploads/someone-else.jpg",
+        },
+        headers={"X-Device-Id": device_id},
+    )
+    assert response.status_code == 201
+    key = response.json()["user_image_storage_key"]
+    assert key not in ("/uploads/someone-else.jpg", storage_key)
+    assert key.startswith("/uploads/")
+
+
+async def test_create_job_without_photo_returns_409(client: AsyncClient) -> None:
     garment, device_id = await _create_garment(client)
 
     response = await client.post(
         "/api/v1/inference-jobs",
-        json={"garment_id": garment["id"], "user_image_storage_key": "http://evil.example/x.jpg"},
+        json={"garment_id": garment["id"]},
         headers={"X-Device-Id": device_id},
     )
-    assert response.status_code == 422
+    assert response.status_code == 409
 
 
-async def test_create_job_with_nonexistent_garment_returns_404(client: AsyncClient) -> None:
+async def test_create_job_with_nonexistent_garment_returns_404(
+    client: AsyncClient,
+) -> None:
     response = await client.post(
         "/api/v1/inference-jobs",
-        json={
-            "garment_id": "00000000-0000-0000-0000-000000000000",
-            "user_image_storage_key": "user-photos/abc.jpg",
-        },
+        json={"garment_id": "00000000-0000-0000-0000-000000000000"},
     )
     assert response.status_code == 404
 
@@ -85,7 +120,7 @@ async def test_create_job_with_garment_from_different_device_returns_404(
 
     response = await client.post(
         "/api/v1/inference-jobs",
-        json={"garment_id": garment["id"], "user_image_storage_key": "user-photos/abc.jpg"},
+        json={"garment_id": garment["id"]},
         headers={"X-Device-Id": "attacker-device"},
     )
     assert response.status_code == 404
@@ -106,7 +141,9 @@ async def test_create_job_auto_attaches_profile_if_exists(client: AsyncClient) -
     assert job["profile_id"] == profile_id
 
 
-async def test_create_job_without_profile_leaves_profile_id_null(client: AsyncClient) -> None:
+async def test_create_job_without_profile_leaves_profile_id_null(
+    client: AsyncClient,
+) -> None:
     garment, device_id = await _create_garment(client)
 
     job = await _create_job(client, garment["id"], device_id)
@@ -140,7 +177,8 @@ async def test_get_job_from_wrong_device_returns_404(client: AsyncClient) -> Non
     job = await _create_job(client, garment["id"], owner_device)
 
     response = await client.get(
-        f"/api/v1/inference-jobs/{job['id']}", headers={"X-Device-Id": "attacker-device"}
+        f"/api/v1/inference-jobs/{job['id']}",
+        headers={"X-Device-Id": "attacker-device"},
     )
     assert response.status_code == 404
 

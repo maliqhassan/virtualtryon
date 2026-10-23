@@ -71,7 +71,9 @@ async def test_process_single_job_missing_job_is_a_noop(client: AsyncClient) -> 
         await worker_service.process_single_job(UUID("00000000-0000-0000-0000-000000000000"))
 
 
-async def test_process_single_job_fails_cleanly_when_garment_deleted(client: AsyncClient) -> None:
+async def test_process_single_job_fails_cleanly_when_garment_deleted(
+    client: AsyncClient,
+) -> None:
     job_id, garment_id, device_id = await _create_garment_and_job(client)
 
     async with db_session.AsyncSessionLocal() as db:
@@ -93,7 +95,9 @@ async def test_process_single_job_fails_cleanly_when_garment_deleted(client: Asy
     assert body["error_message"] == "Referenced garment no longer exists."
 
 
-async def test_missing_stored_file_gets_a_generic_error_message(client: AsyncClient) -> None:
+async def test_missing_stored_file_gets_a_generic_error_message(
+    client: AsyncClient,
+) -> None:
     """A security-review finding, fixed: the raw FileNotFoundError text
     (which contains the server's storage directory layout) must never
     reach InferenceJob.error_message, which this guest can read back via
@@ -139,3 +143,69 @@ async def test_run_once_processes_every_queued_job(client: AsyncClient) -> None:
             f"/api/v1/inference-jobs/{job_id}", headers={"X-Device-Id": device_id}
         )
         assert response.json()["status"] == "failed"
+
+
+async def test_demo_provider_completes_job_with_stored_image(
+    client: AsyncClient, monkeypatch
+) -> None:
+    from app.core.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "TRYON_PROVIDER", "demo")
+    job_id, _garment_id, device_id = await _create_garment_and_job(client)
+
+    async with db_session.AsyncSessionLocal() as db:
+        await WorkerService(db).process_single_job(UUID(job_id))
+
+    body = (
+        await client.get(f"/api/v1/inference-jobs/{job_id}", headers={"X-Device-Id": device_id})
+    ).json()
+    assert body["status"] == "completed"
+    assert body["generated_image_url"].startswith("/uploads/")
+    stored = Image.open(io.BytesIO(get_storage_service().read(body["generated_image_url"])))
+    assert stored.format == "PNG"
+
+
+async def test_stale_queued_job_is_cancelled_not_run(client: AsyncClient) -> None:
+    """A job queued longer than STALE_JOB_AFTER no longer counts against the
+    allowance, so the worker must cancel it rather than give a free try-on."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.db.repositories.inference_job_repository import InferenceJobRepository
+
+    job_id, _garment_id, device_id = await _create_garment_and_job(client)
+    async with db_session.AsyncSessionLocal() as db:
+        row = await InferenceJobRepository(db).get_by_id(UUID(job_id))
+        assert row is not None
+        row.created_at = datetime.now(UTC) - timedelta(hours=2)
+        await db.commit()
+
+    async with db_session.AsyncSessionLocal() as db:
+        await WorkerService(db).process_single_job(UUID(job_id))
+
+    body = (
+        await client.get(f"/api/v1/inference-jobs/{job_id}", headers={"X-Device-Id": device_id})
+    ).json()
+    assert body["status"] == "failed"
+    assert "cancelled" in body["error_message"]
+
+
+async def test_replacing_photo_does_not_break_a_queued_tryon(
+    client: AsyncClient, monkeypatch
+) -> None:
+    from app.core.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "TRYON_PROVIDER", "demo")
+    job_id, _garment_id, device_id = await _create_garment_and_job(client)
+    await client.post(
+        "/api/v1/user-photos",
+        files={"image": ("new.jpg", _jpeg_bytes((1, 2, 3)), "image/jpeg")},
+        headers={"X-Device-Id": device_id},
+    )
+
+    async with db_session.AsyncSessionLocal() as db:
+        await WorkerService(db).process_single_job(UUID(job_id))
+
+    body = (
+        await client.get(f"/api/v1/inference-jobs/{job_id}", headers={"X-Device-Id": device_id})
+    ).json()
+    assert body["status"] == "completed"

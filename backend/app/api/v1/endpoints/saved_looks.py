@@ -10,11 +10,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.saved_look import SavedLookResponse, SavedLookUpdate
+from app.schemas.saved_look import (
+    SavedLookResponse,
+    SavedLookUpdate,
+    SaveLookFromJobRequest,
+)
 from app.services.image_validation import ImageUpload, UnsupportedImageError
 from app.services.saved_looks import (
     SavedLookNotFoundError,
+    TryOnNotFoundError,
+    TryOnNotSaveableError,
     create_saved_look,
+    create_saved_look_from_job,
     delete_saved_look,
     list_saved_looks,
     update_saved_look,
@@ -25,7 +32,9 @@ router = APIRouter()
 
 async def _to_image_upload(file: UploadFile) -> ImageUpload:
     return ImageUpload(
-        content=await file.read(), content_type=file.content_type, filename=file.filename
+        content=await file.read(),
+        content_type=file.content_type,
+        filename=file.filename,
     )
 
 
@@ -59,6 +68,20 @@ async def create_look(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc
+
+
+@router.post("/from-job", response_model=SavedLookResponse, status_code=status.HTTP_201_CREATED)
+async def create_look_from_job(
+    payload: SaveLookFromJobRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> SavedLookResponse:
+    try:
+        return await create_saved_look_from_job(db=db, user_id=current_user.id, payload=payload)
+    except TryOnNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except TryOnNotSaveableError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
 
 @router.patch("/{look_id}", response_model=SavedLookResponse)

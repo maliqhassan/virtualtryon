@@ -26,3 +26,6 @@ docker-compose.override.yml
 # Postgres dump, and uploaded user images — never committed, regardless
 # of how this repo's other ignore rules evolve.
 migration_bundle/
+
+# Personal application documents, kept out of the repo
+portfolio/

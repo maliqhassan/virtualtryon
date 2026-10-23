@@ -40,6 +40,7 @@ COPY backend/alembic ./alembic
 COPY backend/alembic.ini .
 COPY backend/app ./app
 COPY backend/ai ./ai
+COPY backend/start.sh .
 # storage/uploads must exist (owned by appuser) before docker-compose's
 # storage_uploads volume is first mounted here — Docker copies a fresh
 # named volume's initial content/ownership from whatever the image

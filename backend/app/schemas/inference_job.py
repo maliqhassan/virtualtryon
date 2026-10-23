@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from app.models.inference_job import InferenceJobStatus
 
@@ -11,6 +11,7 @@ class InferenceJobResponse(BaseModel):
 
     id: UUID
     garment_id: UUID | None
+    product_id: UUID | None
     profile_id: UUID | None
     user_image_storage_key: str
     generated_image_url: str | None
@@ -23,23 +24,17 @@ class InferenceJobResponse(BaseModel):
 
 
 class CreateInferenceJobRequest(BaseModel):
-    """POST body. `profile_id` is deliberately not a field here — the
-    service auto-attaches the caller's own Profile if one exists, rather
-    than trusting a client-supplied profile reference (there would be no
-    reason for a client to ever need to choose a *different* profile than
-    its own)."""
+    """POST body: the clothing to try on, either a wardrobe garment or a store
+    product (exactly one). The user photo is the caller's current "My Photo"
+    looked up server-side, never a client-supplied storage key, so a request
+    can't point a job at a file the caller doesn't own. `profile_id` isn't a
+    field either; the service auto-attaches the caller's own Profile."""
 
-    garment_id: UUID
-    user_image_storage_key: str = Field(min_length=1)
+    garment_id: UUID | None = None
+    product_id: UUID | None = None
 
-    @field_validator("user_image_storage_key")
-    @classmethod
-    def reject_external_urls(cls, value: str) -> str:
-        """The one change from this feature's original design: this must
-        be a backend-controlled storage reference, never an arbitrary
-        client-supplied URL. "://" is what every scheme (http://, https://,
-        even file://) shares — rejecting it is a cheap, real enforcement
-        of that rule, not just a naming convention."""
-        if "://" in value:
-            raise ValueError("must be a backend storage reference, not an external URL")
-        return value
+    @model_validator(mode="after")
+    def exactly_one_clothing_source(self) -> "CreateInferenceJobRequest":
+        if (self.garment_id is None) == (self.product_id is None):
+            raise ValueError("Provide exactly one of garment_id or product_id.")
+        return self

@@ -19,10 +19,12 @@ from app.schemas.inference_job import CreateInferenceJobRequest, InferenceJobRes
 from app.services.inference_jobs import (
     InferenceJobNotFoundError,
     InvalidGarmentReferenceError,
+    NoUserPhotoError,
     create_inference_job,
     get_inference_job,
     list_inference_jobs,
 )
+from app.services.usage import UsageLimitReachedError
 
 router = APIRouter()
 
@@ -45,6 +47,17 @@ async def create_new_inference_job(
         return await create_inference_job(db=db, user_id=current_user.id, payload=payload)
     except InvalidGarmentReferenceError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except InferenceJobNotFoundError as exc:  # the caller's user row vanished mid-request
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except NoUserPhotoError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except UsageLimitReachedError as exc:
+        # 402 so the app can tell "upgrade needed" apart from other errors
+        # and open the upgrade screen.
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail={"message": str(exc), "usage": exc.usage.model_dump(mode="json")},
+        ) from exc
 
 
 @router.get("/{job_id}", response_model=InferenceJobResponse)

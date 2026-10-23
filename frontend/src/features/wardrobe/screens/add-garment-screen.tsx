@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
@@ -15,6 +15,7 @@ import { CategoryPickerModal } from '../components/category-picker-modal';
 import { useCreateGarment } from '../hooks/use-create-garment';
 
 export function AddGarmentScreen() {
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const { pickFromGallery, fault, clearFault } = useImagePicker();
   const createGarment = useCreateGarment();
 
@@ -47,17 +48,23 @@ export function AddGarmentScreen() {
     if (!image || !category) return;
     createGarment.mutate(
       { image, title: title.trim(), category },
-      { onSuccess: () => router.back() },
+      {
+        onSuccess: (garment) =>
+          // Opened from Try On: go back there with the new piece selected.
+          returnTo === 'tryon'
+            ? router.dismissTo({ pathname: '/', params: { selected: garment.id } })
+            : router.back(),
+      },
     );
-  }, [image, category, title, createGarment]);
+  }, [image, category, title, createGarment, returnTo]);
 
   if (showCamera) {
     return <CameraCaptureView onCapture={handlePicked} onCancel={() => setShowCamera(false)} />;
   }
 
   return (
-    <AppScaffold>
-      <Text className="text-2xl font-bold text-ink-primary">Add Garment</Text>
+    <AppScaffold back>
+      <Text className="font-display text-[34px] leading-[38px] text-ink-primary">Add a piece</Text>
 
       {fault && (
         <Text className="mt-sm text-error" accessibilityRole="alert">

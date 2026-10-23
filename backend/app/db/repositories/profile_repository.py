@@ -8,7 +8,7 @@ pattern as GarmentRepository/SavedLookRepository). No `list_for_user` here
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.profile import Profile
@@ -36,3 +36,11 @@ class ProfileRepository:
         await self._db.commit()
         await self._db.refresh(profile)
         return profile
+
+    async def delete(self, profile: Profile) -> None:
+        await self._db.delete(profile)
+        await self._db.commit()
+
+    async def stage_delete_for_user(self, user_id: UUID) -> None:
+        """Staged only: the caller commits, so several deletes can share one transaction."""
+        await self._db.execute(delete(Profile).where(Profile.user_id == user_id))

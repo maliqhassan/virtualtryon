@@ -51,7 +51,7 @@ export function GarmentDetailsScreen() {
 
   if (garmentsQuery.isLoading) {
     return (
-      <AppScaffold scroll={false}>
+      <AppScaffold back scroll={false}>
         <View className="flex-1 items-center justify-center">
           <ThinkingIndicator step="Loading this garment…" />
         </View>
@@ -61,8 +61,10 @@ export function GarmentDetailsScreen() {
 
   if (!garment) {
     return (
-      <AppScaffold>
-        <Text className="text-2xl font-bold text-ink-primary">Garment not found</Text>
+      <AppScaffold back>
+        <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
+          Garment not found
+        </Text>
         <Text className="mt-xs text-ink-secondary">This garment may have been deleted.</Text>
         <Link href={WARDROBE_HREF} className="mt-lg text-sm font-semibold text-primary">
           Back to Wardrobe →
@@ -72,8 +74,10 @@ export function GarmentDetailsScreen() {
   }
 
   return (
-    <AppScaffold>
-      <Text className="text-2xl font-bold text-ink-primary">{garment.title}</Text>
+    <AppScaffold back>
+      <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
+        {garment.title}
+      </Text>
       <Text className="mt-xs text-sm text-ink-secondary">{garment.category}</Text>
       <Text className="mt-xs text-sm text-ink-secondary">
         Added {formatDate(garment.createdAt)}

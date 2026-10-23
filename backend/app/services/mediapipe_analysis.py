@@ -30,7 +30,7 @@ class UnsupportedImageError(ValueError):
 
 
 @lru_cache
-def _get_service() -> MediaPipeService:
+def get_mediapipe_service() -> MediaPipeService:
     """One MediaPipeService per process, matching get_settings()'s own
     zero-arg lru_cache pattern — the landmarker models load once, lazily,
     on the first real analyze() call, not at import time.
@@ -44,7 +44,7 @@ def analyze_image(content_type: str | None, image_bytes: bytes) -> MediaPipeAnal
     if len(image_bytes) > MAX_UPLOAD_BYTES:
         raise UnsupportedImageError(f"Image exceeds {MAX_UPLOAD_BYTES}-byte limit")
 
-    service = _get_service()
+    service = get_mediapipe_service()
     started = time.perf_counter()
     try:
         result = service.analyze(image_bytes)

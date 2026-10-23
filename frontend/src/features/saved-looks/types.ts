@@ -5,6 +5,8 @@ export type SavedLook = {
   clothingImageUrl: string;
   generatedImageUrl: string;
   isFavourite: boolean;
+  /** Set when the look was saved from a try-on in this app. */
+  inferenceJobId: string | null;
   createdAt: string;
 };
 

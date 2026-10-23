@@ -30,6 +30,9 @@ from src.models.inference_client import (
     AIInferenceResponse,
 )
 from src.models.inference_clients.catvton_inference_client import CatVTONInferenceClient
+from src.models.inference_clients.demo_inference_client import DemoInferenceClient
+
+from app.core.config import get_settings
 
 __all__ = [
     "AIInferenceClient",
@@ -40,11 +43,18 @@ __all__ = [
 
 
 def get_inference_client() -> AIInferenceClient:
-    """Not VirtualTryOnEngineRegistry.create() — that factory defaults to
-    LocalStubInferenceClient, which returns a real (if fake) placeholder
-    image. Using it here would make every job "succeed" with fake
-    content, which this feature's requirements explicitly forbid.
-    CatVTONInferenceClient always raises NotImplementedError today, which
-    is the honest behavior this worker is built to handle.
+    """Chosen by the TRYON_PROVIDER setting:
+
+    - "demo": DemoInferenceClient, which returns the user's photo with the
+      garment pinned on and a visible "DEMO" banner, so the whole app flow
+      can be tested before a real try-on API is connected.
+    - "catvton": CatVTONInferenceClient, which always raises
+      NotImplementedError, so every job fails honestly.
+
+    Not VirtualTryOnEngineRegistry.create(): that factory defaults to
+    LocalStubInferenceClient, a plain grey image with no label, which
+    would look like a broken real result.
     """
+    if get_settings().TRYON_PROVIDER == "demo":
+        return DemoInferenceClient()
     return CatVTONInferenceClient()

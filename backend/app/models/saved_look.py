@@ -23,6 +23,12 @@ class SavedLook(Base):
     clothing_image_url: Mapped[str] = mapped_column(nullable=False)
     generated_image_url: Mapped[str] = mapped_column(nullable=False)
     is_favourite: Mapped[bool] = mapped_column(default=False, nullable=False)
+    # Set when the look was saved from a completed try-on (POST
+    # /saved-looks/from-job). Unique, so the same result can't be saved
+    # twice; SET NULL so deleting job history never deletes a saved look.
+    inference_job_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("inference_jobs.id", ondelete="SET NULL"), nullable=True, unique=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

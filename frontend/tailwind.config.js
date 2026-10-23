@@ -19,13 +19,25 @@ module.exports = {
           secondary: 'var(--color-ink-secondary)',
           onPrimary: 'var(--color-ink-on-primary)',
         },
+        // From the design system (design/figma/01-foundation.md §3): the dark
+        // "machine is speaking" surface, gold for premium moments, and a
+        // muted fill for chips and empty slots.
+        inverse: '#16130F',
+        accent: '#C9A227',
+        muted: '#F0EDE7',
         // Neutral ramp is identical in light/dark per the design spec, so no
         // CSS-variable indirection is needed here (unlike the colors above).
         neutral: {
+          100: '#F0EDE7',
           200: '#E2DED6',
           300: '#C9C3B9',
           500: '#8A8278',
         },
+      },
+      // Instrument Serif is the design system's display face: screen titles,
+      // outfit names and big numbers. Body text stays on the platform font.
+      fontFamily: {
+        display: ['InstrumentSerif_400Regular'],
       },
       spacing: {
         xxs: '2px',

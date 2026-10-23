@@ -9,7 +9,7 @@ was asked: no rename/list/delete operations exist for this resource
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -21,6 +21,14 @@ class UserPhoto(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     storage_key: Mapped[str] = mapped_column(nullable=False)
+    # Which view of the user this is. Try-ons use "front"; "side" and "back"
+    # are optional extra views the app shows on the Try On screen.
+    angle: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="front", server_default="front"
+    )
+    # The same photo on a plain background (MediaPipe cut-out), if it could
+    # be made; the app falls back to the original otherwise.
+    cutout_storage_key: Mapped[str | None] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
@@ -36,3 +44,7 @@ class UserPhoto(Base):
         keep in sync.
         """
         return self.storage_key
+
+    @property
+    def cutout_url(self) -> str | None:
+        return self.cutout_storage_key

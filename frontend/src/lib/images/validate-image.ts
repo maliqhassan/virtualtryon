@@ -1,11 +1,9 @@
 import type { ImageValidationErrorCode } from '@/types';
 
-export const ALLOWED_IMAGE_MIME_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/heic',
-  'image/heif',
-] as const;
+// Matches the server's own allowlist (backend/app/services/image_validation.py).
+// HEIC used to be allowed here, but the server rejects it, so it only
+// failed later with a less helpful error.
+export const ALLOWED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png'] as const;
 export const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 type ValidatableImage = {
@@ -39,7 +37,7 @@ export function validateImage(image: ValidatableImage): ImageValidationErrorCode
 export function describeValidationError(code: ImageValidationErrorCode): string {
   switch (code) {
     case 'unsupported_format':
-      return "That file type isn't supported. Use a JPEG, PNG, or HEIC photo.";
+      return "That file type isn't supported. Use a JPEG or PNG photo.";
     case 'file_too_large':
       return 'That photo is too large. Choose one under 10MB.';
   }

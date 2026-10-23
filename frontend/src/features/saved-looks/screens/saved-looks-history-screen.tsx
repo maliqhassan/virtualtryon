@@ -2,6 +2,8 @@ import { FlatList, RefreshControl, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
 import { AppScaffold } from '@/components/app-scaffold';
+import { FadeInView } from '@/components/fade-in-view';
+import { ScreenHeader } from '@/components/screen-header';
 import { ThinkingIndicator } from '@/components/thinking-indicator';
 
 import { SavedLookCard } from '../components/saved-look-card';
@@ -19,7 +21,7 @@ export function SavedLooksHistoryScreen() {
 
   if (savedLooksQuery.isLoading) {
     return (
-      <AppScaffold scroll={false}>
+      <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center">
           <ThinkingIndicator step="Loading your saved looks…" />
         </View>
@@ -29,7 +31,7 @@ export function SavedLooksHistoryScreen() {
 
   if (savedLooksQuery.isError) {
     return (
-      <AppScaffold scroll={false}>
+      <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
           <Text className="text-lg font-semibold text-ink-primary">
             Couldn&rsquo;t load your saved looks
@@ -47,11 +49,11 @@ export function SavedLooksHistoryScreen() {
 
   if (looks.length === 0) {
     return (
-      <AppScaffold scroll={false}>
+      <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
-          <Text className="text-lg font-semibold text-ink-primary">No saved looks yet</Text>
+          <Text className="font-display text-3xl text-ink-primary">No saved looks yet</Text>
           <Text className="text-center text-sm text-ink-secondary">
-            Looks you save after a try-on will show up here.
+            Try something on, then tap “Save to Looks” to keep it here.
           </Text>
         </View>
       </AppScaffold>
@@ -59,13 +61,16 @@ export function SavedLooksHistoryScreen() {
   }
 
   return (
-    <AppScaffold scroll={false}>
-      <Text className="mb-md text-2xl font-bold text-ink-primary">History</Text>
+    <AppScaffold inTabs scroll={false}>
+      <ScreenHeader eyebrow="Saved try-ons" title="Looks" />
       <FlatList
         data={looks}
         keyExtractor={(look) => look.id}
-        renderItem={({ item }) => (
-          <SavedLookCard look={item} onToggleFavourite={handleToggleFavourite} />
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item, index }) => (
+          <FadeInView index={index}>
+            <SavedLookCard look={item} onToggleFavourite={handleToggleFavourite} />
+          </FadeInView>
         )}
         refreshControl={
           <RefreshControl

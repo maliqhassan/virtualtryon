@@ -13,7 +13,7 @@ import { resolveMediaUrl } from '@/lib/media-url';
 import { useDeleteSavedLook } from '../hooks/use-delete-saved-look';
 import { useSavedLooksQuery } from '../hooks/use-saved-looks-query';
 import { useUpdateSavedLook } from '../hooks/use-update-saved-look';
-import { SAVED_LOOKS_HISTORY_HREF } from '../routes';
+import { LOOKS_HREF } from '../routes';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -49,7 +49,7 @@ export function SavedLookDetailsScreen() {
 
   if (savedLooksQuery.isLoading) {
     return (
-      <AppScaffold scroll={false}>
+      <AppScaffold back scroll={false}>
         <View className="flex-1 items-center justify-center">
           <ThinkingIndicator step="Loading this look…" />
         </View>
@@ -59,10 +59,12 @@ export function SavedLookDetailsScreen() {
 
   if (!look) {
     return (
-      <AppScaffold>
-        <Text className="text-2xl font-bold text-ink-primary">Look not found</Text>
+      <AppScaffold back>
+        <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
+          Look not found
+        </Text>
         <Text className="mt-xs text-ink-secondary">This saved look may have been deleted.</Text>
-        <Link href={SAVED_LOOKS_HISTORY_HREF} className="mt-lg text-sm font-semibold text-primary">
+        <Link href={LOOKS_HREF} className="mt-lg text-sm font-semibold text-primary">
           Back to History →
         </Link>
       </AppScaffold>
@@ -70,8 +72,8 @@ export function SavedLookDetailsScreen() {
   }
 
   return (
-    <AppScaffold>
-      <Text className="text-2xl font-bold text-ink-primary">{look.title}</Text>
+    <AppScaffold back>
+      <Text className="font-display text-[34px] leading-[38px] text-ink-primary">{look.title}</Text>
       <Text className="mt-xs text-sm text-ink-secondary">{formatDate(look.createdAt)}</Text>
 
       <View className="mt-lg gap-xs">

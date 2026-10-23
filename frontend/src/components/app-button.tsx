@@ -1,8 +1,12 @@
-import { Pressable, Text } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { Platform, Text } from 'react-native';
+
+import { PressableScale } from './pressable-scale';
 
 export type AppButtonProps = {
   label: string;
-  variant?: 'primary' | 'secondary';
+  /** primary: clay call to action · dark: ink, for the main action on a screen · secondary: outlined. */
+  variant?: 'primary' | 'dark' | 'secondary';
   /** Only meaningful on `variant="secondary"` — signals a destructive action (e.g. delete). */
   tone?: 'default' | 'destructive';
   onPress: () => void;
@@ -10,10 +14,6 @@ export type AppButtonProps = {
   accessibilityLabel?: string;
 };
 
-// Scoped to the primary/secondary variants this app currently uses.
-// The full spec (design/react-native/02-component-inventory.md) also has an
-// `accent` variant and a Reanimated press-scale animation — deferred until a
-// screen actually needs them, not built speculatively.
 export function AppButton({
   label,
   variant = 'primary',
@@ -22,38 +22,47 @@ export function AppButton({
   disabled = false,
   accessibilityLabel,
 }: AppButtonProps) {
-  const isPrimary = variant === 'primary';
-  const isDestructive = !isPrimary && tone === 'destructive';
+  const filled = variant !== 'secondary';
+  const isDestructive = !filled && tone === 'destructive';
 
   const containerClassName = [
-    'min-h-[48px] items-center justify-center rounded-xl px-xl py-md',
-    isPrimary
+    'min-h-[52px] items-center justify-center rounded-full px-xl py-md',
+    filled
       ? disabled
-        ? 'bg-neutral-300'
-        : 'bg-primary'
-      : ['border bg-transparent', isDestructive ? 'border-error' : 'border-border'].join(' '),
-    !isPrimary && disabled ? 'opacity-50' : '',
+        ? 'bg-neutral-200'
+        : variant === 'dark'
+          ? 'bg-inverse'
+          : 'bg-primary'
+      : ['border bg-surface', isDestructive ? 'border-error' : 'border-border'].join(' '),
+    !filled && disabled ? 'opacity-50' : '',
   ]
     .filter(Boolean)
     .join(' ');
 
   const labelClassName = [
     'text-base font-bold',
-    isPrimary
+    filled
       ? disabled
         ? 'text-neutral-500'
         : 'text-ink-onPrimary'
       : isDestructive
         ? 'text-error'
         : 'text-ink-primary',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  ].join(' ');
+
+  const handlePress = () => {
+    // A light tap on the main actions; skipped on web, which has no haptics.
+    if (filled && Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+    onPress();
+  };
 
   return (
-    <Pressable
-      onPress={onPress}
+    <PressableScale
+      onPress={handlePress}
       disabled={disabled}
+      pressedScale={0.98}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled }}
@@ -61,6 +70,6 @@ export function AppButton({
       className={containerClassName}
     >
       <Text className={labelClassName}>{label}</Text>
-    </Pressable>
+    </PressableScale>
   );
 }

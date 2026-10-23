@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SavedLookResponse(BaseModel):
@@ -13,7 +13,15 @@ class SavedLookResponse(BaseModel):
     clothing_image_url: str
     generated_image_url: str
     is_favourite: bool
+    inference_job_id: UUID | None
     created_at: datetime
+
+
+class SaveLookFromJobRequest(BaseModel):
+    """Save a completed try-on to Looks. `title` defaults to the garment's title."""
+
+    job_id: UUID
+    title: str | None = Field(default=None, min_length=1, max_length=200)
 
 
 class SavedLookUpdate(BaseModel):

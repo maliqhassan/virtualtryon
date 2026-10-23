@@ -1,7 +1,8 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
-from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn
+from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,10 +22,24 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
 
     DATABASE_URL: PostgresDsn
-    REDIS_URL: RedisDsn
+    # Not used by any code path yet (the worker polls Postgres; ADR 0005's
+    # Redis queue isn't built), so a default is safe and hosts like Render
+    # don't need a Redis instance just to boot.
+    REDIS_URL: RedisDsn = RedisDsn("redis://localhost:6379/0")
 
     SECRET_KEY: str
     CORS_ORIGINS: list[AnyHttpUrl] = []
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def use_async_driver(cls, value: object) -> object:
+        """Hosts such as Render hand out `postgres://` / `postgresql://` URLs;
+        the app talks to Postgres through asyncpg."""
+        if isinstance(value, str):
+            for prefix in ("postgres://", "postgresql://"):
+                if value.startswith(prefix):
+                    return "postgresql+asyncpg://" + value[len(prefix) :]
+        return value
 
     # Local cache dir for MediaPipe's downloaded .task model bundles (ADR
     # 0007). Not environment-sensitive like DB/Redis/secrets above, so a
@@ -41,6 +56,21 @@ class Settings(BaseSettings):
     # queued InferenceJobs. Same "safe to default" reasoning — a missing
     # value just means "poll every 5 seconds", not a silent prod issue.
     WORKER_POLL_INTERVAL_SECONDS: float = 5.0
+
+    # Which AIInferenceClient the worker uses (app/worker/inference_client_provider.py).
+    # "demo" returns the user's photo with the garment pinned on and a
+    # visible "DEMO" banner, so the whole app flow can be tested before a
+    # real try-on API is connected. "catvton" is the unimplemented stub and
+    # always fails honestly. A real provider (FASHN) is added here later.
+    TRYON_PROVIDER: Literal["demo", "catvton"] = "demo"
+
+    # Reject user photos where MediaPipe can't see a full body (head,
+    # shoulders, hips and ankles), before any paid try-on is spent on them.
+    FULL_BODY_CHECK_ENABLED: bool = True
+
+    # Make a plain-background cut-out of every user photo (MediaPipe
+    # segmentation). Can be turned off on very small servers to save memory.
+    BACKGROUND_REMOVAL_ENABLED: bool = True
 
 
 @lru_cache

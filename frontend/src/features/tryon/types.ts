@@ -16,6 +16,10 @@ export type TryOnJobStatus = 'queued' | 'processing' | 'completed' | 'failed';
 export type TryOnJob = {
   id: string;
   garmentId: string | null;
+  /** Set when the try-on used a store product instead of a wardrobe item. */
+  productId: string | null;
+  /** The photo this try-on was made from (not necessarily the current one). */
+  userImageUrl: string | null;
   generatedImageUrl: string | null;
   status: TryOnJobStatus;
   errorMessage: string | null;
@@ -23,7 +27,6 @@ export type TryOnJob = {
   completedAt: string | null;
 };
 
-export type CreateTryOnJobInput = {
-  userPhotoId: string;
-  garmentId: string;
-};
+/** The user photo isn't part of the request: the server uses the caller's
+ * saved "My photo" (features/my-photo). */
+export type CreateTryOnJobInput = { garmentId: string } | { productId: string };

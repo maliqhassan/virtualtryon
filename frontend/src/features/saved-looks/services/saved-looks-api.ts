@@ -16,6 +16,7 @@ type SavedLookDto = {
   clothing_image_url: string;
   generated_image_url: string;
   is_favourite: boolean;
+  inference_job_id: string | null;
   created_at: string;
 };
 
@@ -27,6 +28,7 @@ function toSavedLook(dto: SavedLookDto): SavedLook {
     clothingImageUrl: dto.clothing_image_url,
     generatedImageUrl: dto.generated_image_url,
     isFavourite: dto.is_favourite,
+    inferenceJobId: dto.inference_job_id,
     createdAt: dto.created_at,
   };
 }
@@ -48,9 +50,11 @@ export async function deleteSavedLook(id: string): Promise<void> {
   await apiClient.delete(`${BASE_PATH}/${id}`);
 }
 
-// createSavedLook() (POST, multipart, 3 file parts) deliberately isn't
-// here yet — Cycle 1 (this feature) only lists/renames/favourites/deletes
-// existing looks; nothing in it creates one. It belongs to the
-// auto-save-after-tryon retrofit (Cycle 2), once what to actually upload
-// as "generated_image" is resolved — building it now would be a function
-// with no real caller.
+/** Saves a finished try-on to Looks. The server copies the images, and
+ * saving the same try-on twice returns the same look. */
+export async function saveLookFromTryOn(jobId: string): Promise<SavedLook> {
+  const response = await apiClient.post<SavedLookDto>(`${BASE_PATH}/from-job`, {
+    job_id: jobId,
+  });
+  return toSavedLook(response.data);
+}
