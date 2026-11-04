@@ -1,12 +1,15 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { type Href, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
+import { AppIcon } from '@/components/app-icon';
 import { AppScaffold } from '@/components/app-scaffold';
 import { CameraCaptureView } from '@/components/camera-capture-view';
 import { ImagePreviewFrame } from '@/components/image-preview-frame';
-import { ImageSourcePicker } from '@/components/image-source-picker';
+import { PressableScale } from '@/components/pressable-scale';
+import { ScreenHeader } from '@/components/screen-header';
+import { themeColors } from '@/constants/theme';
 import { useImagePicker } from '@/hooks/use-image-picker';
 import { describeValidationError, validateImage } from '@/lib/images/validate-image';
 import type { ImageValidationErrorCode, PickedImage } from '@/types';
@@ -14,6 +17,47 @@ import type { ImageValidationErrorCode, PickedImage } from '@/types';
 import { CategoryPickerModal } from '../components/category-picker-modal';
 import { useCreateGarment } from '../hooks/use-create-garment';
 import { tryOnGarmentHref } from '../routes';
+
+// A plain path, not shop's SHOP_HREF: shop already depends on wardrobe.
+const SHOP_PATH = '/shop' as Href;
+
+/** One way to add a piece, as a tile in the 2×2 grid. The default is dark. */
+function OptionTile({
+  icon,
+  title,
+  caption,
+  dark = false,
+  onPress,
+}: {
+  icon: string;
+  title: string;
+  caption: string;
+  dark?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <PressableScale
+      onPress={onPress}
+      pressedScale={0.97}
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${caption}`}
+      containerStyle={{ width: '48.5%' }}
+      className={`rounded-[18px] p-lg ${dark ? 'bg-inverse' : 'border border-border bg-surface'}`}
+    >
+      <AppIcon name={icon} size={24} color={dark ? themeColors.goldSoft : themeColors.primary} />
+      <Text
+        className={`mt-[9px] font-sans-bold text-[13.5px] ${dark ? 'text-ink-onPrimary' : 'text-ink-primary'}`}
+      >
+        {title}
+      </Text>
+      <Text
+        className={`mt-xxs font-sans text-[11px] ${dark ? 'text-neutral-400' : 'text-ink-secondary'}`}
+      >
+        {caption}
+      </Text>
+    </PressableScale>
+  );
+}
 
 export function AddGarmentScreen() {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
@@ -63,7 +107,10 @@ export function AddGarmentScreen() {
 
   return (
     <AppScaffold back>
-      <Text className="font-display text-[34px] leading-[38px] text-ink-primary">Add a piece</Text>
+      <ScreenHeader
+        title="Add pieces"
+        subtitle="Photograph it, pick it from your camera roll, or bring it from a store."
+      />
 
       {fault && (
         <Text className="mt-sm font-sans text-error" accessibilityRole="alert">
@@ -74,16 +121,39 @@ export function AddGarmentScreen() {
       )}
 
       {!image ? (
-        <View className="mt-lg">
-          <ImageSourcePicker
-            onPickFromGallery={() => {
+        <View className="mt-lg flex-row flex-wrap justify-between gap-y-[10px]">
+          <OptionTile
+            icon="photo_library"
+            title="Camera roll"
+            caption="Pick a photo you have"
+            dark
+            onPress={() => {
               clearFault();
               void handlePickFromGallery();
             }}
-            onOpenCamera={() => {
+          />
+          <OptionTile
+            icon="photo_camera"
+            title="Camera"
+            caption="Snap it now"
+            onPress={() => {
               clearFault();
               setShowCamera(true);
             }}
+          />
+          <OptionTile
+            icon="link"
+            title="Store link"
+            caption="Paste in Shop"
+            onPress={() => router.navigate(SHOP_PATH)}
+          />
+          <OptionTile
+            icon="receipt_long"
+            title="Receipt"
+            caption="Coming soon"
+            onPress={() =>
+              Alert.alert('Coming soon', 'Adding pieces from a receipt arrives in an update.')
+            }
           />
         </View>
       ) : (
