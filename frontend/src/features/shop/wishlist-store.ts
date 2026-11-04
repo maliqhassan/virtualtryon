@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
-import { deleteStoredToken, getStoredToken, setStoredToken } from '@/lib/secure-token-store';
+import { appStateStorage } from '@/lib/app-storage';
+import { onIdentityChange } from '@/lib/identity-events';
 
 type WishlistState = {
   /** Saved product ids, newest first. */
@@ -26,12 +27,11 @@ export const useWishlist = create<WishlistState>()(
     }),
     {
       name: 'wishlist',
-      storage: createJSONStorage(() => ({
-        getItem: getStoredToken,
-        setItem: setStoredToken,
-        removeItem: deleteStoredToken,
-      })),
+      storage: appStateStorage,
       partialize: ({ productIds }) => ({ productIds }),
     },
   ),
 );
+
+// Another person's data must not carry over after signing in or out.
+onIdentityChange(() => useWishlist.setState(useWishlist.getInitialState(), true));

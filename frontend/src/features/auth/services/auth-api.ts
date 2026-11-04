@@ -34,6 +34,7 @@ export class EmailAuthError extends Error {
 export async function continueWithEmail(
   email: string,
   password: string,
+  isRetry = false,
 ): Promise<{ account: Account; created: boolean }> {
   try {
     const response = await apiClient.post<{
@@ -46,7 +47,12 @@ export async function continueWithEmail(
   } catch (error) {
     if (isAxiosError(error) && error.response) {
       const status = error.response.status;
-      if (status === 401) throw new EmailAuthError('wrong_password');
+      const code = (error.response.data as { detail?: { code?: string } } | undefined)?.detail
+        ?.code;
+      // An old token on this phone expired; the session interceptor has
+      // dropped it, so the same request now goes through. Once.
+      if (code === 'session_expired' && !isRetry) return continueWithEmail(email, password, true);
+      if (code === 'wrong_password') throw new EmailAuthError('wrong_password');
       if (status === 429) throw new EmailAuthError('too_many_attempts');
       if (status === 422) throw new EmailAuthError('invalid');
     }

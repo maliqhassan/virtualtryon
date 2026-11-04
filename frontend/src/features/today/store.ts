@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
-import { deleteStoredToken, getStoredToken, setStoredToken } from '@/lib/secure-token-store';
+import { appStateStorage } from '@/lib/app-storage';
+import { onIdentityChange } from '@/lib/identity-events';
 
 type TodayState = {
   /** Which day `shuffles` and `wearing` belong to (see dayNumber). */
@@ -39,12 +40,11 @@ export const useTodayStore = create<TodayState>()(
     }),
     {
       name: 'today_state',
-      storage: createJSONStorage(() => ({
-        getItem: getStoredToken,
-        setItem: setStoredToken,
-        removeItem: deleteStoredToken,
-      })),
+      storage: appStateStorage,
       partialize: ({ day, shuffles, wearing }) => ({ day, shuffles, wearing }),
     },
   ),
 );
+
+// Another person's data must not carry over after signing in or out.
+onIdentityChange(() => useTodayStore.setState(useTodayStore.getInitialState(), true));

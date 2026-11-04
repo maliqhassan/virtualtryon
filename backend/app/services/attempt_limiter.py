@@ -46,5 +46,15 @@ class SlidingWindowLimiter:
         hits.append(now)
         return True
 
+    def is_exhausted(self, key: str) -> bool:
+        """True when `key` has used up its limit; records nothing. For limits
+        that count only some outcomes (e.g. wrong passwords): check this
+        first, then `try_acquire` when the outcome should count."""
+        hits = self._hits.get(key)
+        if not hits:
+            return False
+        self._drop_expired(hits, self._clock())
+        return len(hits) >= self.limit
+
     def reset(self) -> None:
         self._hits.clear()

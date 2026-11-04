@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
-import { deleteStoredToken, getStoredToken, setStoredToken } from '@/lib/secure-token-store';
+import { appStateStorage } from '@/lib/app-storage';
+import { onIdentityChange } from '@/lib/identity-events';
 
 /** Onboarding goals (step 1). The order of `GOALS` is the order shown. */
 export const GOALS = [
@@ -46,12 +47,13 @@ export const useOnboardingPreferences = create<OnboardingPreferences>()(
     }),
     {
       name: 'onboarding_preferences',
-      storage: createJSONStorage(() => ({
-        getItem: getStoredToken,
-        setItem: setStoredToken,
-        removeItem: deleteStoredToken,
-      })),
+      storage: appStateStorage,
       partialize: ({ goals, styleFor, styles }) => ({ goals, styleFor, styles }),
     },
   ),
+);
+
+// Another person's data must not carry over after signing in or out.
+onIdentityChange(() =>
+  useOnboardingPreferences.setState(useOnboardingPreferences.getInitialState(), true),
 );

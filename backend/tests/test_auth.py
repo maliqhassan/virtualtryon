@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from PIL import Image
 
 from app.core.security import create_session_token
-from app.services.auth import ATTEMPTS_PER_EMAIL, reset_attempt_limits
+from app.services.auth import FAILURES_PER_EMAIL, reset_attempt_limits
 
 PASSWORD = "correct horse battery"
 
@@ -129,7 +129,7 @@ async def test_bad_input_is_rejected(client: AsyncClient, email: str, password: 
     assert response.status_code == 422
 
 
-async def test_repeated_guesses_are_limited_per_email(client: AsyncClient) -> None:
+async def test_repeated_wrong_passwords_lock_the_email(client: AsyncClient) -> None:
     email = _email()
     await client.post(
         "/api/v1/auth/email",
@@ -137,7 +137,7 @@ async def test_repeated_guesses_are_limited_per_email(client: AsyncClient) -> No
         headers=await _new_guest(client),
     )
     statuses = []
-    for _ in range(ATTEMPTS_PER_EMAIL):
+    for _ in range(FAILURES_PER_EMAIL + 1):
         response = await client.post(
             "/api/v1/auth/email",
             json={"email": email, "password": "wrong password"},
@@ -163,4 +163,23 @@ async def test_invalid_session_is_refused_not_downgraded(client: AsyncClient, he
 
     assert response.status_code == 401
     assert response.json()["detail"]["code"] == "session_expired"
+    assert "x-device-id" not in response.headers
+
+
+async def test_correct_sign_ins_never_lock_the_email(client: AsyncClient) -> None:
+    email = _email()
+    for _ in range(FAILURES_PER_EMAIL + 2):
+        response = await client.post(
+            "/api/v1/auth/email", json={"email": email, "password": PASSWORD}
+        )
+        assert response.status_code == 200
+
+
+async def test_signing_in_without_a_guest_creates_no_guest(client: AsyncClient) -> None:
+    response = await client.post(
+        "/api/v1/auth/email", json={"email": _email(), "password": PASSWORD}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["created"] is True
     assert "x-device-id" not in response.headers

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
-import { deleteStoredToken, getStoredToken, setStoredToken } from '@/lib/secure-token-store';
+import { appStateStorage } from '@/lib/app-storage';
+import { onIdentityChange } from '@/lib/identity-events';
 
 type LaundryState = {
   /** Garment ids in the wash; they're left out of outfit suggestions. */
@@ -25,12 +26,11 @@ export const useLaundry = create<LaundryState>()(
     }),
     {
       name: 'laundry',
-      storage: createJSONStorage(() => ({
-        getItem: getStoredToken,
-        setItem: setStoredToken,
-        removeItem: deleteStoredToken,
-      })),
+      storage: appStateStorage,
       partialize: ({ garmentIds }) => ({ garmentIds }),
     },
   ),
 );
+
+// Another person's data must not carry over after signing in or out.
+onIdentityChange(() => useLaundry.setState(useLaundry.getInitialState(), true));

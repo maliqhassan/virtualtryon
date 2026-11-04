@@ -1,9 +1,9 @@
 """HTTP layer for sign-in. Logic in app/services/auth.py (ADR 0010)."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_existing_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import AccountResponse, EmailAuthRequest, EmailAuthResponse
@@ -19,11 +19,16 @@ def _account(user: User) -> AccountResponse:
 @router.post("/email", response_model=EmailAuthResponse)
 async def email_sign_in(
     payload: EmailAuthRequest,
-    current_user: User = Depends(get_current_user),
+    request: Request,
+    current_user: User | None = Depends(get_existing_user),
     db: AsyncSession = Depends(get_db),
 ) -> EmailAuthResponse:
+    # The client address as Render's proxy reports it (uvicorn --proxy-headers).
+    caller_address = request.client.host if request.client else "unknown"
     try:
-        result = await continue_with_email(db, current_user, payload.email, payload.password)
+        result = await continue_with_email(
+            db, current_user, payload.email, payload.password, caller_address=caller_address
+        )
     except WrongPasswordError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

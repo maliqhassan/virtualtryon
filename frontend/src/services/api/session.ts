@@ -33,15 +33,16 @@ export function attachSession(client: AxiosInstance): void {
   });
 
   client.interceptors.response.use(undefined, async (error: unknown) => {
-    // An expired or revoked session: forget it, so the next request goes
-    // through as a guest instead of failing forever.
+    // An expired or revoked session: forget the token, so the next request
+    // goes through as a guest instead of failing forever. Only the token:
+    // the device id may already be a fresh guest's, issued by a parallel request.
     if (
       isAxiosError(error) &&
       error.response?.status === 401 &&
       (error.response.data as { detail?: { code?: string } } | undefined)?.detail?.code ===
         'session_expired'
     ) {
-      await clearSession();
+      await deleteStoredToken(SESSION_TOKEN_KEY);
     }
     return Promise.reject(error);
   });

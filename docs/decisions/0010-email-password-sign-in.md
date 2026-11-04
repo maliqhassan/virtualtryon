@@ -29,8 +29,12 @@ Email and password accounts live in our own database, not Firebase:
   it as `Authorization: Bearer`. `get_current_user` accepts either a token
   or a guest device id; an invalid token is refused with
   `session_expired`, never silently treated as a new guest.
-- Attempts are limited per email address and per caller (in memory, like
-  the link-import limits), counted before any password work.
+- Attempts are limited per network address and overall (every attempt
+  costs an argon2 hash), and wrong passwords per email (only failures
+  count, so correct sign-ins never lock an account). All in memory, like
+  the link-import limits, and checked before any password work. Sign-in
+  never creates a guest row of its own: a caller with no guest gets a new
+  account row directly.
 - Production refuses to start with a `SECRET_KEY` shorter than 32
   characters.
 
@@ -53,4 +57,8 @@ Firebase later, which proves identity and then maps onto these same rows.
   version on the user) comes with "sign out everywhere" or account
   deletion.
 - Signing in to an existing account from a guest leaves that guest's data
-  on the guest row. Merging two accounts' data is out of scope for now.
+  on the guest row, and once the phone signs out it can't be reached. A
+  merge (or a cleanup job for unreachable guest rows) is a follow-up.
+- Ten wrong passwords lock an email for 15 minutes, so someone guessing
+  from many addresses can keep a real user locked out; the fix, when it
+  matters, is an emailed unlock code, which needs email sending.

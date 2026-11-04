@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
-import { deleteStoredToken, getStoredToken, setStoredToken } from '@/lib/secure-token-store';
+import { appStateStorage } from '@/lib/app-storage';
+import { onIdentityChange } from '@/lib/identity-events';
 
 type CalendarState = {
   /** Planned outfits: garment ids by day number (see today's dayNumber). */
@@ -25,12 +26,11 @@ export const useCalendar = create<CalendarState>()(
     }),
     {
       name: 'calendar_plans',
-      storage: createJSONStorage(() => ({
-        getItem: getStoredToken,
-        setItem: setStoredToken,
-        removeItem: deleteStoredToken,
-      })),
+      storage: appStateStorage,
       partialize: ({ plans }) => ({ plans }),
     },
   ),
 );
+
+// Another person's data must not carry over after signing in or out.
+onIdentityChange(() => useCalendar.setState(useCalendar.getInitialState(), true));
