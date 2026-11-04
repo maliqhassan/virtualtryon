@@ -4,5 +4,11 @@ export { useCreateGarment } from './hooks/use-create-garment';
 export { useGarmentsQuery } from './hooks/use-garments-query';
 export { useImportFromLink } from './hooks/use-import-from-link';
 export { LinkImportError } from './services/garments-api';
-export { ADD_GARMENT_HREF, WARDROBE_HREF, addGarmentHref, garmentDetailsHref } from './routes';
+export {
+  ADD_GARMENT_HREF,
+  WARDROBE_HREF,
+  addGarmentHref,
+  garmentDetailsHref,
+  tryOnGarmentHref,
+} from './routes';
 export type { Garment } from './types';
