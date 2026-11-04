@@ -1,5 +1,5 @@
 import { AccountScreen } from '@/features/account/screens/account-screen';
 
-export default function AccountTab() {
+export default function YouTab() {
   return <AccountScreen />;
 }

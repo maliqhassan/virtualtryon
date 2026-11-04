@@ -14,7 +14,7 @@ export function addGarmentHref(options: { returnToTryOn?: boolean } = {}): Href 
 }
 /** Back to the Try On tab with this piece selected and ready to try on. */
 export function tryOnGarmentHref(garmentId: string): Href {
-  return { pathname: '/', params: { selected: garmentId, at: String(Date.now()) } } as Href;
+  return { pathname: '/tryon', params: { selected: garmentId, at: String(Date.now()) } } as Href;
 }
 export function garmentDetailsHref(garmentId: string): Href {
   return { pathname: '/garment/[garmentId]', params: { garmentId } } as Href;

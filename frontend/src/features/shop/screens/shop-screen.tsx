@@ -16,7 +16,6 @@ import { AppScaffold } from '@/components/app-scaffold';
 import { FadeInView } from '@/components/fade-in-view';
 import { ScreenHeader } from '@/components/screen-header';
 import { Skeleton } from '@/components/skeleton';
-import { ShopIcon } from '@/components/tab-icons';
 import { themeColors } from '@/constants/theme';
 import { useGarmentsQuery } from '@/features/wardrobe';
 
@@ -135,7 +134,7 @@ export function ShopScreen() {
       </Text>
 
       <View className="mb-lg flex-row items-center rounded-full border border-border bg-surface px-lg">
-        <ShopIcon color={themeColors.neutral500} size={18} />
+        <AppIcon name="search" size="sm" color={themeColors.neutral400} />
         <TextInput
           value={searchText}
           onChangeText={setSearchText}

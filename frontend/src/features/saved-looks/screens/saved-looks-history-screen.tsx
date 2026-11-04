@@ -21,7 +21,7 @@ export function SavedLooksHistoryScreen() {
 
   if (savedLooksQuery.isLoading) {
     return (
-      <AppScaffold inTabs scroll={false}>
+      <AppScaffold back scroll={false}>
         <View className="flex-1 items-center justify-center">
           <ThinkingIndicator step="Loading your saved looks…" />
         </View>
@@ -31,7 +31,7 @@ export function SavedLooksHistoryScreen() {
 
   if (savedLooksQuery.isError) {
     return (
-      <AppScaffold inTabs scroll={false}>
+      <AppScaffold back scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
           <Text className="font-sans-semibold text-lg text-ink-primary">
             Couldn&rsquo;t load your saved looks
@@ -49,7 +49,7 @@ export function SavedLooksHistoryScreen() {
 
   if (looks.length === 0) {
     return (
-      <AppScaffold inTabs scroll={false}>
+      <AppScaffold back scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
           <Text className="font-display text-3xl text-ink-primary">No saved looks yet</Text>
           <Text className="text-center font-sans text-sm text-ink-secondary">
@@ -61,7 +61,7 @@ export function SavedLooksHistoryScreen() {
   }
 
   return (
-    <AppScaffold inTabs scroll={false}>
+    <AppScaffold back scroll={false}>
       <ScreenHeader eyebrow="Saved try-ons" title="Looks" />
       <FlatList
         data={looks}

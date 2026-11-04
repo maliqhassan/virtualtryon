@@ -10,7 +10,6 @@ import { FadeInView } from '@/components/fade-in-view';
 import { PressableScale } from '@/components/pressable-scale';
 import { ScreenHeader } from '@/components/screen-header';
 import { Skeleton } from '@/components/skeleton';
-import { ShopIcon } from '@/components/tab-icons';
 import { themeColors } from '@/constants/theme';
 import { MY_PHOTO_HREF, displayUrl, useMyPhotosQuery } from '@/features/my-photo';
 import { SHOP_HREF } from '@/features/shop';
@@ -141,7 +140,7 @@ export function TryOnHomeScreen() {
               className="flex-row items-center gap-md rounded-xxl border border-border bg-surface p-md"
             >
               <View className="h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <ShopIcon color="#B4713F" size={20} />
+                <AppIcon name="shopping_bag" size="md" color={themeColors.primary} />
               </View>
               <View className="flex-1">
                 <Text className="font-sans-bold text-sm text-ink-primary">Browse stores</Text>

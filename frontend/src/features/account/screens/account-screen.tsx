@@ -4,10 +4,13 @@ import type { ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
+import { AppIcon } from '@/components/app-icon';
 import { AppImage } from '@/components/app-image';
 import { AppScaffold } from '@/components/app-scaffold';
 import { ScreenHeader } from '@/components/screen-header';
+import { themeColors } from '@/constants/theme';
 import { MY_PHOTO_HREF, displayUrl, useMyPhotoQuery } from '@/features/my-photo';
+import { LOOKS_HREF } from '@/features/saved-looks';
 import { UPGRADE_HREF, describeUsage, useUsageQuery } from '@/features/usage';
 import { confirmDestructiveAction } from '@/lib/confirm';
 import { resolveMediaUrl } from '@/lib/media-url';
@@ -51,7 +54,20 @@ export function AccountScreen() {
 
   return (
     <AppScaffold inTabs>
-      <ScreenHeader eyebrow="Your account" title="Account" />
+      <ScreenHeader eyebrow="Your account" title="You" />
+
+      <Section title="Saved looks">
+        <Pressable
+          onPress={() => router.push(LOOKS_HREF)}
+          accessibilityRole="button"
+          accessibilityLabel="Open your saved looks"
+          className="flex-row items-center gap-md"
+        >
+          <AppIcon name="bookmark" size="md" color={themeColors.primary} />
+          <Text className="flex-1 font-sans text-base text-ink-primary">Your saved try-ons</Text>
+          <AppIcon name="chevron_right" size="md" color={themeColors.neutral400} />
+        </Pressable>
+      </Section>
 
       <Section title="My photo">
         <Pressable

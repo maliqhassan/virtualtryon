@@ -1,5 +1,5 @@
-import { TryOnHomeScreen } from '@/features/tryon/screens/tryon-home-screen';
+import { TodayScreen } from '@/features/today/screens/today-screen';
 
-export default function TryOnTab() {
-  return <TryOnHomeScreen />;
+export default function TodayTab() {
+  return <TodayScreen />;
 }
