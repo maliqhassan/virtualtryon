@@ -60,6 +60,7 @@ export default function RootLayout() {
             options={{ gestureEnabled: false, animation: 'fade' }}
           />
           <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
+          <Stack.Screen name="chat" options={{ presentation: 'modal' }} />
           <Stack.Screen
             name="upgrade"
             options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
