@@ -1,8 +1,10 @@
 // Public API of the wardrobe feature, for other features to import.
 export { GarmentCard } from './components/garment-card';
+export { GarmentThumb } from './components/garment-thumb';
 export { useCreateGarment } from './hooks/use-create-garment';
 export { useGarmentsQuery } from './hooks/use-garments-query';
 export { useImportFromLink } from './hooks/use-import-from-link';
+export { useLaundry } from './laundry-store';
 export { LinkImportError } from './services/garments-api';
 export {
   ADD_GARMENT_HREF,

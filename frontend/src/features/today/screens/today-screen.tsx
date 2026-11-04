@@ -8,7 +8,7 @@ import { LIGHT_STRIPES, StripeFill } from '@/components/stripe-fill';
 import { themeColors } from '@/constants/theme';
 import { useAccountQuery } from '@/features/auth';
 import { useOnboardingPreferences } from '@/features/onboarding';
-import { LAUNDRY_HREF, useGarmentsQuery } from '@/features/wardrobe';
+import { LAUNDRY_HREF, useGarmentsQuery, useLaundry } from '@/features/wardrobe';
 import { selectionFeedback } from '@/lib/haptics';
 
 import { OutfitHero } from '../components/outfit-hero';
@@ -43,7 +43,9 @@ export function TodayScreen() {
   const { day, shuffles, wearing, shuffle, setWearing } = useTodayStore();
 
   // No useMemo: the React Compiler memoizes these.
-  const garments = garmentsQuery.data ?? [];
+  const inWash = useLaundry((state) => state.garmentIds);
+  // Pieces in the wash are left out of the outfit.
+  const garments = (garmentsQuery.data ?? []).filter((g) => !inWash.includes(g.id));
   const seed = today + (day === today ? shuffles : 0);
   const worn = day === today ? garments.filter((g) => wearing.includes(g.id)) : [];
   const outfit = worn.length ? worn : pickOutfit(garments, seed);
@@ -137,7 +139,11 @@ export function TodayScreen() {
       >
         <AppIcon name="local_laundry_service" size={21} color="#9A7418" />
         <View className="flex-1">
-          <Text className="font-sans-bold text-[13px] text-ink-primary">Laundry basket</Text>
+          <Text className="font-sans-bold text-[13px] text-ink-primary">
+            {inWash.length
+              ? `${inWash.length} ${inWash.length === 1 ? 'piece' : 'pieces'} in the laundry`
+              : 'Laundry basket'}
+          </Text>
           <Text className="mt-xxs font-sans text-[11.5px] text-ink-secondary">
             Pieces in the wash are left out of suggestions
           </Text>
