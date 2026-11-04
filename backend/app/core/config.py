@@ -84,6 +84,13 @@ class Settings(BaseSettings):
             raise ValueError("TRYON_LIMITS_ENABLED=false is only allowed with TRYON_PROVIDER=demo")
         return self
 
+    @model_validator(mode="after")
+    def strong_secret_in_production(self) -> "Settings":
+        """SECRET_KEY signs session tokens (ADR 0010); a short one can be guessed."""
+        if self.APP_ENV == "production" and len(self.SECRET_KEY) < 32:
+            raise ValueError("SECRET_KEY must be at least 32 characters in production")
+        return self
+
 
 @lru_cache
 def get_settings() -> Settings:

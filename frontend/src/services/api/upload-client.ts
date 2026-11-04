@@ -3,6 +3,7 @@ import axios from 'axios';
 import { resolveApiBaseUrl } from '@/constants/api-host';
 
 import { attachDeviceIdentity } from './device-identity';
+import { attachSession } from './session';
 
 /**
  * Separate from `apiClient` on purpose: that instance defaults to
@@ -18,3 +19,4 @@ export const uploadClient = axios.create({
 });
 
 attachDeviceIdentity(uploadClient);
+attachSession(uploadClient);

@@ -19,6 +19,18 @@ class UserRepository:
         result = await self._db.execute(select(User).where(User.device_id == device_id))
         return result.scalar_one_or_none()
 
+    async def get_by_id(self, user_id: UUID) -> User | None:
+        return await self._db.get(User, user_id)
+
+    async def get_by_email(self, email: str) -> User | None:
+        result = await self._db.execute(select(User).where(User.email == email))
+        return result.scalar_one_or_none()
+
+    def stage_new_email_user(self, email: str, password_hash: str) -> User:
+        user = User(auth_provider=AuthProvider.EMAIL, email=email, password_hash=password_hash)
+        self._db.add(user)
+        return user
+
     async def create_guest(self, device_id: str) -> User:
         user = User(auth_provider=AuthProvider.GUEST, device_id=device_id)
         self._db.add(user)

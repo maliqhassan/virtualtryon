@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     account,
     ai,
+    auth,
     catalog,
     garments,
     inference_jobs,
@@ -21,4 +22,5 @@ api_router.include_router(inference_jobs.router, prefix="/inference-jobs", tags=
 api_router.include_router(user_photos.router, prefix="/user-photos", tags=["user-photos"])
 api_router.include_router(usage.router, prefix="/usage", tags=["usage"])
 api_router.include_router(account.router, prefix="/account", tags=["account"])
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(catalog.router, tags=["catalog"])

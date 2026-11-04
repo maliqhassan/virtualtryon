@@ -10,7 +10,7 @@ import { getStoredToken, setStoredToken } from '@/lib/secure-token-store';
  * credential — never logged, never rendered in any screen.
  */
 const DEVICE_ID_HEADER = 'X-Device-Id';
-const DEVICE_ID_STORAGE_KEY = 'device_id';
+export const DEVICE_ID_STORAGE_KEY = 'device_id';
 
 /**
  * Attaches the stored device id to every outgoing request (if one exists

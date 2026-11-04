@@ -19,6 +19,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
+EMAIL_MAX_LENGTH = 254  # RFC 5321's limit on a usable address
+
 
 class AuthProvider(enum.StrEnum):
     GUEST = "guest"
@@ -48,6 +50,13 @@ class User(Base):
     device_id: Mapped[str | None] = mapped_column(
         String(64), unique=True, index=True, nullable=True
     )
+    # Set when a guest claims an account with email + password (ADR 0010).
+    # Stored lower-cased, so the unique index is case-insensitive in effect.
+    email: Mapped[str | None] = mapped_column(
+        String(EMAIL_MAX_LENGTH), unique=True, index=True, nullable=True
+    )
+    # argon2id hash; None for guests (and, later, Google/Apple-only accounts).
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     # server_default is the enum *name*: SQLAlchemy's Enum stores member
     # names, matching how auth_provider is already stored.
     plan: Mapped[Plan] = mapped_column(
