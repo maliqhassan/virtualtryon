@@ -25,14 +25,14 @@ export function ProductCard({ product, onPress }: { product: Product; onPress: (
       <View className="p-md">
         <Text
           numberOfLines={1}
-          className="text-[11px] font-bold uppercase tracking-wider text-ink-secondary"
+          className="font-mono text-[10px] uppercase tracking-[1.2px] text-ink-secondary"
         >
           {product.storeName}
         </Text>
-        <Text numberOfLines={1} className="mt-xxs text-sm font-semibold text-ink-primary">
+        <Text numberOfLines={1} className="mt-xxs font-sans-semibold text-sm text-ink-primary">
           {product.title}
         </Text>
-        <Text className="mt-xs text-sm font-bold text-primary">
+        <Text className="mt-xs font-sans-bold text-sm text-primary">
           {formatPrice(product.priceCents, product.currency)}
         </Text>
       </View>

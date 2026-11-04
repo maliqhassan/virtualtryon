@@ -66,7 +66,7 @@ export function ProductScreen() {
     return (
       <AppScaffold back>
         <Text className="font-display text-3xl text-ink-primary">Product not found</Text>
-        <Text className="mt-xs text-ink-secondary">It may no longer be available.</Text>
+        <Text className="mt-xs font-sans text-ink-secondary">It may no longer be available.</Text>
       </AppScaffold>
     );
   }
@@ -92,27 +92,32 @@ export function ProductScreen() {
       </FadeInView>
 
       <FadeInView index={1} className="mt-lg">
-        <Text className="text-xs font-bold uppercase tracking-widest text-primary">
+        <Text className="font-mono text-[10px] uppercase tracking-[1.6px] text-primary">
           {product.storeName}
         </Text>
         <Text className="mt-xs font-display text-[34px] leading-[38px] text-ink-primary">
           {product.title}
         </Text>
         <View className="mt-sm flex-row items-center justify-between">
-          <Text className="text-xl font-bold text-ink-primary">
+          <Text className="font-sans-bold text-xl text-ink-primary">
             {formatPrice(product.priceCents, product.currency)}
           </Text>
-          <Text className="text-sm text-ink-secondary">{product.category}</Text>
+          <Text className="font-sans text-sm text-ink-secondary">{product.category}</Text>
         </View>
       </FadeInView>
 
       <FadeInView index={2} className="mt-xl gap-md">
         {usage && <UsagePill usage={usage} />}
         {outOfTryOns ? (
-          <AppButton label="Get more try-ons" onPress={() => router.push(UPGRADE_HREF)} />
+          <AppButton
+            label="Get more try-ons"
+            variant="accent"
+            onPress={() => router.push(UPGRADE_HREF)}
+          />
         ) : (
           <AppButton
-            variant="dark"
+            variant="accent"
+            icon="auto_awesome"
             label={
               startTryOn.isPending
                 ? 'Starting…'
@@ -125,7 +130,7 @@ export function ProductScreen() {
           />
         )}
         {startError && (
-          <Text className="text-center text-sm text-error" accessibilityRole="alert">
+          <Text className="text-center font-sans text-sm text-error" accessibilityRole="alert">
             {startError}
           </Text>
         )}
@@ -136,7 +141,7 @@ export function ProductScreen() {
             onPress={() => openExternalLink(product.productUrl as string)}
           />
         ) : (
-          <Text className="text-center text-xs text-ink-secondary">
+          <Text className="text-center font-sans text-xs text-ink-secondary">
             This is a sample store, so buying isn’t available yet.
           </Text>
         )}

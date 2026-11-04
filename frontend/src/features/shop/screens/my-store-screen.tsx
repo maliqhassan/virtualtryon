@@ -42,7 +42,9 @@ export function MyStoreScreen() {
     return (
       <AppScaffold back>
         <Text className="font-display text-3xl text-ink-primary">No pieces from this store</Text>
-        <Text className="mt-xs text-ink-secondary">Paste a product link in Shop to add one.</Text>
+        <Text className="mt-xs font-sans text-ink-secondary">
+          Paste a product link in Shop to add one.
+        </Text>
         <View className="mt-lg">
           <AppButton label="Go to Shop" onPress={() => router.dismissTo(SHOP_HREF)} />
         </View>

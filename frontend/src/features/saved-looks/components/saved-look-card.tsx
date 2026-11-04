@@ -69,10 +69,12 @@ export function SavedLookCard({ look, onToggleFavourite }: SavedLookCardProps) {
           </View>
 
           <View className="flex-1">
-            <Text className="text-sm font-semibold text-ink-primary" numberOfLines={1}>
+            <Text className="font-sans-semibold text-sm text-ink-primary" numberOfLines={1}>
               {look.title}
             </Text>
-            <Text className="text-xs text-ink-secondary">{formatDate(look.createdAt)}</Text>
+            <Text className="font-sans text-xs text-ink-secondary">
+              {formatDate(look.createdAt)}
+            </Text>
           </View>
         </Pressable>
 
@@ -83,7 +85,7 @@ export function SavedLookCard({ look, onToggleFavourite }: SavedLookCardProps) {
           accessibilityLabel={look.isFavourite ? 'Remove from favourites' : 'Add to favourites'}
           accessibilityState={{ selected: look.isFavourite }}
         >
-          <Text className="text-xl">{look.isFavourite ? '★' : '☆'}</Text>
+          <Text className="font-sans text-xl">{look.isFavourite ? '★' : '☆'}</Text>
         </Pressable>
       </View>
     </View>

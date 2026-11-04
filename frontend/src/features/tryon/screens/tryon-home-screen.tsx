@@ -28,9 +28,9 @@ function SectionLabel({ step, title }: { step: string; title: string }) {
   return (
     <View className="mb-sm flex-row items-center gap-sm">
       <View className="h-6 w-6 items-center justify-center rounded-full bg-inverse">
-        <Text className="text-[11px] font-bold text-white">{step}</Text>
+        <Text className="font-sans-bold text-[11px] text-white">{step}</Text>
       </View>
-      <Text className="text-sm font-bold text-ink-primary">{title}</Text>
+      <Text className="font-sans-bold text-sm text-ink-primary">{title}</Text>
     </View>
   );
 }
@@ -81,7 +81,7 @@ export function TryOnHomeScreen() {
       <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
           <Text className="font-display text-3xl text-ink-primary">Couldn’t connect</Text>
-          <Text className="text-center text-sm text-ink-secondary">
+          <Text className="text-center font-sans text-sm text-ink-secondary">
             Check your connection and try again.
           </Text>
           <AppButton
@@ -144,8 +144,8 @@ export function TryOnHomeScreen() {
                 <ShopIcon color="#B4713F" size={20} />
               </View>
               <View className="flex-1">
-                <Text className="text-sm font-bold text-ink-primary">Browse stores</Text>
-                <Text className="text-xs text-ink-secondary">
+                <Text className="font-sans-bold text-sm text-ink-primary">Browse stores</Text>
+                <Text className="font-sans text-xs text-ink-secondary">
                   Try on clothes before you buy them
                 </Text>
               </View>
@@ -178,7 +178,7 @@ export function TryOnHomeScreen() {
                       placeholderText={slot.label}
                       fit={slot.fit}
                     />
-                    <Text numberOfLines={1} className="mt-xs text-xs text-neutral-300">
+                    <Text numberOfLines={1} className="mt-xs font-sans text-xs text-neutral-300">
                       {slot.label}
                     </Text>
                   </View>
@@ -186,9 +186,15 @@ export function TryOnHomeScreen() {
               </View>
               <View className="mt-lg">
                 {outOfTryOns ? (
-                  <AppButton label="Get more try-ons" onPress={() => router.push(UPGRADE_HREF)} />
+                  <AppButton
+                    label="Get more try-ons"
+                    variant="accent"
+                    onPress={() => router.push(UPGRADE_HREF)}
+                  />
                 ) : (
                   <AppButton
+                    variant="accent"
+                    icon="auto_awesome"
                     label={startTryOn.isPending ? 'Starting…' : 'Try it on'}
                     onPress={handleTryOn}
                     disabled={!ready || startTryOn.isPending}
@@ -196,12 +202,15 @@ export function TryOnHomeScreen() {
                 )}
               </View>
               {!outOfTryOns && !ready && (
-                <Text className="mt-sm text-center text-xs text-neutral-300">
+                <Text className="mt-sm text-center font-sans text-xs text-neutral-300">
                   {!photo ? 'Add your photo first.' : 'Pick a piece above.'}
                 </Text>
               )}
               {showStartError && (
-                <Text className="mt-sm text-center text-sm text-error" accessibilityRole="alert">
+                <Text
+                  className="mt-sm text-center font-sans text-sm text-error"
+                  accessibilityRole="alert"
+                >
                   {startTryOn.error?.message}
                 </Text>
               )}

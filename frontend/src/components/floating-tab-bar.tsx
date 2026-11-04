@@ -91,8 +91,8 @@ function TabItem({
         numberOfLines={1}
         className={
           focused
-            ? 'mt-xxs text-[11px] font-bold text-primary'
-            : 'mt-xxs text-[11px] font-semibold text-neutral-500'
+            ? 'mt-xxs font-sans-bold text-[11px] text-primary'
+            : 'mt-xxs font-sans-semibold text-[11px] text-neutral-500'
         }
         style={{ lineHeight: 14 }}
       >
@@ -133,8 +133,8 @@ function CenterItem({
         numberOfLines={1}
         className={
           focused
-            ? 'mt-xxs text-[11px] font-bold text-primary'
-            : 'mt-xxs text-[11px] font-semibold text-neutral-500'
+            ? 'mt-xxs font-sans-bold text-[11px] text-primary'
+            : 'mt-xxs font-sans-semibold text-[11px] text-neutral-500'
         }
         style={{ lineHeight: 14 }}
       >

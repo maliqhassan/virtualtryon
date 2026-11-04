@@ -51,7 +51,9 @@ function CategoryChip({
     >
       <Text
         className={
-          selected ? 'text-sm font-semibold text-white' : 'text-sm font-semibold text-ink-primary'
+          selected
+            ? 'font-sans-semibold text-sm text-white'
+            : 'font-sans-semibold text-sm text-ink-primary'
         }
       >
         {label}
@@ -106,7 +108,7 @@ export function ShopScreen() {
 
       {myStores.length > 0 && (
         <View className="mb-xl">
-          <Text className="mb-sm text-xs font-bold uppercase tracking-widest text-ink-secondary">
+          <Text className="mb-sm font-mono text-[10px] uppercase tracking-[1.6px] text-ink-secondary">
             Your stores
           </Text>
           <ScrollView
@@ -128,7 +130,7 @@ export function ShopScreen() {
         </View>
       )}
 
-      <Text className="mb-sm text-xs font-bold uppercase tracking-widest text-ink-secondary">
+      <Text className="mb-sm font-mono text-[10px] uppercase tracking-[1.6px] text-ink-secondary">
         Sample stores
       </Text>
 
@@ -214,7 +216,7 @@ export function ShopScreen() {
       <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
           <Text className="font-display text-3xl text-ink-primary">Couldn’t load stores</Text>
-          <Text className="text-center text-sm text-ink-secondary">
+          <Text className="text-center font-sans text-sm text-ink-secondary">
             Check your connection and try again.
           </Text>
           <AppButton
@@ -260,7 +262,7 @@ export function ShopScreen() {
               </View>
             </View>
           ) : (
-            <Text className="mt-xl text-center text-sm text-ink-secondary">
+            <Text className="mt-xl text-center font-sans text-sm text-ink-secondary">
               {search ? `Nothing matches “${search}”.` : 'No stores are connected yet.'}
             </Text>
           )

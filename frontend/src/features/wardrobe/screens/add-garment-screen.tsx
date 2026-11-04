@@ -66,7 +66,7 @@ export function AddGarmentScreen() {
       <Text className="font-display text-[34px] leading-[38px] text-ink-primary">Add a piece</Text>
 
       {fault && (
-        <Text className="mt-sm text-error" accessibilityRole="alert">
+        <Text className="mt-sm font-sans text-error" accessibilityRole="alert">
           {fault === 'permission_denied'
             ? 'Photo library access is needed to choose a photo.'
             : 'Something went wrong picking that photo — try again.'}
@@ -97,24 +97,26 @@ export function AddGarmentScreen() {
           />
 
           <View className="gap-xs">
-            <Text className="text-sm font-semibold text-ink-secondary">Title</Text>
+            <Text className="font-sans-semibold text-sm text-ink-secondary">Title</Text>
             <TextInput
               value={title}
               onChangeText={setTitle}
               placeholder="e.g. Blue Denim Jacket"
               maxLength={200}
-              className="rounded-md border border-border px-md py-sm text-ink-primary"
+              className="rounded-md border border-border px-md py-sm font-sans text-ink-primary"
             />
           </View>
 
           <View className="gap-xs">
-            <Text className="text-sm font-semibold text-ink-secondary">Category</Text>
+            <Text className="font-sans-semibold text-sm text-ink-secondary">Category</Text>
             <Pressable
               onPress={() => setIsCategoryPickerOpen(true)}
               accessibilityRole="button"
               className="rounded-md border border-border px-md py-sm"
             >
-              <Text className={category ? 'text-ink-primary' : 'text-ink-secondary'}>
+              <Text
+                className={category ? 'font-sans text-ink-primary' : 'font-sans text-ink-secondary'}
+              >
                 {category ?? 'Choose a category'}
               </Text>
             </Pressable>
@@ -135,7 +137,7 @@ export function AddGarmentScreen() {
           </View>
 
           {createGarment.isError && (
-            <Text className="text-error" accessibilityRole="alert">
+            <Text className="font-sans text-error" accessibilityRole="alert">
               Couldn’t add this garment. Check your connection and try again.
             </Text>
           )}

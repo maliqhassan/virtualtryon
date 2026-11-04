@@ -130,7 +130,9 @@ export function MyPhotoScreen() {
               <View className="flex-row items-center gap-xxs">
                 <Text
                   className={
-                    active ? 'text-sm font-bold text-white' : 'text-sm font-semibold text-ink-primary'
+                    active
+                      ? 'font-sans-bold text-sm text-white'
+                      : 'font-sans-semibold text-sm text-ink-primary'
                   }
                 >
                   {view.label}
@@ -147,10 +149,10 @@ export function MyPhotoScreen() {
           );
         })}
       </View>
-      <Text className="mt-sm text-sm text-ink-secondary">{VIEW_HINT[angle]}</Text>
+      <Text className="mt-sm font-sans text-sm text-ink-secondary">{VIEW_HINT[angle]}</Text>
 
       {fault === 'permission_denied' && (
-        <Text className="mt-md text-error" accessibilityRole="alert">
+        <Text className="mt-md font-sans text-error" accessibilityRole="alert">
           Photo access was denied. You can allow it in your device settings.
         </Text>
       )}
@@ -173,13 +175,13 @@ export function MyPhotoScreen() {
             />
           </View>
           {!current.cutoutUrl && (
-            <Text className="text-center text-xs text-ink-secondary">
+            <Text className="text-center font-sans text-xs text-ink-secondary">
               We couldn’t remove the background from this photo, so it’s shown as it is.
             </Text>
           )}
           <AppButton
             label={`Replace ${angle} photo`}
-            variant="dark"
+            variant="primary"
             onPress={() => setReplacing(true)}
           />
         </FadeInView>
@@ -210,7 +212,7 @@ export function MyPhotoScreen() {
 
           {upload.isPending && (
             <View className="gap-sm" accessibilityLiveRegion="polite">
-              <Text className="text-ink-secondary">
+              <Text className="font-sans text-ink-secondary">
                 {upload.progress < 100
                   ? `Uploading… ${upload.progress}%`
                   : 'Checking your photo and removing the background…'}
@@ -220,7 +222,7 @@ export function MyPhotoScreen() {
           )}
 
           {upload.isError && (
-            <Text className="text-error" accessibilityRole="alert">
+            <Text className="font-sans text-error" accessibilityRole="alert">
               {upload.error.message}
             </Text>
           )}
@@ -254,7 +256,7 @@ export function MyPhotoScreen() {
         </View>
       )}
 
-      <Text className="mt-xl text-center text-xs text-ink-secondary">
+      <Text className="mt-xl text-center font-sans text-xs text-ink-secondary">
         Your photos are only used to create your try-ons. You can delete them at any time.
       </Text>
     </AppScaffold>

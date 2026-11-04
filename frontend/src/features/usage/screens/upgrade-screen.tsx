@@ -17,11 +17,11 @@ function PlanCard({ offer, isCurrent }: { offer: PlanOffer; isCurrent: boolean }
       ].join(' ')}
     >
       <View className="flex-row items-center justify-between">
-        <Text className="text-lg font-bold text-ink-primary">{offer.name}</Text>
-        {isCurrent && <Text className="text-xs font-semibold text-success">Current plan</Text>}
+        <Text className="font-sans-bold text-lg text-ink-primary">{offer.name}</Text>
+        {isCurrent && <Text className="font-sans-semibold text-xs text-success">Current plan</Text>}
       </View>
-      <Text className="mt-xs text-base font-semibold text-ink-primary">{offer.price}</Text>
-      <Text className="mt-xxs text-sm text-ink-secondary">{offer.allowance}</Text>
+      <Text className="mt-xs font-sans-semibold text-base text-ink-primary">{offer.price}</Text>
+      <Text className="mt-xxs font-sans text-sm text-ink-secondary">{offer.allowance}</Text>
     </View>
   );
 }
@@ -40,7 +40,7 @@ export function UpgradeScreen() {
       <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
         Get more try-ons
       </Text>
-      <Text className="mt-xs text-ink-secondary">
+      <Text className="mt-xs font-sans text-ink-secondary">
         {usage && usage.remaining <= 0
           ? usage.period === 'lifetime'
             ? 'You’ve used your free try-on. Pick a plan to keep trying clothes on.'
@@ -48,7 +48,9 @@ export function UpgradeScreen() {
           : 'Pick the plan that fits how often you try clothes on.'}
       </Text>
       {usage && (
-        <Text className="mt-sm text-sm text-ink-secondary">Now: {describeUsage(usage)}</Text>
+        <Text className="mt-sm font-sans text-sm text-ink-secondary">
+          Now: {describeUsage(usage)}
+        </Text>
       )}
 
       <View className="mt-xl gap-md">
@@ -59,7 +61,7 @@ export function UpgradeScreen() {
 
       <View className="mt-xl gap-sm">
         <AppButton label="Payments coming soon" onPress={() => {}} disabled />
-        <Text className="text-center text-xs text-ink-secondary">
+        <Text className="text-center font-sans text-xs text-ink-secondary">
           Subscriptions aren’t available yet. Failed try-ons never count against your allowance.
         </Text>
         <AppButton label="Back" variant="secondary" onPress={() => router.back()} />

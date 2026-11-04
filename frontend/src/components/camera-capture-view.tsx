@@ -51,11 +51,11 @@ export function CameraCaptureView({ onCapture, onCancel }: CameraCaptureViewProp
   if (!permission || !permission.granted) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-md bg-ink-primary px-xl">
-        <Text className="text-center text-ink-onPrimary">
+        <Text className="text-center font-sans text-ink-onPrimary">
           Camera access is needed to take a photo.
         </Text>
         {permission && !permission.canAskAgain ? (
-          <Text className="text-center text-ink-onPrimary opacity-70">
+          <Text className="text-center font-sans text-ink-onPrimary opacity-70">
             Enable it in your device settings, then come back.
           </Text>
         ) : (
@@ -68,7 +68,7 @@ export function CameraCaptureView({ onCapture, onCancel }: CameraCaptureViewProp
           hitSlop={8}
           className="px-md py-sm"
         >
-          <Text className="text-base font-semibold text-ink-onPrimary">Cancel</Text>
+          <Text className="font-sans-semibold text-base text-ink-onPrimary">Cancel</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -86,7 +86,7 @@ export function CameraCaptureView({ onCapture, onCancel }: CameraCaptureViewProp
           hitSlop={8}
           className="px-md py-sm"
         >
-          <Text className="text-base font-semibold text-ink-onPrimary">Cancel</Text>
+          <Text className="font-sans-semibold text-base text-ink-onPrimary">Cancel</Text>
         </Pressable>
 
         <Pressable

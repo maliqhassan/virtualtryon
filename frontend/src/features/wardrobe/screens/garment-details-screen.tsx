@@ -66,8 +66,10 @@ export function GarmentDetailsScreen() {
         <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
           Garment not found
         </Text>
-        <Text className="mt-xs text-ink-secondary">This garment may have been deleted.</Text>
-        <Link href={WARDROBE_HREF} className="mt-lg text-sm font-semibold text-primary">
+        <Text className="mt-xs font-sans text-ink-secondary">
+          This garment may have been deleted.
+        </Text>
+        <Link href={WARDROBE_HREF} className="mt-lg font-sans-semibold text-sm text-primary">
           Back to Wardrobe →
         </Link>
       </AppScaffold>
@@ -79,8 +81,8 @@ export function GarmentDetailsScreen() {
       <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
         {garment.title}
       </Text>
-      <Text className="mt-xs text-sm text-ink-secondary">{garment.category}</Text>
-      <Text className="mt-xs text-sm text-ink-secondary">
+      <Text className="mt-xs font-sans text-sm text-ink-secondary">{garment.category}</Text>
+      <Text className="mt-xs font-sans text-sm text-ink-secondary">
         Added {formatDate(garment.createdAt)}
       </Text>
 
@@ -94,6 +96,8 @@ export function GarmentDetailsScreen() {
 
       <View className="mt-xl gap-md">
         <AppButton
+          variant="accent"
+          icon="auto_awesome"
           label="Try it on"
           onPress={() => router.dismissTo(tryOnGarmentHref(garment.id))}
         />

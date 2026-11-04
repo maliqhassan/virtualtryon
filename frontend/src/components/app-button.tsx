@@ -1,54 +1,88 @@
 import * as Haptics from 'expo-haptics';
 import { Platform, Text } from 'react-native';
 
+import { themeColors } from '@/constants/theme';
+
+import { AppIcon } from './app-icon';
 import { PressableScale } from './pressable-scale';
+
+type Variant = 'primary' | 'accent' | 'cream' | 'secondary' | 'ghostDark';
 
 export type AppButtonProps = {
   label: string;
-  /** primary: clay call to action · dark: ink, for the main action on a screen · secondary: outlined. */
-  variant?: 'primary' | 'dark' | 'secondary';
-  /** Only meaningful on `variant="secondary"` — signals a destructive action (e.g. delete). */
+  /**
+   * primary: ink, the main action on a light screen · accent: clay, only for
+   * AI actions (Try it on, Analyse, Start free trial) · cream: the main
+   * action on a dark screen · secondary: outlined · ghostDark: outlined on dark.
+   */
+  variant?: Variant;
+  /** Only meaningful on `variant="secondary"`: a destructive action (e.g. delete). */
   tone?: 'default' | 'destructive';
+  /** A leading Material Symbols icon name. `accent` buttons may use "auto_awesome". */
+  icon?: string;
   onPress: () => void;
   disabled?: boolean;
   accessibilityLabel?: string;
 };
 
+const CONTAINER: Record<Variant, string> = {
+  primary: 'bg-inverse',
+  accent: 'bg-primary',
+  cream: 'bg-cream',
+  secondary: 'border border-[rgba(22,19,15,0.12)] bg-surface',
+  ghostDark: 'border border-[rgba(246,241,232,0.22)] bg-transparent',
+};
+
+const LABEL: Record<Variant, string> = {
+  primary: 'text-ink-onPrimary',
+  accent: 'text-ink-onPrimary',
+  cream: 'text-ink-primary',
+  secondary: 'text-ink-primary',
+  ghostDark: 'text-night-text',
+};
+
+const ICON_COLOR: Record<Variant, string> = {
+  primary: themeColors.background,
+  accent: themeColors.background,
+  cream: themeColors.inkPrimary,
+  secondary: themeColors.inkPrimary,
+  ghostDark: themeColors.nightText,
+};
+
+const FILLED: Variant[] = ['primary', 'accent', 'cream'];
+
 export function AppButton({
   label,
   variant = 'primary',
   tone = 'default',
+  icon,
   onPress,
   disabled = false,
   accessibilityLabel,
 }: AppButtonProps) {
-  const filled = variant !== 'secondary';
-  const isDestructive = !filled && tone === 'destructive';
+  const filled = FILLED.includes(variant);
+  const isDestructive = variant === 'secondary' && tone === 'destructive';
 
   const containerClassName = [
-    'min-h-[52px] items-center justify-center rounded-full px-xl py-md',
-    filled
-      ? disabled
-        ? 'bg-neutral-200'
-        : variant === 'dark'
-          ? 'bg-inverse'
-          : 'bg-primary'
-      : ['border bg-surface', isDestructive ? 'border-error' : 'border-border'].join(' '),
+    'min-h-[52px] flex-row items-center justify-center gap-sm rounded-xl px-xl py-md',
+    filled && disabled ? 'bg-neutral-200' : CONTAINER[variant],
+    isDestructive ? 'border-error' : '',
     !filled && disabled ? 'opacity-50' : '',
   ]
     .filter(Boolean)
     .join(' ');
 
   const labelClassName = [
-    'text-base font-bold',
-    filled
-      ? disabled
-        ? 'text-neutral-500'
-        : 'text-ink-onPrimary'
-      : isDestructive
-        ? 'text-error'
-        : 'text-ink-primary',
+    'font-sans-bold text-[15px]',
+    filled && disabled ? 'text-neutral-500' : isDestructive ? 'text-error' : LABEL[variant],
   ].join(' ');
+
+  const iconColor =
+    filled && disabled
+      ? themeColors.neutral500
+      : isDestructive
+        ? themeColors.error
+        : ICON_COLOR[variant];
 
   const handlePress = () => {
     // A light tap on the main actions; skipped on web, which has no haptics.
@@ -69,6 +103,7 @@ export function AppButton({
       hitSlop={8}
       className={containerClassName}
     >
+      {icon ? <AppIcon name={icon} size="sm" color={iconColor} /> : null}
       <Text className={labelClassName}>{label}</Text>
     </PressableScale>
   );

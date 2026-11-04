@@ -25,10 +25,14 @@ export function ResultCanvas({ uri, placeholderCaption, caption }: ResultCanvasP
         />
       ) : (
         <View className="aspect-[3/4] w-full items-center justify-center rounded-xxl bg-neutral-200 p-lg">
-          <Text className="text-center text-sm text-ink-secondary">{placeholderCaption}</Text>
+          <Text className="text-center font-sans text-sm text-ink-secondary">
+            {placeholderCaption}
+          </Text>
         </View>
       )}
-      {caption && <Text className="text-center text-sm text-ink-secondary">{caption}</Text>}
+      {caption && (
+        <Text className="text-center font-sans text-sm text-ink-secondary">{caption}</Text>
+      )}
     </View>
   );
 }

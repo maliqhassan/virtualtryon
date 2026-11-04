@@ -67,7 +67,7 @@ export function ThinkingIndicator({ size = 70, step }: ThinkingIndicatorProps) {
           animatedStyle,
         ]}
       />
-      <Text className="text-center text-ink-secondary" accessibilityLiveRegion="polite">
+      <Text className="text-center font-sans text-ink-secondary" accessibilityLiveRegion="polite">
         {step}
       </Text>
     </View>

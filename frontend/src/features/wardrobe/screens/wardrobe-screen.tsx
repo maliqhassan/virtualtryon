@@ -5,6 +5,7 @@ import { FlatList, Pressable, RefreshControl, ScrollView, Text, View } from 'rea
 import { AppButton } from '@/components/app-button';
 import { AppScaffold } from '@/components/app-scaffold';
 import { FadeInView } from '@/components/fade-in-view';
+import { IconButton } from '@/components/icon-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { ThinkingIndicator } from '@/components/thinking-indicator';
 
@@ -38,10 +39,10 @@ export function WardrobeScreen() {
     return (
       <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
-          <Text className="text-lg font-semibold text-ink-primary">
+          <Text className="font-sans-semibold text-lg text-ink-primary">
             Couldn&rsquo;t load your wardrobe
           </Text>
-          <Text className="text-center text-sm text-ink-secondary">
+          <Text className="text-center font-sans text-sm text-ink-secondary">
             Check your connection and try again.
           </Text>
           <AppButton label="Retry" variant="secondary" onPress={() => garmentsQuery.refetch()} />
@@ -57,7 +58,7 @@ export function WardrobeScreen() {
       <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
           <Text className="font-display text-3xl text-ink-primary">Your wardrobe is empty</Text>
-          <Text className="text-center text-sm text-ink-secondary">
+          <Text className="text-center font-sans text-sm text-ink-secondary">
             Photograph the clothes you own to try them on any time.
           </Text>
           <AppButton
@@ -76,7 +77,12 @@ export function WardrobeScreen() {
         eyebrow={`${all.length} ${all.length === 1 ? 'piece' : 'pieces'} you own`}
         title="Wardrobe"
         right={
-          <AppButton label="Add" variant="dark" onPress={() => router.push(ADD_GARMENT_HREF)} />
+          <IconButton
+            icon="add"
+            tone="ink"
+            accessibilityLabel="Add a piece"
+            onPress={() => router.push(ADD_GARMENT_HREF)}
+          />
         }
       />
       <ScrollView
@@ -101,13 +107,19 @@ export function WardrobeScreen() {
               <Text
                 className={
                   active
-                    ? 'text-sm font-semibold text-white'
-                    : 'text-sm font-semibold text-ink-primary'
+                    ? 'font-sans-semibold text-sm text-white'
+                    : 'font-sans-semibold text-sm text-ink-primary'
                 }
               >
                 {name ?? 'All'}
               </Text>
-              <Text className={active ? 'text-xs text-neutral-300' : 'text-xs text-ink-secondary'}>
+              <Text
+                className={
+                  active
+                    ? 'font-sans text-xs text-neutral-300'
+                    : 'font-sans text-xs text-ink-secondary'
+                }
+              >
                 {count}
               </Text>
             </Pressable>

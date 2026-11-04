@@ -34,15 +34,17 @@ export function StoreCard({ name, subtitle, accentColor, selected, onPress }: St
         numberOfLines={1}
         className={
           selected
-            ? 'mt-sm text-sm font-bold text-white'
-            : 'mt-sm text-sm font-bold text-ink-primary'
+            ? 'mt-sm font-sans-bold text-sm text-white'
+            : 'mt-sm font-sans-bold text-sm text-ink-primary'
         }
       >
         {name}
       </Text>
       <Text
         numberOfLines={1}
-        className={selected ? 'text-xs text-neutral-300' : 'text-xs text-ink-secondary'}
+        className={
+          selected ? 'font-sans text-xs text-neutral-300' : 'font-sans text-xs text-ink-secondary'
+        }
       >
         {subtitle}
       </Text>

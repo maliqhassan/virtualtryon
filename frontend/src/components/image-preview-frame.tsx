@@ -33,7 +33,7 @@ export function ImagePreviewFrame({
         accessibilityLabel={accessibilityLabel}
       />
       {validationErrorText && (
-        <Text className="text-error" accessibilityRole="alert">
+        <Text className="font-sans text-error" accessibilityRole="alert">
           {validationErrorText}
         </Text>
       )}

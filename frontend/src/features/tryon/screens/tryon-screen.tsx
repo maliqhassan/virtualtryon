@@ -91,7 +91,9 @@ export function TryOnScreen() {
         <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
           Try-on not found
         </Text>
-        <Text className="mt-xs text-ink-secondary">Start a new try-on from the home screen.</Text>
+        <Text className="mt-xs font-sans text-ink-secondary">
+          Start a new try-on from the home screen.
+        </Text>
         <View className="mt-lg">
           <AppButton label="Go to Try On" onPress={goHome} />
         </View>
@@ -110,7 +112,9 @@ export function TryOnScreen() {
         <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
           Creating your try-on
         </Text>
-        <Text className="mt-xs text-ink-secondary">This usually takes less than a minute.</Text>
+        <Text className="mt-xs font-sans text-ink-secondary">
+          This usually takes less than a minute.
+        </Text>
 
         <View className="mt-lg flex-row gap-md">
           <View className="flex-1">
@@ -134,7 +138,7 @@ export function TryOnScreen() {
         <View className="flex-1 items-center justify-center gap-lg">
           {jobQuery.pollingTimedOut ? (
             <View className="items-center gap-md px-lg">
-              <Text className="text-center text-ink-secondary">
+              <Text className="text-center font-sans text-ink-secondary">
                 This is taking longer than usual. Your try-on is still in the queue and will finish
                 on its own.
               </Text>
@@ -158,11 +162,13 @@ export function TryOnScreen() {
         <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
           That didn’t work
         </Text>
-        <Text className="mt-xs text-ink-secondary" accessibilityRole="alert">
+        <Text className="mt-xs font-sans text-ink-secondary" accessibilityRole="alert">
           We couldn’t create this try-on. It hasn’t been counted, so you can try again.
         </Text>
         <View className="mt-xl gap-md">
           <AppButton
+            variant="accent"
+            icon="auto_awesome"
             label={retry.isPending ? 'Starting…' : 'Try again'}
             onPress={handleRetry}
             disabled={retry.isPending}
@@ -171,7 +177,7 @@ export function TryOnScreen() {
           {retry.error &&
             !(retry.error instanceof TryOnLimitReachedError) &&
             !(retry.error instanceof MissingPhotoError) && (
-              <Text className="text-center text-sm text-error" accessibilityRole="alert">
+              <Text className="text-center font-sans text-sm text-error" accessibilityRole="alert">
                 {retry.error.message}
               </Text>
             )}
@@ -184,9 +190,9 @@ export function TryOnScreen() {
   return (
     <AppScaffold back>
       <Text className="font-display text-[34px] leading-[38px] text-ink-primary">Your try-on</Text>
-      {garment && <Text className="mt-xs text-ink-secondary">{garment.title}</Text>}
+      {garment && <Text className="mt-xs font-sans text-ink-secondary">{garment.title}</Text>}
       {productQuery.data && (
-        <Text className="mt-xxs text-xs font-bold uppercase tracking-widest text-primary">
+        <Text className="mt-xxs font-mono text-[10px] uppercase tracking-[1.6px] text-primary">
           {productQuery.data.storeName}
         </Text>
       )}
@@ -212,12 +218,13 @@ export function TryOnScreen() {
 
       <View className="mt-xl gap-md">
         <AppButton
+          variant="accent"
           label={saved ? 'Saved to Looks' : saveLook.isPending ? 'Saving…' : 'Save to Looks'}
           onPress={() => saveLook.mutate(job.id)}
           disabled={saved || saveLook.isPending}
         />
         {saveLook.isError && (
-          <Text className="text-center text-sm text-error" accessibilityRole="alert">
+          <Text className="text-center font-sans text-sm text-error" accessibilityRole="alert">
             Couldn’t save this look. Please try again.
           </Text>
         )}

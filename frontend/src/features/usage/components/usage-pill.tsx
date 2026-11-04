@@ -23,7 +23,9 @@ export function UsagePill({ usage }: { usage: Usage }) {
     >
       <Text
         className={
-          empty ? 'text-xs font-semibold text-ink-secondary' : 'text-xs font-semibold text-primary'
+          empty
+            ? 'font-sans-semibold text-xs text-ink-secondary'
+            : 'font-sans-semibold text-xs text-primary'
         }
       >
         {describeUsage(usage)}

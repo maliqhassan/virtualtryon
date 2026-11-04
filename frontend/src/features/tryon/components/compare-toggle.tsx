@@ -31,8 +31,8 @@ export function CompareToggle({ mode, onChange }: CompareToggleProps) {
             <Text
               className={
                 active
-                  ? 'text-sm font-semibold text-ink-onPrimary'
-                  : 'text-sm font-semibold text-ink-primary'
+                  ? 'font-sans-semibold text-sm text-ink-onPrimary'
+                  : 'font-sans-semibold text-sm text-ink-primary'
               }
             >
               {option.label}

@@ -30,7 +30,7 @@ export function CategoryPickerModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View className="flex-1 items-center justify-center bg-black/40 px-xl">
         <View className="w-full gap-xs rounded-xl bg-surface p-lg">
-          <Text className="mb-sm text-lg font-semibold text-ink-primary">Category</Text>
+          <Text className="mb-sm font-sans-semibold text-lg text-ink-primary">Category</Text>
           <ScrollView className="max-h-96">
             {GARMENT_CATEGORIES.map((category) => (
               <Pressable
@@ -42,7 +42,9 @@ export function CategoryPickerModal({
               >
                 <Text
                   className={
-                    category === selected ? 'font-semibold text-primary' : 'text-ink-primary'
+                    category === selected
+                      ? 'font-sans-semibold text-primary'
+                      : 'font-sans text-ink-primary'
                   }
                 >
                   {category}

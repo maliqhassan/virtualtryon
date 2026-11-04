@@ -63,8 +63,10 @@ export function SavedLookDetailsScreen() {
         <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
           Look not found
         </Text>
-        <Text className="mt-xs text-ink-secondary">This saved look may have been deleted.</Text>
-        <Link href={LOOKS_HREF} className="mt-lg text-sm font-semibold text-primary">
+        <Text className="mt-xs font-sans text-ink-secondary">
+          This saved look may have been deleted.
+        </Text>
+        <Link href={LOOKS_HREF} className="mt-lg font-sans-semibold text-sm text-primary">
           Back to History →
         </Link>
       </AppScaffold>
@@ -74,10 +76,12 @@ export function SavedLookDetailsScreen() {
   return (
     <AppScaffold back>
       <Text className="font-display text-[34px] leading-[38px] text-ink-primary">{look.title}</Text>
-      <Text className="mt-xs text-sm text-ink-secondary">{formatDate(look.createdAt)}</Text>
+      <Text className="mt-xs font-sans text-sm text-ink-secondary">
+        {formatDate(look.createdAt)}
+      </Text>
 
       <View className="mt-lg gap-xs">
-        <Text className="text-sm font-semibold text-ink-secondary">Result</Text>
+        <Text className="font-sans-semibold text-sm text-ink-secondary">Result</Text>
         <AppImage
           uri={resolveMediaUrl(look.generatedImageUrl)}
           accessibilityLabel="Generated result"
@@ -87,14 +91,14 @@ export function SavedLookDetailsScreen() {
 
       <View className="mt-lg flex-row gap-sm">
         <View className="flex-1 gap-xs">
-          <Text className="text-sm font-semibold text-ink-secondary">Before (you)</Text>
+          <Text className="font-sans-semibold text-sm text-ink-secondary">Before (you)</Text>
           <AppImage
             uri={resolveMediaUrl(look.userImageUrl)}
             accessibilityLabel="Your original photo"
           />
         </View>
         <View className="flex-1 gap-xs">
-          <Text className="text-sm font-semibold text-ink-secondary">Before (garment)</Text>
+          <Text className="font-sans-semibold text-sm text-ink-secondary">Before (garment)</Text>
           <AppImage
             uri={resolveMediaUrl(look.clothingImageUrl)}
             accessibilityLabel="The garment photo"

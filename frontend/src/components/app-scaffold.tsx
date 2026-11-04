@@ -1,12 +1,10 @@
 import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 
-import { themeColors } from '@/constants/theme';
-
-import { PressableScale } from './pressable-scale';
+import { IconButton } from './icon-button';
 
 export type AppScaffoldProps = {
   children: ReactNode;
@@ -16,29 +14,21 @@ export type AppScaffoldProps = {
   inTabs?: boolean;
   /** Show a back button (stack screens). */
   back?: boolean;
+  /** The dark stage: night background and light status bar. */
+  dark?: boolean;
 };
 
-function BackButton() {
+function BackButton({ dark }: { dark: boolean }) {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/'));
   return (
-    <PressableScale
-      onPress={goBack}
-      accessibilityRole="button"
-      accessibilityLabel="Go back"
-      hitSlop={8}
-      containerClassName="mb-md self-start"
-      className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
-    >
-      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M15 5l-7 7 7 7"
-          stroke={themeColors.inkPrimary}
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
-    </PressableScale>
+    <View className="mb-md self-start">
+      <IconButton
+        icon="arrow_back"
+        tone={dark ? 'glass' : 'light'}
+        accessibilityLabel="Go back"
+        onPress={goBack}
+      />
+    </View>
   );
 }
 
@@ -47,18 +37,20 @@ export function AppScaffold({
   scroll = true,
   inTabs = false,
   back = false,
+  dark = false,
 }: AppScaffoldProps) {
   const content = (
     <>
-      {back && <BackButton />}
+      {back && <BackButton dark={dark} />}
       {children}
     </>
   );
   return (
     <SafeAreaView
-      className="flex-1 bg-background"
+      className={`flex-1 ${dark ? 'bg-night' : 'bg-background'}`}
       edges={inTabs ? ['top', 'left', 'right'] : ['top', 'bottom', 'left', 'right']}
     >
+      {dark && <StatusBar style="light" />}
       {scroll ? (
         <ScrollView
           className="flex-1 px-xl pt-lg"

@@ -28,10 +28,10 @@ export function GarmentCard({ garment }: GarmentCardProps) {
         borderRadius={0}
       />
       <View className="p-sm">
-        <Text className="text-sm font-semibold text-ink-primary" numberOfLines={1}>
+        <Text className="font-sans-semibold text-sm text-ink-primary" numberOfLines={1}>
           {garment.title}
         </Text>
-        <Text className="text-xs text-ink-secondary" numberOfLines={1}>
+        <Text className="font-sans text-xs text-ink-secondary" numberOfLines={1}>
           {garment.sourceUrl ? `${garment.category} · From store` : garment.category}
         </Text>
       </View>

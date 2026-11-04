@@ -43,7 +43,7 @@ export function OnboardingScreen() {
         <View className="items-end">
           {!isLast && (
             <Pressable onPress={finish} accessibilityRole="button" hitSlop={12} className="p-sm">
-              <Text className="text-sm font-semibold text-ink-secondary">Skip</Text>
+              <Text className="font-sans-semibold text-sm text-ink-secondary">Skip</Text>
             </Pressable>
           )}
         </View>
@@ -53,15 +53,15 @@ export function OnboardingScreen() {
           <View className="mb-xl h-20 w-20 items-center justify-center rounded-full bg-inverse">
             <step.icon color="#C9A227" size={34} />
           </View>
-          <Text className="text-sm font-semibold text-primary">
+          <Text className="font-sans-semibold text-sm text-primary">
             {index + 1} of {STEPS.length}
           </Text>
           <Text className="mt-sm font-display text-[44px] leading-[46px] text-ink-primary">
             {step.title}
           </Text>
-          <Text className="mt-md text-base text-ink-secondary">{step.body}</Text>
+          <Text className="mt-md font-sans text-base text-ink-secondary">{step.body}</Text>
           {isLast && (
-            <Text className="mt-xl text-sm text-ink-secondary">
+            <Text className="mt-xl font-sans text-sm text-ink-secondary">
               Your photo is only used to create your try-ons, and you can delete it at any time in
               Account.
             </Text>

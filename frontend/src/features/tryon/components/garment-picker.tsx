@@ -36,10 +36,10 @@ export function GarmentPicker({ garments, selectedId, onSelect, onAdd }: Garment
             className="items-center justify-center rounded-xxl border border-dashed border-neutral-300 bg-surface"
             style={{ aspectRatio: 3 / 4 }}
           >
-            <Text className="text-2xl text-primary">+</Text>
-            <Text className="mt-xxs text-xs font-semibold text-ink-primary">Add clothing</Text>
+            <Text className="font-sans text-2xl text-primary">+</Text>
+            <Text className="mt-xxs font-sans-semibold text-xs text-ink-primary">Add clothing</Text>
           </Pressable>
-          <Text className="mt-xs text-xs text-ink-secondary"> </Text>
+          <Text className="mt-xs font-sans text-xs text-ink-secondary"> </Text>
         </View>
       }
       renderItem={({ item }) => {
@@ -68,8 +68,8 @@ export function GarmentPicker({ garments, selectedId, onSelect, onAdd }: Garment
             <Text
               className={
                 selected
-                  ? 'mt-xs text-xs font-semibold text-primary'
-                  : 'mt-xs text-xs text-ink-secondary'
+                  ? 'mt-xs font-sans-semibold text-xs text-primary'
+                  : 'mt-xs font-sans text-xs text-ink-secondary'
               }
               numberOfLines={1}
             >

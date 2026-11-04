@@ -33,10 +33,10 @@ export function SavedLooksHistoryScreen() {
     return (
       <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
-          <Text className="text-lg font-semibold text-ink-primary">
+          <Text className="font-sans-semibold text-lg text-ink-primary">
             Couldn&rsquo;t load your saved looks
           </Text>
-          <Text className="text-center text-sm text-ink-secondary">
+          <Text className="text-center font-sans text-sm text-ink-secondary">
             Check your connection and try again.
           </Text>
           <AppButton label="Retry" variant="secondary" onPress={() => savedLooksQuery.refetch()} />
@@ -52,7 +52,7 @@ export function SavedLooksHistoryScreen() {
       <AppScaffold inTabs scroll={false}>
         <View className="flex-1 items-center justify-center gap-md">
           <Text className="font-display text-3xl text-ink-primary">No saved looks yet</Text>
-          <Text className="text-center text-sm text-ink-secondary">
+          <Text className="text-center font-sans text-sm text-ink-secondary">
             Try something on, then tap “Save to Looks” to keep it here.
           </Text>
         </View>

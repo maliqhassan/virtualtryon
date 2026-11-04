@@ -19,7 +19,7 @@ const PLAN_NAMES = { free: 'Free', pro: 'Pro', pro_plus: 'Pro Plus' } as const;
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <View className="mb-xl">
-      <Text className="mb-sm text-xs font-bold uppercase tracking-widest text-ink-secondary">
+      <Text className="mb-sm font-mono text-[10px] uppercase tracking-[1.6px] text-ink-secondary">
         {title}
       </Text>
       <View className="rounded-xxl border border-border bg-surface p-lg">{children}</View>
@@ -69,29 +69,35 @@ export function AccountScreen() {
               placeholderText="None"
             />
           </View>
-          <Text className="flex-1 text-base text-ink-primary">
+          <Text className="flex-1 font-sans text-base text-ink-primary">
             {photo ? 'Your full-body photo' : 'No photo added yet'}
           </Text>
-          <Text className="text-sm font-semibold text-primary">{photo ? 'Change' : 'Add'}</Text>
+          <Text className="font-sans-semibold text-sm text-primary">
+            {photo ? 'Change' : 'Add'}
+          </Text>
         </Pressable>
       </Section>
 
       <Section title="Plan">
-        <Text className="text-lg font-bold text-ink-primary">
+        <Text className="font-sans-bold text-lg text-ink-primary">
           {usage ? PLAN_NAMES[usage.plan] : '…'}
         </Text>
-        {usage && <Text className="mt-xxs text-sm text-ink-secondary">{describeUsage(usage)}</Text>}
+        {usage && (
+          <Text className="mt-xxs font-sans text-sm text-ink-secondary">
+            {describeUsage(usage)}
+          </Text>
+        )}
         <View className="mt-md">
           <AppButton
             label={usage?.plan === 'pro_plus' ? 'View plans' : 'Upgrade'}
-            variant={usage && usage.remaining <= 0 ? 'primary' : 'secondary'}
+            variant={usage && usage.remaining <= 0 ? 'accent' : 'secondary'}
             onPress={() => router.push(UPGRADE_HREF)}
           />
         </View>
       </Section>
 
       <Section title="Privacy">
-        <Text className="text-sm text-ink-secondary">
+        <Text className="font-sans text-sm text-ink-secondary">
           Your photo is only used to create your try-ons, and you can delete it at any time.
         </Text>
         <View className="mt-md">
@@ -104,18 +110,20 @@ export function AccountScreen() {
           />
         </View>
         {deleteData.isSuccess && (
-          <Text className="mt-sm text-sm text-success" accessibilityLiveRegion="polite">
+          <Text className="mt-sm font-sans text-sm text-success" accessibilityLiveRegion="polite">
             Your data has been deleted.
           </Text>
         )}
         {deleteData.isError && (
-          <Text className="mt-sm text-sm text-error" accessibilityRole="alert">
+          <Text className="mt-sm font-sans text-sm text-error" accessibilityRole="alert">
             Couldn’t delete your data. Please try again.
           </Text>
         )}
       </Section>
 
-      <Text className="mt-xl text-center text-xs text-ink-secondary">VirtualTryOn · v1.0.0</Text>
+      <Text className="mt-xl text-center font-sans text-xs text-ink-secondary">
+        VirtualTryOn · v1.0.0
+      </Text>
     </AppScaffold>
   );
 }

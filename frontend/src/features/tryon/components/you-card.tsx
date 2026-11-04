@@ -29,13 +29,13 @@ export function YouCard({ photos }: { photos: MyPhoto[] }) {
     return (
       <View className="items-center rounded-[24px] border border-dashed border-neutral-300 bg-surface p-xl">
         <Text className="font-display text-2xl text-ink-primary">Add your photo</Text>
-        <Text className="mt-xs text-center text-sm text-ink-secondary">
+        <Text className="mt-xs text-center font-sans text-sm text-ink-secondary">
           One full-body photo, used for every try-on. We’ll show it on a plain background.
         </Text>
         <View className="mt-lg self-stretch">
           <AppButton
             label="Add your photo"
-            variant="dark"
+            variant="primary"
             onPress={() => router.push(MY_PHOTO_HREF)}
           />
         </View>
@@ -59,7 +59,7 @@ export function YouCard({ photos }: { photos: MyPhoto[] }) {
           </FadeInView>
         ) : (
           <View className="w-3/5 items-center justify-center" style={{ aspectRatio: 3 / 4 }}>
-            <Text className="text-center text-sm text-ink-secondary">
+            <Text className="text-center font-sans text-sm text-ink-secondary">
               No {label.toLowerCase()} view yet
             </Text>
             <Pressable
@@ -67,7 +67,9 @@ export function YouCard({ photos }: { photos: MyPhoto[] }) {
               accessibilityRole="button"
               className="mt-md rounded-full bg-inverse px-lg py-sm"
             >
-              <Text className="text-sm font-bold text-white">Add {label.toLowerCase()} view</Text>
+              <Text className="font-sans-bold text-sm text-white">
+                Add {label.toLowerCase()} view
+              </Text>
             </Pressable>
           </View>
         )}
@@ -89,8 +91,8 @@ export function YouCard({ photos }: { photos: MyPhoto[] }) {
                 <Text
                   className={
                     active
-                      ? 'text-xs font-bold text-white'
-                      : 'text-xs font-semibold text-ink-primary'
+                      ? 'font-sans-bold text-xs text-white'
+                      : 'font-sans-semibold text-xs text-ink-primary'
                   }
                 >
                   {view.label}
@@ -106,10 +108,10 @@ export function YouCard({ photos }: { photos: MyPhoto[] }) {
         accessibilityLabel="Manage your photos"
         className="flex-row items-center justify-between px-lg py-md"
       >
-        <Text className="text-sm text-ink-secondary">
+        <Text className="font-sans text-sm text-ink-secondary">
           {front.cutoutUrl ? 'Background removed' : 'Original photo'} · used for try-ons
         </Text>
-        <Text className="text-sm font-semibold text-primary">Manage</Text>
+        <Text className="font-sans-semibold text-sm text-primary">Manage</Text>
       </Pressable>
     </View>
   );

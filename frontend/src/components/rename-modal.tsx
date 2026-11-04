@@ -36,14 +36,14 @@ export function RenameModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View className="flex-1 items-center justify-center bg-black/40 px-xl">
         <View className="w-full gap-md rounded-xl bg-surface p-lg">
-          <Text className="text-lg font-semibold text-ink-primary">{title}</Text>
+          <Text className="font-sans-semibold text-lg text-ink-primary">{title}</Text>
           <TextInput
             value={value}
             onChangeText={setValue}
             autoFocus
             maxLength={200}
             placeholder={placeholder}
-            className="rounded-md border border-border px-md py-sm text-ink-primary"
+            className="rounded-md border border-border px-md py-sm font-sans text-ink-primary"
           />
           <View className="flex-row justify-end gap-sm">
             <AppButton label="Cancel" variant="secondary" onPress={onCancel} />

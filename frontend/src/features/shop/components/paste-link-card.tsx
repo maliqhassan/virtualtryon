@@ -93,8 +93,8 @@ export function PasteLinkCard() {
   return (
     <View className="mb-xl gap-md rounded-xxl border border-border bg-surface p-lg">
       <View className="gap-xs">
-        <Text className="text-lg font-bold text-ink-primary">Try on from any store</Text>
-        <Text className="text-sm text-ink-secondary">
+        <Text className="font-sans-bold text-lg text-ink-primary">Try on from any store</Text>
+        <Text className="font-sans text-sm text-ink-secondary">
           Open a product in your browser, copy its link and paste it here.
         </Text>
       </View>
@@ -135,25 +135,25 @@ export function PasteLinkCard() {
             accessibilityLabel="Paste link"
             hitSlop={10}
           >
-            <Text className="text-sm font-bold text-primary">Paste</Text>
+            <Text className="font-sans-bold text-sm text-primary">Paste</Text>
           </Pressable>
         )}
       </View>
 
       {busy && (
-        <Text className="text-sm text-ink-secondary" accessibilityLiveRegion="polite">
+        <Text className="font-sans text-sm text-ink-secondary" accessibilityLiveRegion="polite">
           {importLink.isPending ? 'Finding the product…' : 'Starting your try-on…'}
         </Text>
       )}
       {errorText && !busy && (
-        <Text className="text-sm text-error" accessibilityRole="alert">
+        <Text className="font-sans text-sm text-error" accessibilityRole="alert">
           {errorText}
         </Text>
       )}
 
       <AppButton
         label={busy ? 'Working…' : 'Try it on'}
-        variant="dark"
+        variant="accent"
         onPress={handleTryOn}
         disabled={!url || busy}
       />

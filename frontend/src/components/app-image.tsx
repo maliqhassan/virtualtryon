@@ -29,7 +29,7 @@ export function AppImage({
         className="w-full items-center justify-center bg-neutral-200"
         style={{ aspectRatio, borderRadius }}
       >
-        <Text className="text-xs text-ink-secondary">{placeholderText}</Text>
+        <Text className="font-sans text-xs text-ink-secondary">{placeholderText}</Text>
       </View>
     );
   }
