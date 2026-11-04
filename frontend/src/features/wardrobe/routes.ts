@@ -19,3 +19,7 @@ export function tryOnGarmentHref(garmentId: string): Href {
 export function garmentDetailsHref(garmentId: string): Href {
   return { pathname: '/garment/[garmentId]', params: { garmentId } } as Href;
 }
+/** Wardrobe sub-screens (design_handoff_ai_stylist/04-react-native.md §3). */
+export const LAUNDRY_HREF = '/laundry' as Href;
+export const STATS_HREF = '/stats' as Href;
+export const PACKING_HREF = '/packing' as Href;

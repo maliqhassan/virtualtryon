@@ -5,5 +5,4 @@ export const CHAT_HREF = '/chat' as Href;
 export const RATE_HREF = '/rate' as Href;
 export const GENERATE_HREF = '/generate' as Href;
 export const CALENDAR_HREF = '/calendar' as Href;
-export const LAUNDRY_HREF = '/laundry' as Href;
 export const NOTIFICATIONS_HREF = '/notifications' as Href;

@@ -6,6 +6,9 @@ export { useImportFromLink } from './hooks/use-import-from-link';
 export { LinkImportError } from './services/garments-api';
 export {
   ADD_GARMENT_HREF,
+  LAUNDRY_HREF,
+  PACKING_HREF,
+  STATS_HREF,
   WARDROBE_HREF,
   addGarmentHref,
   garmentDetailsHref,

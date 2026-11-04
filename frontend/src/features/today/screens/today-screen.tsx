@@ -8,13 +8,13 @@ import { LIGHT_STRIPES, StripeFill } from '@/components/stripe-fill';
 import { themeColors } from '@/constants/theme';
 import { useAccountQuery } from '@/features/auth';
 import { useOnboardingPreferences } from '@/features/onboarding';
-import { useGarmentsQuery } from '@/features/wardrobe';
+import { LAUNDRY_HREF, useGarmentsQuery } from '@/features/wardrobe';
 import { selectionFeedback } from '@/lib/haptics';
 
 import { OutfitHero } from '../components/outfit-hero';
 import { QuickActions } from '../components/quick-actions';
 import { dayNumber, pickOutfit } from '../lib/pick-outfit';
-import { CALENDAR_HREF, LAUNDRY_HREF, NOTIFICATIONS_HREF } from '../routes';
+import { CALENDAR_HREF, NOTIFICATIONS_HREF } from '../routes';
 import { useTodayStore } from '../store';
 
 const WEEKDAY = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
