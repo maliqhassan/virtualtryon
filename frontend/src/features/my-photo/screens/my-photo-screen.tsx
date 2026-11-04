@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
+import { AppIcon } from '@/components/app-icon';
 import { AppImage } from '@/components/app-image';
 import { AppProgressBar } from '@/components/app-progress-bar';
 import { AppScaffold } from '@/components/app-scaffold';
@@ -12,6 +13,7 @@ import { ImagePreviewFrame } from '@/components/image-preview-frame';
 import { ImageSourcePicker } from '@/components/image-source-picker';
 import { ScreenHeader } from '@/components/screen-header';
 import { Skeleton } from '@/components/skeleton';
+import { themeColors } from '@/constants/theme';
 import { useImagePicker } from '@/hooks/use-image-picker';
 import { confirmDestructiveAction } from '@/lib/confirm';
 import { describeValidationError, validateImage } from '@/lib/images/validate-image';
@@ -125,14 +127,22 @@ export function MyPhotoScreen() {
                 active ? 'bg-inverse' : 'bg-transparent',
               ].join(' ')}
             >
-              <Text
-                className={
-                  active ? 'text-sm font-bold text-white' : 'text-sm font-semibold text-ink-primary'
-                }
-              >
-                {view.label}
-                {added ? ' ✓' : ''}
-              </Text>
+              <View className="flex-row items-center gap-xxs">
+                <Text
+                  className={
+                    active ? 'text-sm font-bold text-white' : 'text-sm font-semibold text-ink-primary'
+                  }
+                >
+                  {view.label}
+                </Text>
+                {added && (
+                  <AppIcon
+                    name="check"
+                    size="xs"
+                    color={active ? themeColors.surface : themeColors.inkPrimary}
+                  />
+                )}
+              </View>
             </Pressable>
           );
         })}

@@ -4,8 +4,9 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      // Only the tokens currently in use — see design/react-native/01-design-tokens.md
-      // for the full target spec, filled in incrementally per screen.
+      // The v2 design tokens, added in one go as the handoff's first build step
+      // (design_handoff_ai_stylist/04-react-native.md §4 and §10) so the screen
+      // restyles that follow share one palette.
       colors: {
         primary: 'var(--color-primary)',
         background: 'var(--color-background)',
@@ -25,19 +26,48 @@ module.exports = {
         inverse: '#16130F',
         accent: '#C9A227',
         muted: '#F0EDE7',
+        // v2 additions (design_handoff_ai_stylist/04-react-native.md §4).
+        secondary: '#4A5578',
+        warning: '#C9922E',
+        // Primary fill on dark screens.
+        cream: '#F6F1E8',
+        gold: { DEFAULT: '#C9A227', soft: '#E7C77A', overline: '#D9B26A' },
+        // The dark stage (Try-On, Plans, onboarding photo steps).
+        night: { DEFAULT: '#12110F', surface: '#1C1A17', text: '#F2EFEA', body: '#B9B1A6' },
+        match: {
+          perfectFg: '#2E7050',
+          perfectBg: '#DCF0E4',
+          goodFg: '#7E5A18',
+          goodBg: '#F5EBD3',
+          poorFg: '#8E3324',
+          poorBg: '#F7E5E1',
+        },
+        callout: { bg: '#F7F3E9', border: '#E5DCC0' },
         // Neutral ramp is identical in light/dark per the design spec, so no
         // CSS-variable indirection is needed here (unlike the colors above).
         neutral: {
           100: '#F0EDE7',
           200: '#E2DED6',
           300: '#C9C3B9',
+          400: '#A39B90',
           500: '#8A8278',
+          600: '#6B655D',
+          700: '#4E4841',
+          900: '#16130F',
         },
       },
-      // Instrument Serif is the design system's display face: screen titles,
-      // outfit names and big numbers. Body text stays on the platform font.
+      // Each weight is its own family: React Native can't derive weights from
+      // one name, so use `font-sans-bold`, never `font-sans font-bold`.
+      // Manrope for interface text, Instrument Serif for display (titles,
+      // outfit names, big numbers), IBM Plex Mono for overlines and metadata.
       fontFamily: {
+        sans: ['Manrope_500Medium'],
+        'sans-semibold': ['Manrope_600SemiBold'],
+        'sans-bold': ['Manrope_700Bold'],
         display: ['InstrumentSerif_400Regular'],
+        'display-italic': ['InstrumentSerif_400Regular_Italic'],
+        mono: ['IBMPlexMono_500Medium'],
+        'mono-semibold': ['IBMPlexMono_600SemiBold'],
       },
       spacing: {
         xxs: '2px',
@@ -58,6 +88,8 @@ module.exports = {
         xl: '16px',
         xxl: '20px',
         xxxl: '26px',
+        hero: '28px',
+        sheet: '30px',
       },
     },
   },

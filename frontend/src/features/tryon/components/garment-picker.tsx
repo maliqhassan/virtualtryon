@@ -1,8 +1,9 @@
 import { FlatList, Pressable, Text, View } from 'react-native';
 
-import { PressableScale } from '@/components/pressable-scale';
-
+import { AppIcon } from '@/components/app-icon';
 import { AppImage } from '@/components/app-image';
+import { PressableScale } from '@/components/pressable-scale';
+import { themeColors } from '@/constants/theme';
 import type { Garment } from '@/features/wardrobe';
 import { resolveMediaUrl } from '@/lib/media-url';
 
@@ -76,7 +77,7 @@ export function GarmentPicker({ garments, selectedId, onSelect, onAdd }: Garment
             </Text>
             {selected && (
               <View className="absolute right-xs top-xs h-6 w-6 items-center justify-center rounded-full bg-primary">
-                <Text className="text-xs font-bold text-white">✓</Text>
+                <AppIcon name="check" size="xs" color={themeColors.surface} />
               </View>
             )}
           </PressableScale>

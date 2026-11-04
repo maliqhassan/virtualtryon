@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
+import { AppIcon } from '@/components/app-icon';
 import { themeColors } from '@/constants/theme';
 import { MY_PHOTO_HREF, useMyPhotoQuery } from '@/features/my-photo';
 import {
@@ -125,7 +126,7 @@ export function PasteLinkCard() {
             accessibilityLabel="Clear link"
             hitSlop={10}
           >
-            <Text className="text-lg text-ink-secondary">×</Text>
+            <AppIcon name="close" size="sm" color={themeColors.inkSecondary} />
           </Pressable>
         ) : (
           <Pressable

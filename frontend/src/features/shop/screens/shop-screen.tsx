@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
+import { AppIcon } from '@/components/app-icon';
 import { AppScaffold } from '@/components/app-scaffold';
 import { FadeInView } from '@/components/fade-in-view';
 import { ScreenHeader } from '@/components/screen-header';
@@ -154,7 +155,7 @@ export function ShopScreen() {
             accessibilityLabel="Clear search"
             hitSlop={10}
           >
-            <Text className="text-lg text-ink-secondary">×</Text>
+            <AppIcon name="close" size="sm" color={themeColors.inkSecondary} />
           </Pressable>
         )}
       </View>

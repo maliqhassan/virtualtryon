@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
+import { AppIcon } from '@/components/app-icon';
 import { AppImage } from '@/components/app-image';
 import { AppScaffold } from '@/components/app-scaffold';
 import { FadeInView } from '@/components/fade-in-view';
@@ -10,6 +11,7 @@ import { PressableScale } from '@/components/pressable-scale';
 import { ScreenHeader } from '@/components/screen-header';
 import { Skeleton } from '@/components/skeleton';
 import { ShopIcon } from '@/components/tab-icons';
+import { themeColors } from '@/constants/theme';
 import { MY_PHOTO_HREF, displayUrl, useMyPhotosQuery } from '@/features/my-photo';
 import { SHOP_HREF } from '@/features/shop';
 import { UPGRADE_HREF, UsagePill, useUsageQuery } from '@/features/usage';
@@ -147,7 +149,7 @@ export function TryOnHomeScreen() {
                   Try on clothes before you buy them
                 </Text>
               </View>
-              <Text className="text-lg text-primary">›</Text>
+              <AppIcon name="chevron_right" size="md" color={themeColors.primary} />
             </PressableScale>
           </FadeInView>
 
