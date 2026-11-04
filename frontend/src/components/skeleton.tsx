@@ -16,10 +16,18 @@ type SkeletonProps = {
   height?: DimensionValue;
   aspectRatio?: number;
   radius?: number;
+  /** On the dark stage. */
+  dark?: boolean;
 };
 
 /** A soft pulsing placeholder shown while content loads. Static with reduced motion. */
-export function Skeleton({ width = '100%', height, aspectRatio, radius = 16 }: SkeletonProps) {
+export function Skeleton({
+  width = '100%',
+  height,
+  aspectRatio,
+  radius = 16,
+  dark = false,
+}: SkeletonProps) {
   const pulse = useSharedValue(0);
   const reducedMotion = useReducedMotion();
 
@@ -40,7 +48,13 @@ export function Skeleton({ width = '100%', height, aspectRatio, radius = 16 }: S
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={[
-        { width, height, aspectRatio, borderRadius: radius, backgroundColor: '#E2DED6' },
+        {
+          width,
+          height,
+          aspectRatio,
+          borderRadius: radius,
+          backgroundColor: dark ? '#26221D' : '#E2DED6',
+        },
         style,
       ]}
     />

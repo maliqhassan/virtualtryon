@@ -1,5 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 
+import { selectionFeedback } from '@/lib/haptics';
+
 export type CompareMode = 'before' | 'after';
 
 type CompareToggleProps = {
@@ -12,28 +14,28 @@ const OPTIONS: { value: CompareMode; label: string }[] = [
   { value: 'after', label: 'After' },
 ];
 
+/** Before/after as a pill segment in the result header (dark stage). */
 export function CompareToggle({ mode, onChange }: CompareToggleProps) {
   return (
-    <View className="flex-row gap-sm">
+    <View
+      className="flex-row rounded-full bg-[rgba(255,255,255,0.08)] p-[3px]"
+      accessibilityRole="tablist"
+    >
       {OPTIONS.map((option) => {
         const active = option.value === mode;
         return (
           <Pressable
             key={option.value}
-            onPress={() => onChange(option.value)}
-            accessibilityRole="button"
+            onPress={() => {
+              selectionFeedback();
+              onChange(option.value);
+            }}
+            accessibilityRole="tab"
             accessibilityState={{ selected: active }}
-            className={[
-              'flex-1 items-center rounded-lg py-sm',
-              active ? 'bg-primary' : 'border border-border bg-transparent',
-            ].join(' ')}
+            className={`rounded-full px-[14px] py-[7px] ${active ? 'bg-cream' : ''}`}
           >
             <Text
-              className={
-                active
-                  ? 'font-sans-semibold text-sm text-ink-onPrimary'
-                  : 'font-sans-semibold text-sm text-ink-primary'
-              }
+              className={`font-sans-bold text-[12px] ${active ? 'text-ink-primary' : 'text-night-body'}`}
             >
               {option.label}
             </Text>

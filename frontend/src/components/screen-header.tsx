@@ -12,6 +12,8 @@ type ScreenHeaderProps = {
   variant?: 'tab' | 'editorial';
   /** Editorial only: a second title line in italic (the "gold accent" line). */
   italic?: string;
+  /** Put the italic words on the same line as the title ("Try it *on.*"). */
+  italicInline?: boolean;
   /** Mono overline above the title. */
   eyebrow?: string;
   subtitle?: string;
@@ -25,6 +27,7 @@ export function ScreenHeader({
   title,
   variant = 'tab',
   italic,
+  italicInline = false,
   eyebrow,
   subtitle,
   right,
@@ -61,7 +64,7 @@ export function ScreenHeader({
                 <Text
                   className={`font-display-italic ${dark ? 'text-gold-soft' : 'text-ink-primary'}`}
                 >
-                  {`\n${italic}`}
+                  {italicInline ? ` ${italic}` : `\n${italic}`}
                 </Text>
               ) : null}
             </Text>

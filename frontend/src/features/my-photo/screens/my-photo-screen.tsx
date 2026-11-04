@@ -172,7 +172,7 @@ export function MyPhotoScreen() {
 
       {photosQuery.isLoading && (
         <View className="mt-xl w-2/3 self-center">
-          <Skeleton aspectRatio={3 / 4} radius={20} />
+          <Skeleton aspectRatio={3 / 4} radius={20} dark />
         </View>
       )}
 

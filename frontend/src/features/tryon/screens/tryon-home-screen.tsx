@@ -1,11 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { Fragment, useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
 import { AppImage } from '@/components/app-image';
 import { AppScaffold } from '@/components/app-scaffold';
+import { NightGlow } from '@/components/gradient-fill';
 import { FadeInView } from '@/components/fade-in-view';
 import { PressableScale } from '@/components/pressable-scale';
 import { ScreenHeader } from '@/components/screen-header';
@@ -25,11 +26,11 @@ import { MissingPhotoError, TryOnLimitReachedError } from '../services/tryon-job
 
 function SectionLabel({ step, title }: { step: string; title: string }) {
   return (
-    <View className="mb-sm flex-row items-center gap-sm">
-      <View className="h-6 w-6 items-center justify-center rounded-full bg-inverse">
-        <Text className="font-sans-bold text-[11px] text-white">{step}</Text>
+    <View className="mb-[10px] flex-row items-center gap-[9px]">
+      <View className="h-[22px] w-[22px] items-center justify-center rounded-full bg-night-text">
+        <Text className="font-sans-bold text-[11px] text-night">{step}</Text>
       </View>
-      <Text className="font-sans-bold text-sm text-ink-primary">{title}</Text>
+      <Text className="font-sans-bold text-[13.5px] text-night-text">{title}</Text>
     </View>
   );
 }
@@ -77,15 +78,15 @@ export function TryOnHomeScreen() {
 
   if (photoQuery.isError || garmentsQuery.isError) {
     return (
-      <AppScaffold inTabs scroll={false}>
+      <AppScaffold inTabs scroll={false} dark>
         <View className="flex-1 items-center justify-center gap-md">
-          <Text className="font-display text-3xl text-ink-primary">Couldn’t connect</Text>
-          <Text className="text-center font-sans text-sm text-ink-secondary">
+          <Text className="font-display text-3xl text-night-text">Couldn’t connect</Text>
+          <Text className="text-center font-sans text-sm text-night-body">
             Check your connection and try again.
           </Text>
           <AppButton
             label="Retry"
-            variant="secondary"
+            variant="ghostDark"
             onPress={() => {
               photoQuery.refetch();
               garmentsQuery.refetch();
@@ -104,18 +105,24 @@ export function TryOnHomeScreen() {
   const ready = !!photo && !!selectedGarment;
 
   return (
-    <AppScaffold inTabs>
+    <AppScaffold inTabs dark>
+      <View className="absolute -left-xl -right-xl -top-lg h-[460px]" pointerEvents="none">
+        <NightGlow center={{ x: 0.5, y: 0 }} />
+      </View>
       <ScreenHeader
+        variant="editorial"
+        dark
         eyebrow="Virtual fitting room"
-        title="Try on"
-        subtitle="See any piece on you before you wear it or buy it."
-        right={usage ? <UsagePill usage={usage} /> : undefined}
+        title="Try it"
+        italic="on."
+        italicInline
+        right={usage ? <UsagePill usage={usage} dark /> : undefined}
       />
 
       {loading ? (
         <View className="gap-md">
-          <Skeleton height={92} radius={20} />
-          <Skeleton height={150} radius={20} />
+          <Skeleton height={92} radius={20} dark />
+          <Skeleton height={150} radius={20} dark />
         </View>
       ) : (
         <>
@@ -135,31 +142,26 @@ export function TryOnHomeScreen() {
             <PressableScale
               onPress={() => router.push(SHOP_HREF)}
               accessibilityRole="button"
-              accessibilityLabel="Browse stores"
-              containerClassName="mt-md"
-              className="flex-row items-center gap-md rounded-xxl border border-border bg-surface p-md"
+              accessibilityLabel="Or try something from a store"
+              containerClassName="mt-[10px]"
+              className="flex-row items-center gap-[11px] rounded-lg border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] px-[14px] py-md"
             >
-              <View className="h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <AppIcon name="shopping_bag" size="md" color={themeColors.primary} />
-              </View>
-              <View className="flex-1">
-                <Text className="font-sans-bold text-sm text-ink-primary">Browse stores</Text>
-                <Text className="font-sans text-xs text-ink-secondary">
-                  Try on clothes before you buy them
-                </Text>
-              </View>
-              <AppIcon name="chevron_right" size="md" color={themeColors.primary} />
+              <AppIcon name="storefront" size={19} color="#D9B26A" />
+              <Text className="flex-1 font-sans-semibold text-[12.5px] text-night-text">
+                Or try something from a store
+              </Text>
+              <AppIcon name="chevron_right" size="sm" color={themeColors.inkSecondary} />
             </PressableScale>
           </FadeInView>
 
           <FadeInView index={3} className="mt-xl">
             <SectionLabel step="3" title="Try it on" />
-            <View className="rounded-[24px] bg-inverse p-lg">
-              <View className="flex-row gap-md">
+            <View className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-night-surface p-md">
+              <View className="flex-row items-center gap-sm">
                 {[
                   {
                     uri: photo ? resolveMediaUrl(displayUrl(photo)) : null,
-                    label: 'Your photo',
+                    label: 'you',
                     fit: 'contain' as const,
                   },
                   {
@@ -167,23 +169,29 @@ export function TryOnHomeScreen() {
                     label: selectedGarment?.title ?? 'Pick a piece',
                     fit: 'cover' as const,
                   },
-                ].map((slot) => (
-                  <View key={slot.label} className="flex-1">
-                    <AppImage
-                      uri={slot.uri}
-                      accessibilityLabel={slot.label}
-                      aspectRatio={3 / 4}
-                      borderRadius={14}
-                      placeholderText={slot.label}
-                      fit={slot.fit}
-                    />
-                    <Text numberOfLines={1} className="mt-xs font-sans text-xs text-neutral-300">
-                      {slot.label}
-                    </Text>
-                  </View>
+                ].map((slot, index) => (
+                  <Fragment key={slot.label}>
+                    {index === 1 && <AppIcon name="add" size="md" color={themeColors.goldSoft} />}
+                    <View className="flex-1">
+                      <AppImage
+                        uri={slot.uri}
+                        accessibilityLabel={slot.label}
+                        aspectRatio={3 / 4}
+                        borderRadius={14}
+                        placeholderText={slot.label}
+                        fit={slot.fit}
+                      />
+                      <Text
+                        numberOfLines={1}
+                        className="mt-xs font-mono text-[9px] text-neutral-500"
+                      >
+                        {slot.label}
+                      </Text>
+                    </View>
+                  </Fragment>
                 ))}
               </View>
-              <View className="mt-lg">
+              <View className="mt-md">
                 {outOfTryOns ? (
                   <AppButton
                     label="Get more try-ons"
@@ -200,11 +208,13 @@ export function TryOnHomeScreen() {
                   />
                 )}
               </View>
-              {!outOfTryOns && !ready && (
-                <Text className="mt-sm text-center font-sans text-xs text-neutral-300">
-                  {!photo ? 'Add your photo first.' : 'Pick a piece above.'}
-                </Text>
-              )}
+              <Text className="mt-[9px] text-center font-sans text-[11px] text-ink-secondary">
+                {!outOfTryOns && !ready
+                  ? !photo
+                    ? 'Add your photo first.'
+                    : 'Pick a piece above.'
+                  : 'Failed try-ons never count against your allowance.'}
+              </Text>
               {showStartError && (
                 <Text
                   className="mt-sm text-center font-sans text-sm text-error"

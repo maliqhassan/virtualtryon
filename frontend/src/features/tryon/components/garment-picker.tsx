@@ -7,7 +7,8 @@ import { themeColors } from '@/constants/theme';
 import type { Garment } from '@/features/wardrobe';
 import { resolveMediaUrl } from '@/lib/media-url';
 
-const TILE_WIDTH = 104;
+const TILE_WIDTH = 84;
+const TILE_HEIGHT = 108;
 
 type GarmentPickerProps = {
   garments: Garment[];
@@ -16,7 +17,7 @@ type GarmentPickerProps = {
   onAdd: () => void;
 };
 
-/** Horizontal rail of wardrobe items, with an "Add" tile first. */
+/** Horizontal rail of wardrobe pieces on the dark stage, with "Add new" first. */
 export function GarmentPicker({ garments, selectedId, onSelect, onAdd }: GarmentPickerProps) {
   return (
     <FlatList
@@ -24,22 +25,26 @@ export function GarmentPicker({ garments, selectedId, onSelect, onAdd }: Garment
       data={garments}
       keyExtractor={(garment) => garment.id}
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 12, paddingVertical: 4 }}
+      contentContainerStyle={{ gap: 9, paddingVertical: 4, paddingHorizontal: 2 }}
       ListHeaderComponent={
-        // Same height as an item tile (image + label line), so the row never
-        // clips the item labels.
-        <View style={{ width: TILE_WIDTH, marginRight: 12 }}>
+        <View style={{ width: TILE_WIDTH, marginRight: 9 }}>
           <Pressable
             onPress={onAdd}
             accessibilityRole="button"
-            accessibilityLabel="Add clothing"
-            className="items-center justify-center rounded-xxl border border-dashed border-neutral-300 bg-surface"
-            style={{ aspectRatio: 3 / 4 }}
+            accessibilityLabel="Add a new piece"
+            className="items-center justify-center rounded-lg"
+            style={{
+              height: TILE_HEIGHT,
+              borderWidth: 1.5,
+              borderStyle: 'dashed',
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+            }}
           >
-            <Text className="font-sans text-2xl text-primary">+</Text>
-            <Text className="mt-xxs font-sans-semibold text-xs text-ink-primary">Add clothing</Text>
+            <AppIcon name="add" size="lg" color={themeColors.neutral500} />
           </Pressable>
-          <Text className="mt-xs font-sans text-xs text-ink-secondary"> </Text>
+          <Text className="mt-[6px] text-center font-sans-semibold text-[10.5px] text-neutral-500">
+            Add new
+          </Text>
         </View>
       }
       renderItem={({ item }) => {
@@ -53,33 +58,33 @@ export function GarmentPicker({ garments, selectedId, onSelect, onAdd }: Garment
             containerStyle={{ width: TILE_WIDTH }}
           >
             <View
-              className={[
-                'overflow-hidden rounded-xxl bg-surface',
-                selected ? 'border-2 border-primary' : 'border border-border',
-              ].join(' ')}
+              className="overflow-hidden rounded-lg bg-night-surface"
+              style={{
+                height: TILE_HEIGHT,
+                borderWidth: 2,
+                borderColor: selected ? themeColors.goldSoft : 'transparent',
+              }}
             >
               <AppImage
                 uri={resolveMediaUrl(item.imageUrl)}
                 accessibilityLabel={item.title}
-                aspectRatio={3 / 4}
+                aspectRatio={TILE_WIDTH / TILE_HEIGHT}
                 borderRadius={0}
               />
+              {selected && (
+                <View className="absolute right-[5px] top-[5px] h-5 w-5 items-center justify-center rounded-full bg-gold-soft">
+                  <AppIcon name="check" size={13} color={themeColors.night} />
+                </View>
+              )}
             </View>
             <Text
-              className={
-                selected
-                  ? 'mt-xs font-sans-semibold text-xs text-primary'
-                  : 'mt-xs font-sans text-xs text-ink-secondary'
-              }
+              className={`mt-[6px] text-center font-sans-semibold text-[10.5px] leading-[14px] ${
+                selected ? 'text-night-text' : 'text-neutral-500'
+              }`}
               numberOfLines={1}
             >
               {item.title}
             </Text>
-            {selected && (
-              <View className="absolute right-xs top-xs h-6 w-6 items-center justify-center rounded-full bg-primary">
-                <AppIcon name="check" size="xs" color={themeColors.surface} />
-              </View>
-            )}
           </PressableScale>
         );
       }}

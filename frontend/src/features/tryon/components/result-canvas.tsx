@@ -1,38 +1,35 @@
 import { Image } from 'expo-image';
-import { Text, View } from 'react-native';
+import type { ReactNode } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { StripeFill } from '@/components/stripe-fill';
 
 type ResultCanvasProps = {
-  /** A real image to display. Null renders the placeholder instead — this
-   * is the branch that starts rendering something real, with no changes
-   * needed here, once a real inference worker populates
-   * TryOnJob.generatedImageUrl (see ../types). */
+  /** The image to show; null shows a striped placeholder with `placeholderCaption`. */
   uri: string | null;
-  /** Shown inside the placeholder box when `uri` is null. */
   placeholderCaption?: string;
-  /** Shown below the image/placeholder either way (e.g. AI reasoning, or a simple label). */
-  caption?: string;
+  /** Laid over the bottom of the image (the glass caption on the result). */
+  overlay?: ReactNode;
 };
 
-export function ResultCanvas({ uri, placeholderCaption, caption }: ResultCanvasProps) {
+/** The large try-on image on the dark stage, 3:4.15 at radius 28. */
+export function ResultCanvas({ uri, placeholderCaption, overlay }: ResultCanvasProps) {
   return (
-    <View className="gap-sm">
+    <View className="w-full overflow-hidden rounded-hero" style={{ aspectRatio: 3 / 4.15 }}>
       {uri ? (
         <Image
           source={{ uri }}
-          style={{ width: '100%', aspectRatio: 3 / 4, borderRadius: 20 }}
+          style={StyleSheet.absoluteFill}
           contentFit="cover"
           accessibilityLabel="Try-on result"
         />
       ) : (
-        <View className="aspect-[3/4] w-full items-center justify-center rounded-xxl bg-neutral-200 p-lg">
-          <Text className="text-center font-sans text-sm text-ink-secondary">
-            {placeholderCaption}
-          </Text>
+        <View className="flex-1 items-center justify-center">
+          <StripeFill tone="dark" period={9} />
+          <Text className="font-mono text-[10px] text-neutral-500">{placeholderCaption}</Text>
         </View>
       )}
-      {caption && (
-        <Text className="text-center font-sans text-sm text-ink-secondary">{caption}</Text>
-      )}
+      {overlay && <View className="absolute bottom-md left-md right-md">{overlay}</View>}
     </View>
   );
 }
