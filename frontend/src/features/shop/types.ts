@@ -19,4 +19,15 @@ export type Product = {
   imageUrl: string;
   /** Where to buy it on the store's own site; null for sample products. */
   productUrl: string | null;
+  /** How well it suits the user. Not sent by the server yet (see ../flags.ts). */
+  match?: ProductMatch;
+};
+
+export type ProductMatch = {
+  score: number;
+  label: 'perfect' | 'good' | 'poor';
+  /** Letter grades, e.g. "A", "B+". */
+  colour: string;
+  fit: string;
+  reason: string;
 };

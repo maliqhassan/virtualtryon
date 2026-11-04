@@ -7,3 +7,6 @@ export function myStoreHref(host: string): Href {
 export function productHref(productId: string): Href {
   return { pathname: '/product/[productId]', params: { productId } } as Href;
 }
+export const WISHLIST_HREF = '/wishlist' as Href;
+/** The seasonal editorial lookbook (one for now). */
+export const LOOKBOOK_HREF = '/lookbook/eid' as Href;

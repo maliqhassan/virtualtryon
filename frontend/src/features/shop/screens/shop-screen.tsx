@@ -14,18 +14,19 @@ import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
 import { AppScaffold } from '@/components/app-scaffold';
 import { FadeInView } from '@/components/fade-in-view';
+import { IconButton } from '@/components/icon-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { Skeleton } from '@/components/skeleton';
 import { themeColors } from '@/constants/theme';
 import { useGarmentsQuery } from '@/features/wardrobe';
 
 import { PasteLinkCard } from '../components/paste-link-card';
-import { ProductCard } from '../components/product-card';
+import { LookbookBanner } from '../components/lookbook-banner';
+import { ProductMatchCard } from '../components/product-match-card';
 import { StoreCard } from '../components/store-card';
 import { useDebouncedValue, useProductsQuery, useStoresQuery } from '../hooks/use-catalog';
 import { groupByStore } from '../lib/group-by-store';
-import { myStoreHref, productHref } from '../routes';
-import type { Product } from '../types';
+import { WISHLIST_HREF, myStoreHref, productHref } from '../routes';
 
 const ALL = 'All';
 
@@ -44,15 +45,15 @@ function CategoryChip({
       accessibilityRole="button"
       accessibilityState={{ selected }}
       className={[
-        'mr-sm rounded-full px-lg py-sm',
+        'mr-[7px] rounded-full px-[15px] py-[9px]',
         selected ? 'bg-inverse' : 'border border-border bg-surface',
       ].join(' ')}
     >
       <Text
         className={
           selected
-            ? 'font-sans-semibold text-sm text-white'
-            : 'font-sans-semibold text-sm text-ink-primary'
+            ? 'font-sans-semibold text-[12.5px] text-white'
+            : 'font-sans-semibold text-[12.5px] text-ink-primary'
         }
       >
         {label}
@@ -87,8 +88,6 @@ export function ShopScreen() {
     () => (category === ALL ? products : products.filter((p) => p.category === category)),
     [products, category],
   );
-  // An odd count gets an empty spacer so the last card keeps its half width.
-  const gridData: (Product | null)[] = visible.length % 2 === 0 ? visible : [...visible, null];
 
   const selectStore = (id: string | null) => {
     setStoreId(id);
@@ -98,12 +97,19 @@ export function ShopScreen() {
   const header = (
     <View>
       <ScreenHeader
-        eyebrow="Any store"
+        eyebrow="Any store · try before you buy"
         title="Shop"
-        subtitle="Try clothes from stores on yourself before you buy them online."
+        right={
+          <IconButton
+            icon="bookmark"
+            accessibilityLabel="Wishlist"
+            onPress={() => router.push(WISHLIST_HREF)}
+          />
+        }
       />
 
       <PasteLinkCard />
+      <LookbookBanner />
 
       {myStores.length > 0 && (
         <View className="mb-xl">
@@ -234,10 +240,8 @@ export function ShopScreen() {
   return (
     <AppScaffold inTabs scroll={false}>
       <FlatList
-        data={productsQuery.isLoading ? [] : gridData}
-        keyExtractor={(item, index) => item?.id ?? `spacer-${index}`}
-        numColumns={2}
-        columnWrapperStyle={{ gap: 12 }}
+        data={productsQuery.isLoading ? [] : visible}
+        keyExtractor={(item) => item.id}
         ListHeaderComponent={header}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24 }}
@@ -252,13 +256,9 @@ export function ShopScreen() {
         }
         ListEmptyComponent={
           productsQuery.isLoading ? (
-            <View className="flex-row gap-md">
-              <View className="flex-1">
-                <Skeleton aspectRatio={3 / 4} radius={20} />
-              </View>
-              <View className="flex-1">
-                <Skeleton aspectRatio={3 / 4} radius={20} />
-              </View>
+            <View className="gap-[11px]">
+              <Skeleton height={152} radius={22} />
+              <Skeleton height={152} radius={22} />
             </View>
           ) : (
             <Text className="mt-xl text-center font-sans text-sm text-ink-secondary">
@@ -266,15 +266,11 @@ export function ShopScreen() {
             </Text>
           )
         }
-        renderItem={({ item, index }) =>
-          item ? (
-            <FadeInView index={index} className="flex-1">
-              <ProductCard product={item} onPress={() => router.push(productHref(item.id))} />
-            </FadeInView>
-          ) : (
-            <View className="flex-1" />
-          )
-        }
+        renderItem={({ item, index }) => (
+          <FadeInView index={index}>
+            <ProductMatchCard product={item} onPress={() => router.push(productHref(item.id))} />
+          </FadeInView>
+        )}
       />
     </AppScaffold>
   );

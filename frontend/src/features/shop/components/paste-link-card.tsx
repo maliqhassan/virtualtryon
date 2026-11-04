@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
 import { themeColors } from '@/constants/theme';
 import { MY_PHOTO_HREF, useMyPhotoQuery } from '@/features/my-photo';
@@ -91,15 +90,9 @@ export function PasteLinkCard() {
   const errorText = importError ?? startError;
 
   return (
-    <View className="mb-xl gap-md rounded-xxl border border-border bg-surface p-lg">
-      <View className="gap-xs">
-        <Text className="font-sans-bold text-lg text-ink-primary">Try on from any store</Text>
-        <Text className="font-sans text-sm text-ink-secondary">
-          Open a product in your browser, copy its link and paste it here.
-        </Text>
-      </View>
-
-      <View className="flex-row items-center rounded-full border border-border bg-background px-lg">
+    <View className="mt-lg">
+      <View className="flex-row items-center gap-[10px] rounded-[18px] border border-[rgba(22,19,15,0.1)] bg-surface py-[6px] pl-[14px] pr-[6px]">
+        <AppIcon name="link" size={19} color={themeColors.neutral400} />
         <TextInput
           value={link}
           onChangeText={(text) => {
@@ -107,8 +100,8 @@ export function PasteLinkCard() {
             if (importLink.isError) importLink.reset();
             if (startTryOn.isError) startTryOn.reset();
           }}
-          placeholder="https://store.com/product…"
-          placeholderTextColor={themeColors.neutral500}
+          placeholder="Paste a link from any store"
+          placeholderTextColor={themeColors.neutral400}
           keyboardType="url"
           autoCapitalize="none"
           autoCorrect={false}
@@ -116,47 +109,49 @@ export function PasteLinkCard() {
           onSubmitEditing={handleTryOn}
           editable={!busy}
           accessibilityLabel="Product link"
-          className="flex-1 py-md text-base text-ink-primary"
+          className="flex-1 py-sm font-sans text-[13.5px] text-ink-primary"
         />
-        {link.length > 0 ? (
+        {link.length > 0 && !busy && (
           <Pressable
             onPress={() => setLink('')}
-            disabled={busy}
             accessibilityRole="button"
             accessibilityLabel="Clear link"
             hitSlop={10}
           >
             <AppIcon name="close" size="sm" color={themeColors.inkSecondary} />
           </Pressable>
-        ) : (
-          <Pressable
-            onPress={handlePaste}
-            accessibilityRole="button"
-            accessibilityLabel="Paste link"
-            hitSlop={10}
-          >
-            <Text className="font-sans-bold text-sm text-primary">Paste</Text>
-          </Pressable>
         )}
+        <Pressable
+          onPress={url ? handleTryOn : handlePaste}
+          disabled={busy}
+          accessibilityRole="button"
+          accessibilityLabel={url ? 'Try it on' : 'Paste link'}
+          className={`rounded-[13px] px-[14px] py-[10px] ${busy ? 'bg-neutral-300' : 'bg-inverse'}`}
+        >
+          <Text className="font-sans-bold text-[12.5px] text-ink-onPrimary">
+            {busy ? 'Working…' : url ? 'Try on' : 'Paste'}
+          </Text>
+        </Pressable>
       </View>
 
       {busy && (
-        <Text className="font-sans text-sm text-ink-secondary" accessibilityLiveRegion="polite">
+        <Text
+          className="mt-sm font-sans text-[12.5px] text-ink-secondary"
+          accessibilityLiveRegion="polite"
+        >
           {importLink.isPending ? 'Finding the product…' : 'Starting your try-on…'}
         </Text>
       )}
       {errorText && !busy && (
-        <Text className="font-sans text-sm text-error" accessibilityRole="alert">
+        <Text className="mt-sm font-sans text-[12.5px] text-error" accessibilityRole="alert">
           {errorText}
         </Text>
       )}
-
-      <AppButton
-        label={busy ? 'Working…' : 'Try it on'}
-        variant="accent"
-        onPress={handleTryOn}
-        disabled={!url || busy}
-      />
+      {!busy && !errorText && (
+        <Text className="mt-sm font-sans text-[11.5px] text-ink-secondary">
+          Copy a product link in your browser, paste it here, and see it on you.
+        </Text>
+      )}
     </View>
   );
 }

@@ -13,7 +13,11 @@ type GradientFillProps =
       /** Radii as fractions of the box (CSS `120% 70%` = { x: 1.2, y: 0.7 }). */
       radius?: { x: number; y: number };
     }
-  | { kind: 'linear'; stops: GradientStop[] };
+  | {
+      kind: 'linear';
+      stops: GradientStop[];
+      /** Left to right instead of top to bottom. */ horizontal?: boolean;
+    };
 
 /**
  * Fills its parent (absolutely positioned) with a gradient, drawn with
@@ -47,7 +51,13 @@ export function GradientFill(props: GradientFillProps) {
             {stops}
           </RadialGradient>
         ) : (
-          <LinearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <LinearGradient
+            id={id}
+            x1="0"
+            y1="0"
+            x2={props.horizontal ? '1' : '0'}
+            y2={props.horizontal ? '0' : '1'}
+          >
             {stops}
           </LinearGradient>
         )}
