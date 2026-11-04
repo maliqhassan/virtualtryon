@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
@@ -34,9 +34,12 @@ function PlanCard({ offer, isCurrent }: { offer: PlanOffer; isCurrent: boolean }
 export function UpgradeScreen() {
   const usageQuery = useUsageQuery();
   const usage = usageQuery.data;
+  // At the end of onboarding nothing is behind this screen: leave to Today.
+  const fromOnboarding = useLocalSearchParams<{ from?: string }>().from === 'onboarding';
+  const close = () => (fromOnboarding ? router.replace('/') : router.back());
 
   return (
-    <AppScaffold back>
+    <AppScaffold back={!fromOnboarding}>
       <Text className="font-display text-[34px] leading-[38px] text-ink-primary">
         Get more try-ons
       </Text>
@@ -64,7 +67,11 @@ export function UpgradeScreen() {
         <Text className="text-center font-sans text-xs text-ink-secondary">
           Subscriptions aren’t available yet. Failed try-ons never count against your allowance.
         </Text>
-        <AppButton label="Back" variant="secondary" onPress={() => router.back()} />
+        <AppButton
+          label={fromOnboarding ? 'Continue with Free' : 'Back'}
+          variant="secondary"
+          onPress={close}
+        />
       </View>
     </AppScaffold>
   );

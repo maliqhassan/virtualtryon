@@ -2,13 +2,13 @@ import { Redirect, Tabs } from 'expo-router';
 
 import { FloatingTabBar } from '@/components/floating-tab-bar';
 import { themeColors } from '@/constants/theme';
-import { useOnboardingSeen } from '@/features/onboarding/onboarding-flag';
+import { WELCOME_HREF, useOnboardingSeen } from '@/features/onboarding';
 
 export default function TabsLayout() {
   const onboardingSeen = useOnboardingSeen();
 
   if (onboardingSeen === null) return null; // reading the flag, a few ms
-  if (!onboardingSeen) return <Redirect href="/onboarding" />;
+  if (!onboardingSeen) return <Redirect href={WELCOME_HREF} />;
 
   return (
     <Tabs

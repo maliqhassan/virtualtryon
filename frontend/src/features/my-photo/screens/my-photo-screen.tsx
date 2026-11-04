@@ -20,6 +20,9 @@ import { describeValidationError, validateImage } from '@/lib/images/validate-im
 import { resolveMediaUrl } from '@/lib/media-url';
 import type { PickedImage } from '@/types';
 
+import { ANALYSING_HREF, StepHeader } from '@/features/onboarding';
+
+import { GoldBrackets } from '../components/gold-brackets';
 import { PhotoTips } from '../components/photo-tips';
 import { useDeleteMyPhotos, useMyPhotosQuery, useUploadMyPhoto } from '../hooks/use-my-photo';
 import { PHOTO_ANGLES, displayUrl, type PhotoAngle } from '../types';
@@ -35,7 +38,8 @@ const VIEW_HINT: Record<PhotoAngle, string> = {
 };
 
 export function MyPhotoScreen() {
-  const params = useLocalSearchParams<{ angle?: string }>();
+  const params = useLocalSearchParams<{ angle?: string; from?: string }>();
+  const inOnboarding = params.from === 'onboarding';
   const [angle, setAngle] = useState<PhotoAngle>(isAngle(params.angle) ? params.angle : 'front');
   const photosQuery = useMyPhotosQuery();
   const upload = useUploadMyPhoto();
@@ -83,11 +87,12 @@ export function MyPhotoScreen() {
           setSelected(null);
           setReplacing(false);
           // The front photo is what the user came for; go back to try it on.
-          if (angle === 'front' && router.canGoBack()) router.back();
+          // In onboarding they stay, and "Analyse my style" moves them on.
+          if (angle === 'front' && !inOnboarding && router.canGoBack()) router.back();
         },
       },
     );
-  }, [angle, selected, upload]);
+  }, [angle, inOnboarding, selected, upload]);
 
   const handleDeleteAll = useCallback(async () => {
     const confirmed = await confirmDestructiveAction(
@@ -102,16 +107,24 @@ export function MyPhotoScreen() {
   }
 
   const showPicker = !selected && (!current || replacing);
+  const hasFront = photos.some((p) => p.angle === 'front');
 
   return (
-    <AppScaffold back>
+    <AppScaffold back={!inOnboarding} dark>
+      {inOnboarding && (
+        <View className="mb-xl">
+          <StepHeader step={4} dark />
+        </View>
+      )}
       <ScreenHeader
-        eyebrow="Your photos"
-        title="My photo"
+        variant="editorial"
+        dark
+        title="One photo,"
+        italic="every try-on."
         subtitle="Add your photo once and use it for every try-on. Side and back views are optional."
       />
 
-      <View className="flex-row gap-sm rounded-full bg-muted p-xs">
+      <View className="flex-row gap-xs rounded-full bg-[rgba(255,255,255,0.07)] p-xs">
         {PHOTO_ANGLES.map((view) => {
           const active = view.angle === angle;
           const added = photos.some((p) => p.angle === view.angle);
@@ -123,16 +136,16 @@ export function MyPhotoScreen() {
               accessibilityState={{ selected: active }}
               accessibilityLabel={`${view.label} view${added ? ', added' : ''}`}
               className={[
-                'flex-1 items-center rounded-full py-sm',
-                active ? 'bg-inverse' : 'bg-transparent',
+                'flex-1 items-center rounded-full py-[9px]',
+                active ? 'bg-cream' : 'bg-transparent',
               ].join(' ')}
             >
               <View className="flex-row items-center gap-xxs">
                 <Text
                   className={
                     active
-                      ? 'font-sans-bold text-sm text-white'
-                      : 'font-sans-semibold text-sm text-ink-primary'
+                      ? 'font-sans-bold text-[12.5px] text-ink-primary'
+                      : 'font-sans-bold text-[12.5px] text-night-body'
                   }
                 >
                   {view.label}
@@ -141,7 +154,7 @@ export function MyPhotoScreen() {
                   <AppIcon
                     name="check"
                     size="xs"
-                    color={active ? themeColors.surface : themeColors.inkPrimary}
+                    color={active ? themeColors.inkPrimary : themeColors.nightBody}
                   />
                 )}
               </View>
@@ -149,7 +162,7 @@ export function MyPhotoScreen() {
           );
         })}
       </View>
-      <Text className="mt-sm font-sans text-sm text-ink-secondary">{VIEW_HINT[angle]}</Text>
+      <Text className="mt-sm font-sans text-sm text-night-body">{VIEW_HINT[angle]}</Text>
 
       {fault === 'permission_denied' && (
         <Text className="mt-md font-sans text-error" accessibilityRole="alert">
@@ -165,7 +178,7 @@ export function MyPhotoScreen() {
 
       {current && !selected && !replacing && (
         <FadeInView key={current.id} className="mt-xl gap-md">
-          <View className="w-2/3 self-center overflow-hidden rounded-[24px] border border-border">
+          <View className="overflow-hidden rounded-[26px] bg-[#211E1A]">
             <AppImage
               uri={resolveMediaUrl(displayUrl(current))}
               accessibilityLabel={`Your ${angle} view`}
@@ -173,15 +186,23 @@ export function MyPhotoScreen() {
               fit="contain"
               borderRadius={0}
             />
+            <GoldBrackets />
+            <View className="absolute bottom-[18px] flex-row items-center gap-[6px] self-center rounded-full bg-[rgba(28,26,23,0.7)] px-md py-[7px]">
+              <AppIcon name="check_circle" size={14} color="#7FC49C" />
+              <Text className="font-mono-semibold text-[10.5px] text-[#7FC49C]">
+                {current.cutoutUrl ? 'captured · background removed' : 'captured'}
+              </Text>
+            </View>
           </View>
           {!current.cutoutUrl && (
-            <Text className="text-center font-sans text-xs text-ink-secondary">
+            <Text className="text-center font-sans text-xs text-night-body">
               We couldn’t remove the background from this photo, so it’s shown as it is.
             </Text>
           )}
           <AppButton
             label={`Replace ${angle} photo`}
-            variant="primary"
+            variant="ghostDark"
+            icon="photo_camera"
             onPress={() => setReplacing(true)}
           />
         </FadeInView>
@@ -189,13 +210,28 @@ export function MyPhotoScreen() {
 
       {showPicker && !photosQuery.isLoading && (
         <View className="mt-xl gap-lg">
-          {angle === 'front' && <PhotoTips />}
+          {/* Onboarding showed the tips on the step before. */}
+          {angle === 'front' && !inOnboarding && <PhotoTips />}
+          <View className="aspect-[3/4] items-center justify-center overflow-hidden rounded-[26px] bg-[#1A1815]">
+            <GoldBrackets />
+            <AppIcon name="accessibility_new" size={64} color="rgba(242, 239, 234, 0.22)" />
+            <Text className="mt-[10px] font-mono text-[10px] text-neutral-500">
+              [ {angle} view ]
+            </Text>
+            <View className="absolute bottom-[18px] flex-row items-center gap-[6px] rounded-full bg-[rgba(28,26,23,0.7)] px-md py-[7px]">
+              <AppIcon name="center_focus_weak" size={14} color="#D9B26A" />
+              <Text className="font-mono-semibold text-[10.5px] text-gold-overline">
+                {angle === 'front' ? 'required · stand straight' : 'optional'}
+              </Text>
+            </View>
+          </View>
           <ImageSourcePicker
+            dark
             onPickFromGallery={handlePickFromGallery}
             onOpenCamera={() => setShowCamera(true)}
           />
           {replacing && (
-            <AppButton label="Cancel" variant="secondary" onPress={() => setReplacing(false)} />
+            <AppButton label="Cancel" variant="ghostDark" onPress={() => setReplacing(false)} />
           )}
         </View>
       )}
@@ -212,7 +248,7 @@ export function MyPhotoScreen() {
 
           {upload.isPending && (
             <View className="gap-sm" accessibilityLiveRegion="polite">
-              <Text className="font-sans text-ink-secondary">
+              <Text className="font-sans text-night-body">
                 {upload.progress < 100
                   ? `Uploading… ${upload.progress}%`
                   : 'Checking your photo and removing the background…'}
@@ -229,12 +265,13 @@ export function MyPhotoScreen() {
 
           <AppButton
             label="Use this photo"
+            variant="cream"
             onPress={handleConfirm}
             disabled={!!validationError || upload.isPending}
           />
           <AppButton
             label="Choose a different photo"
-            variant="secondary"
+            variant="ghostDark"
             onPress={() => {
               setSelected(null);
               upload.reset();
@@ -244,7 +281,19 @@ export function MyPhotoScreen() {
         </View>
       )}
 
-      {photos.length > 0 && !selected && (
+      {inOnboarding && !selected && (
+        <View className="mt-lg">
+          <AppButton
+            label="Analyse my style"
+            variant="accent"
+            icon="auto_awesome"
+            onPress={() => router.push(ANALYSING_HREF)}
+            disabled={!hasFront}
+          />
+        </View>
+      )}
+
+      {photos.length > 0 && !selected && !inOnboarding && (
         <View className="mt-xxxl">
           <AppButton
             label={deletePhotos.isPending ? 'Deleting…' : 'Delete all my photos'}
@@ -256,7 +305,10 @@ export function MyPhotoScreen() {
         </View>
       )}
 
-      <Text className="mt-xl text-center font-sans text-xs text-ink-secondary">
+      <Text className="mt-xl text-center font-sans text-[11px] leading-[17px] text-ink-secondary">
+        {inOnboarding
+          ? 'Side and back are optional, and make try-ons from other angles possible.\n'
+          : ''}
         Your photos are only used to create your try-ons. You can delete them at any time.
       </Text>
     </AppScaffold>

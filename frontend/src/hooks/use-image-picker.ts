@@ -49,5 +49,28 @@ export function useImagePicker() {
     }
   }, []);
 
-  return { pickFromGallery, fault, clearFault: () => setFault(null) };
+  /** Several photos at once, in the order picked (onboarding's first pieces). */
+  const pickManyFromGallery = useCallback(async (limit: number): Promise<PickedImage[]> => {
+    setFault(null);
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setFault('permission_denied');
+      return [];
+    }
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.9,
+        allowsMultipleSelection: true,
+        orderedSelection: true,
+        selectionLimit: limit,
+      });
+      return result.canceled ? [] : result.assets.map(toPickedImage);
+    } catch {
+      setFault('unknown_error');
+      return [];
+    }
+  }, []);
+
+  return { pickFromGallery, pickManyFromGallery, fault, clearFault: () => setFault(null) };
 }

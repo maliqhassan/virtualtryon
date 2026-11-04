@@ -1,11 +1,11 @@
-import * as Haptics from 'expo-haptics';
 import type { Tabs } from 'expo-router';
 import { useEffect, type ComponentProps } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { themeColors } from '@/constants/theme';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { selectionFeedback } from '@/lib/haptics';
 
 import { AppIcon } from './app-icon';
 import { PressableScale } from './pressable-scale';
@@ -45,10 +45,6 @@ const PALETTE = {
 type Palette = (typeof PALETTE)[keyof typeof PALETTE];
 
 const BAR_SHADOW = '0px 10px 28px rgba(22, 19, 15, 0.14)';
-
-function tapFeedback() {
-  if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
-}
 
 function TabItem({
   label,
@@ -209,7 +205,7 @@ export function FloatingTabBar({ state, descriptors, navigation, insets }: TabBa
           const label = typeof options?.title === 'string' ? options.title : route.name;
 
           const onPress = () => {
-            tapFeedback();
+            selectionFeedback();
             const event = navigation.emit({
               type: 'tabPress',
               target: route.key,

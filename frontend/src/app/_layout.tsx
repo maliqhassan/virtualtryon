@@ -17,6 +17,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { themeColors } from '@/constants/theme';
+import { BrandSplash } from '@/features/onboarding';
 import { queryClient } from '@/lib/query-client';
 
 // Keep the splash screen up until the fonts are ready, so text never flashes
@@ -54,13 +55,18 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
+          <Stack.Screen
+            name="(onboarding)"
+            options={{ gestureEnabled: false, animation: 'fade' }}
+          />
+          <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
           <Stack.Screen
             name="upgrade"
             options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
           />
         </Stack>
         <StatusBar style="dark" />
+        <BrandSplash />
       </QueryClientProvider>
     </SafeAreaProvider>
   );
