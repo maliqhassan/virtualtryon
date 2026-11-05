@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "548378184863",
+    "project_id": "virtualtryon-cb20a",
+    "storage_bucket": "virtualtryon-cb20a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:548378184863:android:231ae37c981333377566aa",
+        "android_client_info": {
+          "package_name": "com.maliqhassan.virtualtryon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "548378184863-jjualnlec5ld95hrt9atvpn79matuvrj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgC6angHUmLe-mCi727F3ZnqTTLaO95PI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "548378184863-jjualnlec5ld95hrt9atvpn79matuvrj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

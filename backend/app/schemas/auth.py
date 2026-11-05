@@ -26,6 +26,13 @@ class EmailAuthRequest(BaseModel):
         return value
 
 
+class GoogleAuthRequest(BaseModel):
+    """The Firebase ID token from Google sign-in on the phone (ADR 0012)."""
+
+    # Firebase ID tokens are around 1 KB; the cap only bounds the work.
+    id_token: str = Field(min_length=1, max_length=8192)
+
+
 class AccountResponse(BaseModel):
     """Who the caller is: a guest (email null) or a signed-in account."""
 
@@ -34,7 +41,9 @@ class AccountResponse(BaseModel):
     plan: Plan
 
 
-class EmailAuthResponse(BaseModel):
+class SignInResponse(BaseModel):
+    """Both sign-in methods answer with this."""
+
     token: str
     # True when this call created the account (the app then continues onboarding).
     created: bool

@@ -24,9 +24,11 @@ gunicorn>=23.0,<24.0
 
 # Email + password sign-in (ADR 0010). argon2id over bcrypt: the current
 # OWASP recommendation, as docs/roadmap/phase-b-platform.md planned. PyJWT
-# signs the session token the app sends as `Authorization: Bearer`.
+# signs the session token the app sends as `Authorization: Bearer`, and with
+# its crypto extra checks Firebase's RS256 sign-in tokens (ADR 0012), which
+# firebase-admin would also do but with the whole Google Cloud client stack.
 argon2-cffi>=23.1,<26.0
-pyjwt>=2.9,<3.0
+pyjwt[crypto]>=2.9,<3.0
 
 # MediaPipe diagnostic analysis (ADR 0007 — narrow exception to ADR 0004,
 # runs in-process here instead of over HTTP to root ai/). Pinned to match

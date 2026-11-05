@@ -32,9 +32,10 @@ async def _user_from_token(repo: UserRepository, authorization: str) -> User:
     # fall-back to a guest: that would hide the account's data.
     if not authorization.lower().startswith(_BEARER):
         raise _session_expired()
-    user_id = read_session_token(authorization[len(_BEARER) :].strip())
-    user = await repo.get_by_id(user_id) if user_id is not None else None
-    if user is None:
+    claims = read_session_token(authorization[len(_BEARER) :].strip())
+    user = await repo.get_by_id(claims.user_id) if claims is not None else None
+    # A bumped session version revokes every token issued before it.
+    if user is None or claims is None or claims.version != user.session_version:
         raise _session_expired()
     return user
 

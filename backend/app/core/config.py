@@ -77,6 +77,11 @@ class Settings(BaseSettings):
     # segmentation). Can be turned off on very small servers to save memory.
     BACKGROUND_REMOVAL_ENABLED: bool = True
 
+    # Firebase project that Google sign-in goes through (ADR 0012): its
+    # sign-in tokens must be issued for this project. Empty turns Google
+    # sign-in off. Not a secret; it's in the app's google-services.json too.
+    FIREBASE_PROJECT_ID: str = ""
+
     # RapidAPI key for guessing a new wardrobe piece's category
     # (app/services/garment_detection.py). Empty turns detection off. Every
     # call costs a credit, so all users together get at most

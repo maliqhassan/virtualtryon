@@ -41,6 +41,10 @@ services:
         value: "true"
       - key: BACKGROUND_REMOVAL_ENABLED
         value: "true"
+      # Google sign-in (ADR 0012): the Firebase project id, set in the
+      # dashboard once the Firebase project exists. Empty turns it off.
+      - key: FIREBASE_PROJECT_ID
+        sync: false
       # Category guess for new wardrobe pieces (api4.ai via RapidAPI). Secret:
       # paste the key in Render's dashboard; empty turns detection off.
       - key: FASHION_API_KEY

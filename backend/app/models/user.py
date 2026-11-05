@@ -13,7 +13,7 @@ import enum
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import DateTime, Integer, String
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -55,8 +55,18 @@ class User(Base):
     email: Mapped[str | None] = mapped_column(
         String(EMAIL_MAX_LENGTH), unique=True, index=True, nullable=True
     )
-    # argon2id hash; None for guests (and, later, Google/Apple-only accounts).
+    # argon2id hash; None for guests and Google accounts.
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # The Firebase user id, set by Google sign-in (ADR 0012). Firebase keeps
+    # it stable for a Google account even if its email changes.
+    firebase_uid: Mapped[str | None] = mapped_column(
+        String(128), unique=True, index=True, nullable=True
+    )
+    # In every session token; bumping it revokes all sessions issued before
+    # (app/core/security.py), e.g. when Google takes over an email account.
+    session_version: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     # server_default is the enum *name*: SQLAlchemy's Enum stores member
     # names, matching how auth_provider is already stored.
     plan: Mapped[Plan] = mapped_column(

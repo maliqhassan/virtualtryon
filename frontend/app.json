@@ -11,6 +11,8 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.maliqhassan.virtualtryon",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#F6F4F0",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -45,7 +47,10 @@
           "photosPermission": "VirtualTryOn uses your photo library to select images for virtual try-on."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true,

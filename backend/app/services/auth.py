@@ -1,6 +1,6 @@
-"""Email + password sign-in (ADR 0010). One call handles both cases, as the
-design's single email screen does: an unknown email creates the account, a
-known one signs in.
+"""Sign-in: email + password (ADR 0010) and Google through Firebase (ADR
+0012). Each is one call for both cases: an unknown person gets a new
+account, a known one signs in.
 
 Creating an account from a guest turns that guest's row into the account
 (email, password hash, provider), so everything the guest already made
@@ -26,6 +26,11 @@ from app.core.security import (
 from app.db.repositories.user_repository import UserRepository
 from app.models.user import AuthProvider, User
 from app.services.attempt_limiter import SlidingWindowLimiter
+from app.services.firebase_identity import (
+    IdentityVerifier,
+    InvalidIdentityError,
+    VerifiedIdentity,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +65,7 @@ class TooManyAttemptsError(Exception):
 
 
 @dataclass(frozen=True)
-class EmailSignIn:
+class SignInResult:
     user: User
     token: str
     created: bool
@@ -77,7 +82,7 @@ async def continue_with_email(
     password: str,
     *,
     caller_address: str,
-) -> EmailSignIn:
+) -> SignInResult:
     """`current_user` is the caller's existing guest or account, or None.
     Raises WrongPasswordError or TooManyAttemptsError."""
     email = normalize_email(email)
@@ -94,11 +99,7 @@ async def continue_with_email(
         return await _sign_in(db, existing, email, password)
 
     password_hash = await asyncio.to_thread(hash_password, password)
-    is_guest = (
-        current_user is not None
-        and current_user.auth_provider == AuthProvider.GUEST
-        and current_user.email is None
-    )
+    is_guest = _is_unclaimed_guest(current_user)
     if is_guest and current_user is not None:
         user = current_user
         user.email = email
@@ -120,10 +121,93 @@ async def continue_with_email(
         return await _sign_in(db, existing, email, password)
     await db.refresh(user)
     logger.info("account created: user_id=%s from_guest=%s", user.id, is_guest)
-    return EmailSignIn(user=user, token=create_session_token(user.id), created=True)
+    return SignInResult(
+        user=user, token=create_session_token(user.id, user.session_version), created=True
+    )
 
 
-async def _sign_in(db: AsyncSession, user: User, email: str, password: str) -> EmailSignIn:
+def _is_unclaimed_guest(user: User | None) -> bool:
+    return user is not None and user.auth_provider == AuthProvider.GUEST and user.email is None
+
+
+# Only Google is switched on in the app for now; other Firebase methods
+# (Apple, phone) are refused until they're deliberately added.
+_ALLOWED_PROVIDERS = {"google.com"}
+
+
+async def continue_with_google(
+    db: AsyncSession,
+    current_user: User | None,
+    id_token: str,
+    verifier: IdentityVerifier,
+    *,
+    caller_address: str,
+) -> SignInResult:
+    """`id_token` is the Firebase token the app got from Google sign-in.
+    Raises InvalidIdentityError, IdentityUnavailableError or TooManyAttemptsError."""
+    if not _per_address.try_acquire(caller_address) or not _all_callers.try_acquire(_ALL):
+        raise TooManyAttemptsError
+    identity = await verifier.verify(id_token)
+    if identity.provider not in _ALLOWED_PROVIDERS:
+        raise InvalidIdentityError
+
+    repo = UserRepository(db)
+    known = await repo.get_by_firebase_uid(identity.uid)
+    if known is not None:
+        return SignInResult(
+            user=known, token=create_session_token(known.id, known.session_version), created=False
+        )
+
+    # Google has proven this address belongs to this person.
+    email = normalize_email(identity.email) if identity.email and identity.email_verified else None
+    same_email = await repo.get_by_email(email) if email else None
+    if same_email is not None:
+        user = _link_google(same_email, identity)
+        created = False
+    elif _is_unclaimed_guest(current_user) and current_user is not None:
+        user = current_user
+        user.firebase_uid = identity.uid
+        user.email = email
+        user.auth_provider = AuthProvider.GOOGLE
+        user.device_id = None
+        created = True
+    else:
+        user = repo.stage_new_google_user(identity.uid, email)
+        created = True
+    try:
+        await db.commit()
+    except IntegrityError:
+        # The same Google account signed in a moment ago (a double tap).
+        await db.rollback()
+        known = await repo.get_by_firebase_uid(identity.uid)
+        if known is None:
+            raise
+        return SignInResult(
+            user=known, token=create_session_token(known.id, known.session_version), created=False
+        )
+    await db.refresh(user)
+    if created:
+        logger.info("google account created: user_id=%s", user.id)
+    return SignInResult(
+        user=user, token=create_session_token(user.id, user.session_version), created=created
+    )
+
+
+def _link_google(user: User, identity: VerifiedIdentity) -> User:
+    """An account already uses this email (registered with a password,
+    which never proved ownership of the address). Google just did, so the
+    account becomes this person's Google account and the password is
+    removed. Bumping the session version also ends every session issued
+    before, so whoever set that password is signed out everywhere."""
+    user.firebase_uid = identity.uid
+    user.password_hash = None
+    user.auth_provider = AuthProvider.GOOGLE
+    user.session_version += 1
+    logger.info("email account linked to google: user_id=%s", user.id)
+    return user
+
+
+async def _sign_in(db: AsyncSession, user: User, email: str, password: str) -> SignInResult:
     stored = user.password_hash
     if stored is None or not await asyncio.to_thread(verify_password, stored, password):
         _failures_per_email.try_acquire(email)
@@ -131,4 +215,6 @@ async def _sign_in(db: AsyncSession, user: User, email: str, password: str) -> E
     if password_needs_rehash(stored):
         user.password_hash = await asyncio.to_thread(hash_password, password)
         await db.commit()
-    return EmailSignIn(user=user, token=create_session_token(user.id), created=False)
+    return SignInResult(
+        user=user, token=create_session_token(user.id, user.session_version), created=False
+    )

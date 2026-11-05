@@ -1,12 +1,16 @@
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/app-icon';
 import { PressableScale } from '@/components/pressable-scale';
 import { StripeFill, type StripeTone } from '@/components/stripe-fill';
 import { themeColors } from '@/constants/theme';
-import { EMAIL_HREF, GOAL_HREF, OnboardingFrame } from '@/features/onboarding';
+import { GOAL_HREF, markOnboardingSeen, OnboardingFrame } from '@/features/onboarding';
+
+import { GoogleMark } from '../components/google-mark';
+import { useContinueWithGoogle } from '../hooks/use-account';
+import { signInErrorMessage } from '../services/auth-api';
 
 const COLLAGE: { tone: StripeTone; style: object; caption?: string }[] = [
   { tone: 'warm', style: { left: 4, top: 36, height: 200, transform: [{ rotate: '-7deg' }] } },
@@ -18,37 +22,32 @@ const COLLAGE: { tone: StripeTone; style: object; caption?: string }[] = [
   },
 ];
 
-function comingSoon(provider: string) {
-  // Google and Apple go through Firebase (ADR 0009), which needs a
-  // development build; until then, say so instead of failing silently.
-  Alert.alert(
-    `${provider} sign-in is coming soon`,
-    'Continue with email for now, or try the app as a guest.',
-  );
-}
-
 function ProviderButton({
   label,
   mark,
   dark = false,
+  busy = false,
   onPress,
 }: {
   label: string;
   mark: ReactNode;
   dark?: boolean;
+  busy?: boolean;
   onPress: () => void;
 }) {
   return (
     <PressableScale
       onPress={onPress}
+      disabled={busy}
       pressedScale={0.98}
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{ busy, disabled: busy }}
       className={`min-h-[52px] flex-row items-center justify-center gap-[9px] rounded-xl ${
         dark ? 'bg-inverse' : 'border border-[rgba(22,19,15,0.12)] bg-surface'
       }`}
     >
-      {mark}
+      {busy ? <ActivityIndicator size="small" color={themeColors.inkPrimary} /> : mark}
       <Text
         className={`font-sans-bold text-[14.5px] ${dark ? 'text-ink-onPrimary' : 'text-ink-primary'}`}
       >
@@ -58,8 +57,26 @@ function ProviderButton({
   );
 }
 
-/** "Make it yours": Apple and Google first, then email, or try as a guest. */
+/** "Make it yours": Google sign-in (ADR 0012), or try as a guest. */
 export function SignInScreen() {
+  const signIn = useContinueWithGoogle();
+
+  const handleGoogle = () =>
+    signIn.mutate(undefined, {
+      onSuccess: async (result) => {
+        if (!result) return; // the picker was closed
+        if (result.created) {
+          router.push(GOAL_HREF);
+        } else {
+          // A returning account has been through onboarding already.
+          await markOnboardingSeen();
+          router.replace('/');
+        }
+      },
+    });
+
+  const errorMessage = signInErrorMessage(signIn.error);
+
   return (
     <OnboardingFrame>
       <View
@@ -80,7 +97,7 @@ export function SignInScreen() {
           </View>
         ))}
         <View
-          className="absolute right-[40px] top-[196px] z-10 flex-row items-center gap-[6px] rounded-full bg-inverse px-md py-sm"
+          className="absolute right-[40px] top-[222px] z-10 flex-row items-center gap-[6px] rounded-full bg-inverse px-md py-sm"
           style={{ boxShadow: '0px 8px 20px rgba(22, 19, 15, 0.25)' }}
         >
           <AppIcon name="auto_awesome" size={14} color={themeColors.goldSoft} />
@@ -100,22 +117,20 @@ export function SignInScreen() {
 
       <View className="mt-xxl gap-[10px]">
         <ProviderButton
-          label="Continue with Apple"
-          dark
-          mark={<View className="h-[14px] w-[14px] rounded-[4px] bg-background" />}
-          onPress={() => comingSoon('Apple')}
-        />
-        <ProviderButton
-          label="Continue with Google"
-          mark={<View className="h-[15px] w-[15px] rounded-full border-[3px] border-[#4285F4]" />}
-          onPress={() => comingSoon('Google')}
-        />
-        <ProviderButton
-          label="Continue with email"
-          mark={<AppIcon name="mail" size="sm" color={themeColors.inkPrimary} />}
-          onPress={() => router.push(EMAIL_HREF)}
+          label={signIn.isPending ? 'Signing in…' : 'Continue with Google'}
+          busy={signIn.isPending}
+          mark={<GoogleMark />}
+          onPress={handleGoogle}
         />
       </View>
+      {errorMessage && (
+        <Text
+          className="mt-[10px] text-center font-sans text-[12.5px] text-error"
+          accessibilityRole="alert"
+        >
+          {errorMessage}
+        </Text>
+      )}
       <Pressable
         onPress={() => router.push(GOAL_HREF)}
         accessibilityRole="button"

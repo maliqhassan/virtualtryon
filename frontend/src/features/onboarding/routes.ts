@@ -3,7 +3,6 @@ import type { Href } from 'expo-router';
 /** The first-run flow, in order (design_handoff_ai_stylist/04-react-native.md §2). */
 export const WELCOME_HREF = '/welcome' as Href;
 export const SIGN_IN_HREF = '/sign-in' as Href;
-export const EMAIL_HREF = '/email' as Href;
 export const GOAL_HREF = '/goal' as Href;
 export const QUIZ_HREF = '/quiz' as Href;
 export const HOW_IT_WORKS_HREF = '/how-it-works' as Href;

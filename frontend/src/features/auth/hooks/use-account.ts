@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { emitIdentityChange } from '@/lib/identity-events';
 import { clearSession } from '@/services/api/session';
 
-import { continueWithEmail, getAccount } from '../services/auth-api';
+import { continueWithGoogle, getAccount } from '../services/auth-api';
+import { signOutOfGoogle } from '../services/google-sign-in';
 
 const ACCOUNT_KEY = ['account'] as const;
 
@@ -24,21 +25,26 @@ function useIdentityChanged() {
   };
 }
 
-/** Sign up or sign in with email. */
-export function useContinueWithEmail() {
+/** Sign up or sign in with Google. Resolves to null when the picker is closed. */
+export function useContinueWithGoogle() {
   const identityChanged = useIdentityChanged();
   return useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      continueWithEmail(email, password),
-    onSuccess: identityChanged,
+    mutationFn: continueWithGoogle,
+    onSuccess: async (result) => {
+      if (result) await identityChanged();
+    },
   });
 }
 
-/** Signs out on this phone and continues as a fresh guest. */
+/** Signs out on this phone and continues as a fresh guest. The Google
+ * account is forgotten too, so signing in again shows the picker. */
 export function useSignOut() {
   const identityChanged = useIdentityChanged();
   return useMutation({
-    mutationFn: clearSession,
+    mutationFn: async () => {
+      await clearSession();
+      await signOutOfGoogle();
+    },
     onSuccess: identityChanged,
   });
 }

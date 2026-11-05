@@ -6,7 +6,6 @@ export { markOnboardingSeen, useOnboardingSeen } from './onboarding-flag';
 export { GOALS, type GoalId, useOnboardingPreferences } from './preferences';
 export {
   ANALYSING_HREF,
-  EMAIL_HREF,
   GOAL_HREF,
   ONBOARDING_PLANS_HREF,
   SIGN_IN_HREF,

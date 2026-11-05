@@ -5,7 +5,7 @@ import { deleteStoredToken, getStoredToken, setStoredToken } from '@/lib/secure-
 import { DEVICE_ID_STORAGE_KEY } from './device-identity';
 
 /**
- * Signed-in session (backend ADR 0010): the token from `POST /auth/email`,
+ * Signed-in session (backend ADRs 0010, 0012): the token from `POST /auth/google`,
  * sent as `Authorization: Bearer` on every request. Without one the app is
  * a guest, identified by its device id. Treated as a credential: kept in
  * secure storage, never logged or shown.

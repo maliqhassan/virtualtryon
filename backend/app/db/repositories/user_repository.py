@@ -26,6 +26,15 @@ class UserRepository:
         result = await self._db.execute(select(User).where(User.email == email))
         return result.scalar_one_or_none()
 
+    async def get_by_firebase_uid(self, firebase_uid: str) -> User | None:
+        result = await self._db.execute(select(User).where(User.firebase_uid == firebase_uid))
+        return result.scalar_one_or_none()
+
+    def stage_new_google_user(self, firebase_uid: str, email: str | None) -> User:
+        user = User(auth_provider=AuthProvider.GOOGLE, firebase_uid=firebase_uid, email=email)
+        self._db.add(user)
+        return user
+
     def stage_new_email_user(self, email: str, password_hash: str) -> User:
         user = User(auth_provider=AuthProvider.EMAIL, email=email, password_hash=password_hash)
         self._db.add(user)

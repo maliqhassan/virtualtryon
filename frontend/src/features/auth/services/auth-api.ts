@@ -4,6 +4,7 @@ import { apiClient } from '@/services/api/client';
 import { saveSessionToken } from '@/services/api/session';
 
 import type { Account } from '../types';
+import { getGoogleIdToken, GoogleSignInError } from './google-sign-in';
 
 type AccountDto = {
   email: string | null;
@@ -15,49 +16,61 @@ function toAccount(dto: AccountDto): Account {
   return { email: dto.email, authProvider: dto.auth_provider, plan: dto.plan };
 }
 
-export type EmailAuthErrorCode = 'wrong_password' | 'too_many_attempts' | 'invalid' | 'network';
+export type SignInErrorCode = 'too_many_attempts' | 'unavailable' | 'failed' | 'network';
 
-const MESSAGES: Record<EmailAuthErrorCode, string> = {
-  wrong_password: 'That password doesn’t match this email.',
+const MESSAGES: Record<SignInErrorCode, string> = {
   too_many_attempts: 'Too many attempts. Please wait a few minutes and try again.',
-  invalid: 'Check the email format, and use a password of 8 or more characters.',
+  unavailable: 'Google sign-in isn’t available right now. Please try again later.',
+  failed: 'Google sign-in didn’t go through. Please try again.',
   network: 'Couldn’t reach the server. Check your connection and try again.',
 };
 
-export class EmailAuthError extends Error {
-  constructor(readonly code: EmailAuthErrorCode) {
+/** Our server refused or couldn't be reached; Google's own problems are
+ * GoogleSignInError. Both have a message that's safe to show. */
+export class SignInError extends Error {
+  constructor(readonly code: SignInErrorCode) {
     super(MESSAGES[code]);
+    this.name = 'SignInError';
   }
 }
 
-/** Signs up (new email) or signs in (known email), then keeps the session. */
-export async function continueWithEmail(
-  email: string,
-  password: string,
-  isRetry = false,
-): Promise<{ account: Account; created: boolean }> {
+export type SignInResult = { account: Account; created: boolean };
+
+async function exchangeGoogleToken(idToken: string, isRetry = false): Promise<SignInResult> {
   try {
     const response = await apiClient.post<{
       token: string;
       created: boolean;
       account: AccountDto;
-    }>('/api/v1/auth/email', { email, password });
+    }>('/api/v1/auth/google', { id_token: idToken });
     await saveSessionToken(response.data.token);
     return { account: toAccount(response.data.account), created: response.data.created };
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      const status = error.response.status;
       const code = (error.response.data as { detail?: { code?: string } } | undefined)?.detail
         ?.code;
       // An old token on this phone expired; the session interceptor has
       // dropped it, so the same request now goes through. Once.
-      if (code === 'session_expired' && !isRetry) return continueWithEmail(email, password, true);
-      if (code === 'wrong_password') throw new EmailAuthError('wrong_password');
-      if (status === 429) throw new EmailAuthError('too_many_attempts');
-      if (status === 422) throw new EmailAuthError('invalid');
+      if (code === 'session_expired' && !isRetry) return exchangeGoogleToken(idToken, true);
+      if (error.response.status === 429) throw new SignInError('too_many_attempts');
+      if (error.response.status === 503) throw new SignInError('unavailable');
+      throw new SignInError('failed');
     }
-    throw new EmailAuthError('network');
+    throw new SignInError('network');
   }
+}
+
+/** Opens Google's account picker, then signs in (or up) on our server and
+ * keeps the session. Null when the user closes the picker. */
+export async function continueWithGoogle(): Promise<SignInResult | null> {
+  const idToken = await getGoogleIdToken();
+  if (idToken === null) return null;
+  return exchangeGoogleToken(idToken);
+}
+
+export function signInErrorMessage(error: unknown): string | null {
+  if (error instanceof SignInError || error instanceof GoogleSignInError) return error.message;
+  return error ? MESSAGES.failed : null;
 }
 
 export async function getAccount(): Promise<Account> {

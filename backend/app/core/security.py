@@ -4,12 +4,13 @@ Passwords: argon2id with argon2-cffi's defaults (OWASP's recommended
 parameters). Hashing deliberately takes tens of milliseconds, so callers
 run it in a worker thread rather than on the event loop.
 
-Sessions: a JWT signed with SECRET_KEY (HS256) whose subject is the user id.
-Stateless on purpose (KISS): signing out deletes the token on the phone.
-Revoking every session server-side would need a stored token version; add
-that with "sign out everywhere" or account deletion, not before.
+Sessions: a JWT signed with SECRET_KEY (HS256) whose subject is the user id
+and whose `ver` is the account's session version. Signing out deletes the
+token on the phone; bumping `users.session_version` revokes every session
+issued before (ADR 0012: when Google takes over an email account).
 """
 
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -40,14 +41,26 @@ def password_needs_rehash(password_hash: str) -> bool:
     return _hasher.check_needs_rehash(password_hash)
 
 
-def create_session_token(user_id: UUID, *, now: datetime | None = None) -> str:
+@dataclass(frozen=True)
+class SessionClaims:
+    user_id: UUID
+    version: int
+
+
+def create_session_token(user_id: UUID, version: int = 0, *, now: datetime | None = None) -> str:
     issued = now or datetime.now(UTC)
-    claims = {"sub": str(user_id), "iat": issued, "exp": issued + SESSION_LIFETIME}
+    claims = {
+        "sub": str(user_id),
+        "ver": version,
+        "iat": issued,
+        "exp": issued + SESSION_LIFETIME,
+    }
     return jwt.encode(claims, get_settings().SECRET_KEY, algorithm=_ALGORITHM)
 
 
-def read_session_token(token: str) -> UUID | None:
-    """The user id in a valid, unexpired token, or None for anything else."""
+def read_session_token(token: str) -> SessionClaims | None:
+    """The claims of a valid, unexpired token, or None for anything else.
+    Tokens from before session versions count as version 0."""
     try:
         claims = jwt.decode(
             token,
@@ -55,6 +68,9 @@ def read_session_token(token: str) -> UUID | None:
             algorithms=[_ALGORITHM],
             options={"require": ["sub", "exp"]},
         )
-        return UUID(claims["sub"])
+        version = claims.get("ver", 0)
+        if not isinstance(version, int):
+            return None
+        return SessionClaims(user_id=UUID(claims["sub"]), version=version)
     except (jwt.PyJWTError, ValueError):
         return None
