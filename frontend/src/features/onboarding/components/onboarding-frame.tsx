@@ -1,9 +1,9 @@
-import { StatusBar } from 'expo-status-bar';
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GradientFill } from '@/components/gradient-fill';
+import { ScreenStatusBar } from '@/components/screen-status-bar';
 
 type OnboardingFrameProps = {
   children: ReactNode;
@@ -28,7 +28,7 @@ export function OnboardingFrame({
   return (
     <View className="flex-1" style={{ backgroundColor: stage }}>
       {backdrop}
-      <StatusBar style={dark ? 'light' : 'dark'} />
+      <ScreenStatusBar style={dark ? 'light' : 'dark'} />
       <SafeAreaView className="flex-1" edges={['top', 'bottom', 'left', 'right']}>
         {scroll ? (
           <ScrollView

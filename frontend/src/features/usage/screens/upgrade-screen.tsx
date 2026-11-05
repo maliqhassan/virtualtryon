@@ -1,13 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
 import { GradientFill } from '@/components/gradient-fill';
 import { IconButton } from '@/components/icon-button';
+import { ScreenStatusBar } from '@/components/screen-status-bar';
 import { StripeFill } from '@/components/stripe-fill';
 import { themeColors } from '@/constants/theme';
 import { selectionFeedback } from '@/lib/haptics';
@@ -46,11 +46,16 @@ export function UpgradeScreen() {
   const close = () => (fromOnboarding ? router.replace('/') : router.back());
   const paid = PLAN_OFFERS.filter((offer) => offer.id !== 'free');
   const [selected, setSelected] = useState<PlanId>('pro_plus');
+  const insets = useSafeAreaInsets();
 
   return (
     <View className="flex-1 bg-night">
-      <StatusBar style="light" />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-xxxl">
+      <ScreenStatusBar style="light" />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        // Clear Android's navigation bar, which the page draws under.
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+      >
         <View className="h-[330px] overflow-hidden" accessibilityElementsHidden>
           <StripeFill tone="dark" period={10} />
           <View

@@ -35,10 +35,12 @@ class DemoInferenceClient(AIInferenceClient):
         framed = Image.new("RGB", (garment.width + border * 2, garment.height + border * 2), _PAPER)
         framed.paste(garment, (border, border))
         margin = max(width // 30, 8)
-        base.paste(framed, (width - framed.width - margin, height - framed.height - margin))
+        banner_height = max(height // 14, 28)
+        # Top right, under the banner: the app lays its caption over the
+        # bottom of the result, which hid a bottom-corner garment.
+        base.paste(framed, (width - framed.width - margin, banner_height + margin))
 
         draw = ImageDraw.Draw(base, "RGBA")
-        banner_height = max(height // 14, 28)
         draw.rectangle((0, 0, width, banner_height), fill=(*_INK, 220))
         draw.rectangle((0, banner_height - 4, width, banner_height), fill=_CLAY)
         font = ImageFont.load_default(size=max(banner_height // 2, 12))

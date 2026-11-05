@@ -1,5 +1,5 @@
-import { useId } from 'react';
-import { StyleSheet } from 'react-native';
+import { useId, useState } from 'react';
+import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 type GradientStop = { offset: number; color: string; opacity?: number };
@@ -34,36 +34,47 @@ export function GradientFill(props: GradientFillProps) {
       stopOpacity={stop.opacity ?? 1}
     />
   ));
+  // Drawn at the measured size in pixels: a "100%" Svg on Android kept a
+  // stale, smaller size when its box grew (the plan card, "Best value").
+  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+  const onLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setSize((old) => (old?.width === width && old.height === height ? old : { width, height }));
+  };
   return (
-    <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Defs>
-        {props.kind === 'radial' ? (
-          <RadialGradient
-            id={id}
-            cx={`${(props.center?.x ?? 0.5) * 100}%`}
-            cy={`${(props.center?.y ?? 0.5) * 100}%`}
-            rx={`${(props.radius?.x ?? 0.5) * 100}%`}
-            ry={`${(props.radius?.y ?? 0.5) * 100}%`}
-            fx={`${(props.center?.x ?? 0.5) * 100}%`}
-            fy={`${(props.center?.y ?? 0.5) * 100}%`}
-            gradientUnits="objectBoundingBox"
-          >
-            {stops}
-          </RadialGradient>
-        ) : (
-          <LinearGradient
-            id={id}
-            x1="0"
-            y1="0"
-            x2={props.horizontal ? '1' : '0'}
-            y2={props.horizontal ? '0' : '1'}
-          >
-            {stops}
-          </LinearGradient>
-        )}
-      </Defs>
-      <Rect x={0} y={0} width="100%" height="100%" fill={`url(#${id})`} />
-    </Svg>
+    <View style={StyleSheet.absoluteFill} pointerEvents="none" onLayout={onLayout}>
+      {size && size.width > 0 && size.height > 0 && (
+        <Svg width={size.width} height={size.height}>
+          <Defs>
+            {props.kind === 'radial' ? (
+              <RadialGradient
+                id={id}
+                cx={`${(props.center?.x ?? 0.5) * 100}%`}
+                cy={`${(props.center?.y ?? 0.5) * 100}%`}
+                rx={`${(props.radius?.x ?? 0.5) * 100}%`}
+                ry={`${(props.radius?.y ?? 0.5) * 100}%`}
+                fx={`${(props.center?.x ?? 0.5) * 100}%`}
+                fy={`${(props.center?.y ?? 0.5) * 100}%`}
+                gradientUnits="objectBoundingBox"
+              >
+                {stops}
+              </RadialGradient>
+            ) : (
+              <LinearGradient
+                id={id}
+                x1="0"
+                y1="0"
+                x2={props.horizontal ? '1' : '0'}
+                y2={props.horizontal ? '0' : '1'}
+              >
+                {stops}
+              </LinearGradient>
+            )}
+          </Defs>
+          <Rect x={0} y={0} width={size.width} height={size.height} fill={`url(#${id})`} />
+        </Svg>
+      )}
+    </View>
   );
 }
 

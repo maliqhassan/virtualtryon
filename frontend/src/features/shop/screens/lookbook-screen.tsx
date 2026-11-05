@@ -1,11 +1,11 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FadeInView } from '@/components/fade-in-view';
 import { IconButton } from '@/components/icon-button';
+import { ScreenStatusBar } from '@/components/screen-status-bar';
 import { Skeleton } from '@/components/skeleton';
 import { resolveMediaUrl } from '@/lib/media-url';
 
@@ -60,7 +60,7 @@ export function LookbookScreen() {
 
   return (
     <View className="flex-1" style={{ backgroundColor: PAGE }}>
-      <StatusBar style="light" />
+      <ScreenStatusBar style="light" />
       <SafeAreaView className="flex-1" edges={['top', 'left', 'right']}>
         <ScrollView
           contentContainerClassName="px-xl pb-huge pt-lg"

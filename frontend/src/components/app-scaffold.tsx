@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconButton } from './icon-button';
+import { ScreenStatusBar } from './screen-status-bar';
 
 export type AppScaffoldProps = {
   children: ReactNode;
@@ -50,7 +50,7 @@ export function AppScaffold({
       className={`flex-1 ${dark ? 'bg-night' : 'bg-background'}`}
       edges={inTabs ? ['top', 'left', 'right'] : ['top', 'bottom', 'left', 'right']}
     >
-      {dark && <StatusBar style="light" />}
+      {dark && <ScreenStatusBar style="light" />}
       {scroll ? (
         <ScrollView
           className="flex-1 px-xl pt-lg"

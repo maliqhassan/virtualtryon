@@ -21,16 +21,16 @@ const WEEKDAY = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
 const DAY_MONTH = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' });
 const SHORT_DAY = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric' });
 
-function greeting(hour: number): string {
-  if (hour < 12) return 'Good morning,';
-  if (hour < 18) return 'Good afternoon,';
-  return 'Good evening,';
+function partOfDay(hour: number): string {
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
+  return 'evening';
 }
 
-/** The first part of the email, capitalised ("zara.k@…" → "Zara"); a guest is "there". */
-function firstName(email: string | null | undefined): string {
+/** The first part of the email, capitalised ("zara.k@…" → "Zara"); null for a guest. */
+function firstName(email: string | null | undefined): string | null {
   const local = email?.split('@')[0]?.split(/[._+-]/)[0];
-  return local ? local.charAt(0).toUpperCase() + local.slice(1) : 'there';
+  return local ? local.charAt(0).toUpperCase() + local.slice(1) : null;
 }
 
 /** Home: today's outfit from the user's own wardrobe, quick actions, the week ahead. */
@@ -39,6 +39,8 @@ export function TodayScreen() {
   const today = dayNumber(now);
   const garmentsQuery = useGarmentsQuery();
   const account = useAccountQuery().data;
+  const name = firstName(account?.email);
+  const part = partOfDay(now.getHours());
   const goals = useOnboardingPreferences((state) => state.goals);
   const { day, shuffles, wearing, shuffle, setWearing } = useTodayStore();
 
@@ -64,9 +66,10 @@ export function TodayScreen() {
             className="mt-sm font-display text-[36px] leading-[37px] text-ink-primary"
             accessibilityRole="header"
           >
-            {greeting(now.getHours())}
+            {/* "Good evening, Zara"; a guest gets "Good evening." with no name. */}
+            {name ? `Good ${part},` : 'Good'}
             {'\n'}
-            <Text className="font-display-italic">{firstName(account?.email)}</Text>
+            <Text className="font-display-italic">{name ?? `${part}.`}</Text>
           </Text>
         </View>
         <View className="flex-row gap-sm">
