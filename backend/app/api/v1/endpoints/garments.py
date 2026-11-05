@@ -11,7 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.garment import GarmentFromLinkRequest, GarmentResponse, GarmentUpdate
+from app.schemas.garment import (
+    CategoryGuessResponse,
+    GarmentFromLinkRequest,
+    GarmentResponse,
+    GarmentUpdate,
+)
+from app.services.garment_detection import GarmentDetector, detect_category, get_garment_detector
 from app.services.garments import (
     GarmentNotFoundError,
     create_garment,
@@ -70,6 +76,23 @@ async def create_new_garment(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc
+
+
+@router.post("/detect-category", response_model=CategoryGuessResponse)
+async def detect_garment_category(
+    image: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    detector: GarmentDetector = Depends(get_garment_detector),
+) -> CategoryGuessResponse:
+    try:
+        guess = await detect_category(
+            user_id=current_user.id, image=await _to_image_upload(image), detector=detector
+        )
+    except UnsupportedImageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
+        ) from exc
+    return CategoryGuessResponse.model_validate(guess)
 
 
 def _link_error(status_code: int, code: str, message: str) -> HTTPException:

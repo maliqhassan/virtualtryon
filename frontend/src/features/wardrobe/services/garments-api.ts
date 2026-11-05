@@ -69,6 +69,20 @@ export async function createGarment(input: CreateGarmentInput): Promise<Garment>
   return toGarment(dto);
 }
 
+/** The server's guess at a photo's category; both null when it couldn't
+ * tell (or detection is off), and the user chooses as before. */
+export type CategoryGuess = { category: string | null; confidence: number | null };
+
+/** No retries: every call can cost the server a paid credit. */
+export async function detectCategory(image: PickedImage): Promise<CategoryGuess> {
+  return uploadImage<CategoryGuess>({
+    path: `${BASE_PATH}/detect-category`,
+    fieldName: 'image',
+    image,
+    maxRetries: 0,
+  });
+}
+
 export async function updateGarment(id: string, input: UpdateGarmentInput): Promise<Garment> {
   const response = await apiClient.patch<GarmentDto>(`${BASE_PATH}/${id}`, input);
   return toGarment(response.data);

@@ -19,6 +19,16 @@ class GarmentResponse(BaseModel):
     updated_at: datetime
 
 
+class CategoryGuessResponse(BaseModel):
+    """POST /garments/detect-category: null when the photo couldn't be read
+    (or detection is off), so the user chooses as before."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    category: str | None
+    confidence: float | None
+
+
 class GarmentFromLinkRequest(BaseModel):
     """POST /garments/from-link body: a product page link from any store."""
 

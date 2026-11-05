@@ -16,6 +16,7 @@ import type { ImageValidationErrorCode, PickedImage } from '@/types';
 
 import { CategoryPickerModal } from '../components/category-picker-modal';
 import { useCreateGarment } from '../hooks/use-create-garment';
+import { useDetectCategory } from '../hooks/use-detect-category';
 import { tryOnGarmentHref } from '../routes';
 
 // A plain path, not shop's SHOP_HREF: shop already depends on wardrobe.
@@ -63,6 +64,8 @@ export function AddGarmentScreen() {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const { pickFromGallery, fault, clearFault } = useImagePicker();
   const createGarment = useCreateGarment();
+  const detect = useDetectCategory();
+  const { mutate: detectCategory, reset: resetDetection } = detect;
 
   const [showCamera, setShowCamera] = useState(false);
   const [image, setImage] = useState<PickedImage | null>(null);
@@ -71,21 +74,37 @@ export function AddGarmentScreen() {
   const [category, setCategory] = useState<string | null>(null);
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
 
-  const handlePicked = useCallback((picked: PickedImage) => {
-    setImage(picked);
-    setValidationError(validateImage(picked));
-    setShowCamera(false);
-  }, []);
+  const handlePicked = useCallback(
+    (picked: PickedImage) => {
+      const error = validateImage(picked);
+      setImage(picked);
+      setValidationError(error);
+      setShowCamera(false);
+      if (error) return;
+      // Filled in only if the user hasn't chosen a category meanwhile.
+      detectCategory(picked, {
+        onSuccess: ({ category: detected }) => {
+          if (detected) setCategory((current) => current ?? detected);
+        },
+      });
+    },
+    [detectCategory],
+  );
 
   const handlePickFromGallery = useCallback(async () => {
     const picked = await pickFromGallery();
     if (picked) handlePicked(picked);
   }, [pickFromGallery, handlePicked]);
 
+  const detectedCategory = detect.data?.category ?? null;
+
   const handleRemoveImage = useCallback(() => {
     setImage(null);
     setValidationError(null);
-  }, []);
+    // A guess from the old photo doesn't describe the next one.
+    setCategory((current) => (current === detectedCategory ? null : current));
+    resetDetection();
+  }, [detectedCategory, resetDetection]);
 
   const canSubmit = !!image && !validationError && title.trim().length > 0 && !!category;
 
@@ -190,6 +209,23 @@ export function AddGarmentScreen() {
                 {category ?? 'Choose a category'}
               </Text>
             </Pressable>
+            {detect.isPending && (
+              <Text className="font-sans text-xs text-ink-secondary">
+                Detecting the category from your photo…
+              </Text>
+            )}
+            {detect.isSuccess && !!category && category === detectedCategory && (
+              <Text className="font-sans text-xs text-ink-secondary">
+                {detect.data.confidence
+                  ? `Detected from your photo · ${Math.round(detect.data.confidence * 100)}% sure. Tap to change.`
+                  : 'Detected from your photo. Tap to change.'}
+              </Text>
+            )}
+            {detect.isSuccess && !detectedCategory && !category && (
+              <Text className="font-sans text-xs text-ink-secondary">
+                We couldn’t tell from the photo. Please choose one.
+              </Text>
+            )}
           </View>
 
           <View className="gap-md">

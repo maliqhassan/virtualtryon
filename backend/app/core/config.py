@@ -77,6 +77,13 @@ class Settings(BaseSettings):
     # segmentation). Can be turned off on very small servers to save memory.
     BACKGROUND_REMOVAL_ENABLED: bool = True
 
+    # RapidAPI key for guessing a new wardrobe piece's category
+    # (app/services/garment_detection.py). Empty turns detection off. Every
+    # call costs a credit, so all users together get at most
+    # FASHION_API_DAILY_LIMIT calls a day.
+    FASHION_API_KEY: str = ""
+    FASHION_API_DAILY_LIMIT: int = 10
+
     @model_validator(mode="after")
     def limits_off_only_with_demo(self) -> "Settings":
         """Unlimited try-ons on a paid provider would mean unlimited spend."""

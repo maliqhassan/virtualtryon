@@ -41,6 +41,13 @@ services:
         value: "true"
       - key: BACKGROUND_REMOVAL_ENABLED
         value: "true"
+      # Category guess for new wardrobe pieces (api4.ai via RapidAPI). Secret:
+      # paste the key in Render's dashboard; empty turns detection off.
+      - key: FASHION_API_KEY
+        sync: false
+      # Paid credits: at most this many calls a day across all users.
+      - key: FASHION_API_DAILY_LIMIT
+        value: "10"
 
 databases:
   - name: virtualtryon-db

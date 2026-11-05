@@ -9,6 +9,7 @@ from app.core.config import get_settings
 from app.main import app
 from app.models.user import Plan
 from app.services import plans
+from app.services.garment_detection import NoDetector, get_garment_detector
 from app.services.photo_background import NoBackgroundRemoval, get_background_remover
 from app.services.plans import AllowancePeriod, PlanAllowance
 
@@ -56,6 +57,8 @@ def _test_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "TRYON_PROVIDER", "catvton")
     # No MediaPipe model downloads in tests; test_user_photos covers cut-outs.
     app.dependency_overrides[get_background_remover] = NoBackgroundRemoval
+    # Never spend paid API credits in tests; test_garment_detection uses fakes.
+    app.dependency_overrides[get_garment_detector] = NoDetector
     monkeypatch.setattr(settings, "FULL_BODY_CHECK_ENABLED", False)
     monkeypatch.setitem(
         plans.PLAN_ALLOWANCES,
