@@ -20,7 +20,7 @@ const QUESTIONS = [
   },
   {
     q: 'Where my photos are stored',
-    a: 'On our server, only to create your try-ons. Nothing is posted. When you add a piece, its photo (never a photo of you) goes to our image-recognition partner, api4.ai, to suggest its category. Settings → Delete all my data removes your photos, wardrobe, looks and every stored image.',
+    a: 'On our server, only to create your try-ons. Nothing is posted. To make a try-on, your photo and the piece’s photo go to our try-on partner, Texel.Moda (through RapidAPI), which sends back the result. When you add a piece, its photo (never a photo of you) goes to our image-recognition partner, api4.ai, to suggest its category. Settings → Delete all my data removes your photos, wardrobe, looks and every stored image on our server.',
   },
   {
     q: 'A try-on failed',

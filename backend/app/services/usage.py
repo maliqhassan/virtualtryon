@@ -68,9 +68,31 @@ async def get_usage(db: AsyncSession, user: User, now: datetime | None = None) -
     )
 
 
+class DailyCapReachedError(Exception):
+    """All users together have used today's try-ons on a real provider
+    (TRYON_DAILY_LIMIT), which protects the provider's quota and spend."""
+
+    def __init__(self) -> None:
+        super().__init__("Try-ons are paused for today. Please try again tomorrow.")
+
+
 async def ensure_tryon_available(db: AsyncSession, user: User) -> None:
     """Call with the user's row already locked (UserRepository.get_for_update)
-    and in the same transaction that creates the job."""
+    and in the same transaction that creates the job. Raises
+    UsageLimitReachedError or DailyCapReachedError.
+
+    The daily cap is a count, not a lock across users: try-ons started by
+    different users at the same instant can all pass at the edge and go a
+    few over. Fine for protecting a test quota; not an exact limit."""
     usage = await get_usage(db, user)
     if usage.remaining <= 0:
         raise UsageLimitReachedError(usage)
+
+    settings = get_settings()
+    if settings.TRYON_PROVIDER != "demo" and settings.TRYON_DAILY_LIMIT > 0:
+        now = datetime.now(UTC)
+        started_today = await InferenceJobRepository(db).count_counted_since(
+            _start_of_today_utc(now), stale_before=now - STALE_JOB_AFTER
+        )
+        if started_today >= settings.TRYON_DAILY_LIMIT:
+            raise DailyCapReachedError

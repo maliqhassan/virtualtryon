@@ -31,9 +31,17 @@ services:
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
-      # demo: try-ons return a labelled placeholder until FASHN is connected.
+      # vton_d: real try-ons through RapidAPI for testing (ADR 0013), needs
+      # TRYON_API_KEY. demo: a labelled placeholder, no AI.
       - key: TRYON_PROVIDER
-        value: demo
+        value: vton_d
+      # Secret: the RapidAPI key, pasted in Render's dashboard.
+      - key: TRYON_API_KEY
+        sync: false
+      # Try-ons all users together can start in a day (VTON-D's free plan
+      # is 100 a month). Required while TRYON_LIMITS_ENABLED is false.
+      - key: TRYON_DAILY_LIMIT
+        value: "10"
       # Off while testing (no 1-free-try-on limit). Set to "true" before launch.
       - key: TRYON_LIMITS_ENABLED
         value: "false"

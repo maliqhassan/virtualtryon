@@ -24,7 +24,7 @@ from app.services.inference_jobs import (
     get_inference_job,
     list_inference_jobs,
 )
-from app.services.usage import UsageLimitReachedError
+from app.services.usage import DailyCapReachedError, UsageLimitReachedError
 
 router = APIRouter()
 
@@ -57,6 +57,11 @@ async def create_new_inference_job(
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail={"message": str(exc), "usage": exc.usage.model_dump(mode="json")},
+        ) from exc
+    except DailyCapReachedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={"code": "tryons_paused", "message": str(exc)},
         ) from exc
 
 

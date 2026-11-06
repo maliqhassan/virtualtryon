@@ -17,6 +17,10 @@ mediapipe>=0.10,<1.0
 pillow>=11.0,<12.0
 numpy>=1.26,<2.0
 
+# HTTP calls to hosted try-on APIs (inference_clients/vton_d_inference_client.py).
+# Same range as backend/requirements.txt, which installs this package too.
+httpx>=0.27,<1.0
+
 pydantic>=2.9,<3.0
 pydantic-settings>=2.5,<3.0
 python-dotenv>=1.0,<2.0

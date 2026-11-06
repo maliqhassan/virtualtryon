@@ -5,6 +5,7 @@ attempt — calls only the existing, unchanged app/services/inference_jobs.py
 functions to persist transitions; never mutates InferenceJob rows itself.
 """
 
+import asyncio
 import io
 import logging
 from datetime import UTC, datetime
@@ -77,7 +78,10 @@ class JobProcessor:
 
         await mark_processing(self._db, job_id)
 
-        attempt = self._inference_worker.attempt(
+        # In a thread: a real provider takes seconds over the network, and
+        # the demo's image work is CPU-bound; neither should hold the loop.
+        attempt = await asyncio.to_thread(
+            self._inference_worker.attempt,
             user_image_storage_key=job.user_image_storage_key,
             garment_image_storage_key=clothing.image_url,
         )

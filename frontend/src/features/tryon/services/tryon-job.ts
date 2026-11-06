@@ -70,6 +70,12 @@ export async function createTryOnJob(input: CreateTryOnJobInput): Promise<TryOnJ
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 402) throw new TryOnLimitReachedError();
       if (error.response?.status === 409) throw new MissingPhotoError();
+      // The server's daily cap for all users on a real try-on provider.
+      const detail = (error.response?.data as { detail?: { code?: string; message?: string } })
+        ?.detail;
+      if (error.response?.status === 429 && detail?.code === 'tryons_paused') {
+        throw new Error(detail.message ?? 'Try-ons are paused for today. Please try again later.');
+      }
       if (!error.response) {
         throw new Error('Can’t reach the server. Check your connection and try again.');
       }

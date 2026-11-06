@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn, field_validator, model_validator
+from pydantic import AnyHttpUrl, Field, PostgresDsn, RedisDsn, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -60,13 +60,23 @@ class Settings(BaseSettings):
     # Which AIInferenceClient the worker uses (app/worker/inference_client_provider.py).
     # "demo" returns the user's photo with the garment pinned on and a
     # visible "DEMO" banner, so the whole app flow can be tested before a
-    # real try-on API is connected. "catvton" is the unimplemented stub and
-    # always fails honestly. A real provider (FASHN) is added here later.
-    TRYON_PROVIDER: Literal["demo", "catvton"] = "demo"
+    # real try-on API is connected. "vton_d" is a real try-on through
+    # RapidAPI for testing (ADR 0013); FASHN replaces it later. "catvton" is
+    # the unimplemented stub and always fails honestly.
+    TRYON_PROVIDER: Literal["demo", "vton_d", "catvton"] = "demo"
+
+    # The real provider's API key (for vton_d: the RapidAPI key). Secret:
+    # set in the server's environment only.
+    TRYON_API_KEY: str = ""
+
+    # Most try-ons all users together can start in a UTC day on a real
+    # provider, so testers can't use up the API's quota (VTON-D's free plan
+    # is 100 a month). Failed try-ons don't count. 0 = no cap.
+    TRYON_DAILY_LIMIT: int = Field(default=10, ge=0)
 
     # Off while testing: nobody runs out of try-ons and the app shows
     # "Unlimited try-ons". Turn back on before real users and payments.
-    # Only allowed with the free demo provider (see below).
+    # Only allowed with the demo provider, or with TRYON_DAILY_LIMIT set.
     TRYON_LIMITS_ENABLED: bool = True
 
     # Reject user photos where MediaPipe can't see a full body (head,
@@ -91,9 +101,16 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def limits_off_only_with_demo(self) -> "Settings":
-        """Unlimited try-ons on a paid provider would mean unlimited spend."""
-        if not self.TRYON_LIMITS_ENABLED and self.TRYON_PROVIDER != "demo":
-            raise ValueError("TRYON_LIMITS_ENABLED=false is only allowed with TRYON_PROVIDER=demo")
+        """Unlimited try-ons on a paid provider would mean unlimited spend,
+        unless the daily cap for all users bounds it."""
+        if (
+            not self.TRYON_LIMITS_ENABLED
+            and self.TRYON_PROVIDER != "demo"
+            and self.TRYON_DAILY_LIMIT <= 0
+        ):
+            raise ValueError(
+                "TRYON_LIMITS_ENABLED=false needs TRYON_PROVIDER=demo or a TRYON_DAILY_LIMIT"
+            )
         return self
 
     @model_validator(mode="after")

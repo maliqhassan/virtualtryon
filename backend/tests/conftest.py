@@ -55,6 +55,10 @@ def _test_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     settings = get_settings()
     monkeypatch.setattr(settings, "TRYON_PROVIDER", "catvton")
+    # No server-wide daily cap (test_vton_d covers it) and no real key, so
+    # nothing here can reach the paid try-on API.
+    monkeypatch.setattr(settings, "TRYON_DAILY_LIMIT", 0)
+    monkeypatch.setattr(settings, "TRYON_API_KEY", "")
     # No MediaPipe model downloads in tests; test_user_photos covers cut-outs.
     app.dependency_overrides[get_background_remover] = NoBackgroundRemoval
     # Never spend paid API credits in tests; test_garment_detection uses fakes.

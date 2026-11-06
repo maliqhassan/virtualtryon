@@ -66,7 +66,8 @@ async def create_inference_job(
     db: AsyncSession, user_id: UUID, payload: CreateInferenceJobRequest
 ) -> InferenceJobResponse:
     """Raises UsageLimitReachedError (app/services/usage.py) when the user
-    has no try-ons left. The user's row is locked first, so the allowance
+    has no try-ons left, or DailyCapReachedError when all users together
+    have used today's try-ons. The user's row is locked first, so the allowance
     check and the job insert happen atomically for that user."""
     user = await UserRepository(db).get_for_update(user_id)
     if user is None:

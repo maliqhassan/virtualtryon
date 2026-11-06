@@ -31,6 +31,7 @@ from src.models.inference_client import (
 )
 from src.models.inference_clients.catvton_inference_client import CatVTONInferenceClient
 from src.models.inference_clients.demo_inference_client import DemoInferenceClient
+from src.models.inference_clients.vton_d_inference_client import VtonDInferenceClient
 
 from app.core.config import get_settings
 
@@ -48,6 +49,8 @@ def get_inference_client() -> AIInferenceClient:
     - "demo": DemoInferenceClient, which returns the user's photo with the
       garment pinned on and a visible "DEMO" banner, so the whole app flow
       can be tested before a real try-on API is connected.
+    - "vton_d": VtonDInferenceClient, real try-ons through RapidAPI with
+      TRYON_API_KEY (ADR 0013).
     - "catvton": CatVTONInferenceClient, which always raises
       NotImplementedError, so every job fails honestly.
 
@@ -55,6 +58,9 @@ def get_inference_client() -> AIInferenceClient:
     LocalStubInferenceClient, a plain grey image with no label, which
     would look like a broken real result.
     """
-    if get_settings().TRYON_PROVIDER == "demo":
+    settings = get_settings()
+    if settings.TRYON_PROVIDER == "demo":
         return DemoInferenceClient()
+    if settings.TRYON_PROVIDER == "vton_d":
+        return VtonDInferenceClient(api_key=settings.TRYON_API_KEY)
     return CatVTONInferenceClient()

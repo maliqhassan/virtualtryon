@@ -14,10 +14,21 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import Select, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.inference_job import InferenceJob, InferenceJobStatus
+
+
+def _counted(stale_before: datetime) -> Select[tuple[int]]:
+    """Counts completed jobs, plus queued/processing ones newer than
+    `stale_before`; failed and stuck jobs never count."""
+    in_flight = (
+        InferenceJob.status.in_([InferenceJobStatus.QUEUED, InferenceJobStatus.PROCESSING])
+    ) & (InferenceJob.created_at >= stale_before)
+    return select(func.count()).where(
+        or_(InferenceJob.status == InferenceJobStatus.COMPLETED, in_flight)
+    )
 
 
 class InferenceJobRepository:
@@ -69,15 +80,16 @@ class InferenceJobRepository:
         (e.g. the worker was down), so a try-on that never produced a
         result never costs the user one. `since=None` counts from the
         beginning (the free plan's lifetime limit)."""
-        in_flight = (
-            InferenceJob.status.in_([InferenceJobStatus.QUEUED, InferenceJobStatus.PROCESSING])
-        ) & (InferenceJob.created_at >= stale_before)
-        query = select(func.count()).where(
-            InferenceJob.user_id == user_id,
-            or_(InferenceJob.status == InferenceJobStatus.COMPLETED, in_flight),
-        )
+        query = _counted(stale_before).where(InferenceJob.user_id == user_id)
         if since is not None:
             query = query.where(InferenceJob.created_at >= since)
+        result = await self._db.execute(query)
+        return int(result.scalar_one())
+
+    async def count_counted_since(self, since: datetime, stale_before: datetime) -> int:
+        """The same try-ons as `count_counted_for_user`, for every user
+        together: the server-wide daily cap on a real provider."""
+        query = _counted(stale_before).where(InferenceJob.created_at >= since)
         result = await self._db.execute(query)
         return int(result.scalar_one())
 
