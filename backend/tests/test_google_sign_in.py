@@ -131,6 +131,145 @@ async def test_signing_in_again_returns_the_same_account(client, use_verifier) -
     assert [g["id"] for g in garments] == [garment.json()["id"]]
 
 
+async def _new_guest(client: AsyncClient) -> dict[str, str]:
+    return {"X-Device-Id": (await client.get("/api/v1/usage")).headers["x-device-id"]}
+
+
+async def _add_garment(client: AsyncClient, headers: dict, title: str) -> str:
+    response = await client.post(
+        "/api/v1/garments",
+        files={"image": ("g.png", _png(), "image/png")},
+        data={"title": title, "category": "Jackets"},
+        headers=headers,
+    )
+    assert response.status_code == 201
+    return response.json()["id"]
+
+
+async def test_signing_in_again_brings_the_guests_things_along(client, use_verifier) -> None:
+    use_verifier(FakeVerifier({"t": _google()}))
+    account = (await _sign_in(client, "t")).json()
+    own_piece = await _add_garment(client, _bearer(account), "Own coat")
+
+    # Signed out on this phone, the person used the app as a guest.
+    guest = await _new_guest(client)
+    guest_piece = await _add_garment(client, guest, "Guest scarf")
+    photo = await client.post(
+        "/api/v1/user-photos",
+        files={"image": ("me.png", _png(), "image/png")},
+        headers=guest,
+    )
+    job = await client.post(
+        "/api/v1/inference-jobs", json={"garment_id": guest_piece}, headers=guest
+    )
+    assert job.status_code == 201
+
+    again = await _sign_in(client, "t", headers=guest)
+
+    body = again.json()
+    assert body["created"] is False
+    signed_in = _bearer(body)
+    pieces = {g["id"] for g in (await client.get("/api/v1/garments", headers=signed_in)).json()}
+    assert pieces == {own_piece, guest_piece}
+    current = (await client.get("/api/v1/user-photos/current", headers=signed_in)).json()
+    assert current["id"] == photo.json()["id"]
+    jobs = (await client.get("/api/v1/inference-jobs", headers=signed_in)).json()
+    assert [j["id"] for j in jobs] == [job.json()["id"]]
+    # The emptied guest is gone: its device id now starts a fresh guest.
+    assert (await client.get("/api/v1/garments", headers=guest)).json() == []
+
+
+async def test_the_accounts_own_style_profile_wins(client, use_verifier) -> None:
+    use_verifier(FakeVerifier({"t": _google()}))
+    account = (await _sign_in(client, "t")).json()
+    await client.post(
+        "/api/v1/profile",
+        json={"display_name": "Account", "height_cm": 170, "weight_kg": 60},
+        headers=_bearer(account),
+    )
+    guest = await _new_guest(client)
+    await client.post(
+        "/api/v1/profile",
+        json={"display_name": "Guest", "height_cm": 160, "weight_kg": 50},
+        headers=guest,
+    )
+
+    body = (await _sign_in(client, "t", headers=guest)).json()
+
+    profile = (await client.get("/api/v1/profile", headers=_bearer(body))).json()
+    assert profile["display_name"] == "Account"
+
+
+async def test_a_guests_style_profile_moves_when_the_account_has_none(client, use_verifier) -> None:
+    use_verifier(FakeVerifier({"t": _google()}))
+    await _sign_in(client, "t")
+    guest = await _new_guest(client)
+    await client.post(
+        "/api/v1/profile",
+        json={"display_name": "Guest", "height_cm": 160, "weight_kg": 50},
+        headers=guest,
+    )
+
+    body = (await _sign_in(client, "t", headers=guest)).json()
+
+    profile = (await client.get("/api/v1/profile", headers=_bearer(body))).json()
+    assert profile["display_name"] == "Guest"
+
+
+async def test_one_photo_per_view_is_kept_and_the_older_file_removed(client, use_verifier) -> None:
+    from app.services.storage import get_storage_service
+
+    use_verifier(FakeVerifier({"t": _google()}))
+    account = (await _sign_in(client, "t")).json()
+    older = await client.post(
+        "/api/v1/user-photos",
+        files={"image": ("old.png", _png(), "image/png")},
+        headers=_bearer(account),
+    )
+    guest = await _new_guest(client)
+    newer = await client.post(
+        "/api/v1/user-photos",
+        files={"image": ("new.png", _png(), "image/png")},
+        headers=guest,
+    )
+
+    body = (await _sign_in(client, "t", headers=guest)).json()
+
+    photos = (await client.get("/api/v1/user-photos", headers=_bearer(body))).json()
+    assert [p["id"] for p in photos] == [newer.json()["id"]]
+    with pytest.raises(FileNotFoundError):
+        get_storage_service().read(older.json()["storage_key"])
+
+
+async def test_google_taking_over_an_email_account_also_merges(client, use_verifier) -> None:
+    email = f"merge-{uuid.uuid4().hex[:8]}@gmail.com"
+    await client.post("/api/v1/auth/email", json={"email": email, "password": PASSWORD})
+    guest = await _new_guest(client)
+    piece = await _add_garment(client, guest, "Guest scarf")
+    use_verifier(FakeVerifier({"t": _google(email=email)}))
+
+    body = (await _sign_in(client, "t", headers=guest)).json()
+
+    assert body["created"] is False
+    pieces = [g["id"] for g in (await client.get("/api/v1/garments", headers=_bearer(body))).json()]
+    assert pieces == [piece]
+
+
+async def test_a_signed_in_caller_is_not_merged(client, use_verifier) -> None:
+    """Only an unclaimed guest moves; another account signing in stays whole."""
+    use_verifier(FakeVerifier({"a": _google(), "b": _google()}))
+    first = (await _sign_in(client, "a")).json()
+    first_piece = await _add_garment(client, _bearer(first), "First's coat")
+    second = (await _sign_in(client, "b")).json()
+
+    body = (await _sign_in(client, "a", headers=_bearer(second))).json()
+
+    pieces = [g["id"] for g in (await client.get("/api/v1/garments", headers=_bearer(body))).json()]
+    assert pieces == [first_piece]
+    still = await client.get("/api/v1/auth/me", headers=_bearer(second))
+    assert still.status_code == 200
+
+
 async def test_takes_over_an_email_account_and_removes_its_password(client, use_verifier) -> None:
     email = f"owner-{uuid.uuid4().hex[:8]}@gmail.com"
     squatter = await client.post("/api/v1/auth/email", json={"email": email, "password": PASSWORD})

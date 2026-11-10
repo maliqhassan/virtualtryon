@@ -23,6 +23,7 @@ from app.core.security import (
     password_needs_rehash,
     verify_password,
 )
+from app.db.repositories.guest_merge_repository import GuestMergeRepository
 from app.db.repositories.user_repository import UserRepository
 from app.models.user import AuthProvider, User
 from app.services.attempt_limiter import SlidingWindowLimiter
@@ -31,6 +32,7 @@ from app.services.firebase_identity import (
     InvalidIdentityError,
     VerifiedIdentity,
 )
+from app.services.storage import get_storage_service
 
 logger = logging.getLogger(__name__)
 
@@ -152,20 +154,19 @@ async def continue_with_google(
         raise InvalidIdentityError
 
     repo = UserRepository(db)
+    guest = current_user if _is_unclaimed_guest(current_user) else None
     known = await repo.get_by_firebase_uid(identity.uid)
-    if known is not None:
-        return SignInResult(
-            user=known, token=create_session_token(known.id, known.session_version), created=False
-        )
-
     # Google has proven this address belongs to this person.
     email = normalize_email(identity.email) if identity.email and identity.email_verified else None
-    same_email = await repo.get_by_email(email) if email else None
-    if same_email is not None:
+    same_email = await repo.get_by_email(email) if known is None and email is not None else None
+    if known is not None:
+        user = known
+        created = False
+    elif same_email is not None:
         user = _link_google(same_email, identity)
         created = False
-    elif _is_unclaimed_guest(current_user) and current_user is not None:
-        user = current_user
+    elif guest is not None:
+        user = guest
         user.firebase_uid = identity.uid
         user.email = email
         user.auth_provider = AuthProvider.GOOGLE
@@ -174,11 +175,28 @@ async def continue_with_google(
     else:
         user = repo.stage_new_google_user(identity.uid, email)
         created = True
+
+    # Signing in to an account they already had: what they made as a guest
+    # on this phone (pieces, photos, try-ons, looks) moves into it (ADR 0014).
+    merged_guest = None
+    superseded_files: list[str] = []
+    if not created and guest is not None and guest.id != user.id:
+        # Both rows locked, in a fixed order: no try-on can start on either
+        # while things move, so the account's allowance check sees them all.
+        for user_id in sorted((guest.id, user.id)):
+            await repo.get_for_update(user_id)
+        superseded_files = await GuestMergeRepository(db).move_everything(guest, user.id)
+        merged_guest = guest.id
     try:
         await db.commit()
     except IntegrityError:
-        # The same Google account signed in a moment ago (a double tap).
         await db.rollback()
+        if merged_guest is not None:
+            # Not a double tap: the move itself failed. Say so rather than
+            # sign in without the guest's things.
+            logger.exception("guest merge failed: guest=%s user_id=%s", merged_guest, user.id)
+            raise
+        # The same Google account signed in a moment ago (a double tap).
         known = await repo.get_by_firebase_uid(identity.uid)
         if known is None:
             raise
@@ -188,9 +206,23 @@ async def continue_with_google(
     await db.refresh(user)
     if created:
         logger.info("google account created: user_id=%s", user.id)
+    if merged_guest is not None:
+        logger.info("guest merged into account: guest=%s user_id=%s", merged_guest, user.id)
+        await asyncio.to_thread(_delete_files, superseded_files)
     return SignInResult(
         user=user, token=create_session_token(user.id, user.session_version), created=created
     )
+
+
+def _delete_files(paths: list[str]) -> None:
+    """Photos replaced by a newer one of the same view, after the merge
+    committed. A leftover file isn't worth failing the sign-in over."""
+    storage = get_storage_service()
+    for path in paths:
+        try:
+            storage.delete(path)
+        except Exception:
+            logger.exception("could not delete a superseded photo file")
 
 
 def _link_google(user: User, identity: VerifiedIdentity) -> User:
