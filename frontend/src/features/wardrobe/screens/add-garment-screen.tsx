@@ -62,12 +62,14 @@ function OptionTile({
 
 export function AddGarmentScreen() {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
-  const { pickFromGallery, fault, clearFault } = useImagePicker();
+  const [showCamera, setShowCamera] = useState(false);
+  const { pickFromGallery, fault, clearFault } = useImagePicker({
+    onUseCamera: () => setShowCamera(true),
+  });
   const createGarment = useCreateGarment();
   const detect = useDetectCategory();
   const { mutate: detectCategory, reset: resetDetection } = detect;
 
-  const [showCamera, setShowCamera] = useState(false);
   const [image, setImage] = useState<PickedImage | null>(null);
   const [validationError, setValidationError] = useState<ImageValidationErrorCode | null>(null);
   const [title, setTitle] = useState('');

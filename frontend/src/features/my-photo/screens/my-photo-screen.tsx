@@ -44,10 +44,10 @@ export function MyPhotoScreen() {
   const photosQuery = useMyPhotosQuery();
   const upload = useUploadMyPhoto();
   const deletePhotos = useDeleteMyPhotos();
-  const { pickFromGallery, fault } = useImagePicker();
+  const [showCamera, setShowCamera] = useState(false);
+  const { pickFromGallery, fault } = useImagePicker({ onUseCamera: () => setShowCamera(true) });
 
   const [selected, setSelected] = useState<PickedImage | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
   const [replacing, setReplacing] = useState(false);
 
   const photos = photosQuery.data ?? [];

@@ -65,6 +65,10 @@ export default function RootLayout() {
             name="upgrade"
             options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
           />
+          <Stack.Screen
+            name="permissions/photos"
+            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+          />
         </Stack>
         <StatusBar style="dark" />
         <BrandSplash />
