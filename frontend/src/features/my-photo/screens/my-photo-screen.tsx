@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
@@ -38,7 +38,7 @@ const VIEW_HINT: Record<PhotoAngle, string> = {
 };
 
 export function MyPhotoScreen() {
-  const params = useLocalSearchParams<{ angle?: string; from?: string }>();
+  const params = useLocalSearchParams<{ angle?: string; from?: string; pick?: string }>();
   const inOnboarding = params.from === 'onboarding';
   const [angle, setAngle] = useState<PhotoAngle>(isAngle(params.angle) ? params.angle : 'front');
   const photosQuery = useMyPhotosQuery();
@@ -68,6 +68,15 @@ export function MyPhotoScreen() {
       setSelected(image);
     }
   }, [pickFromGallery, upload]);
+
+  // "Add portrait" on Today opens this screen with ?pick=1: straight to the
+  // picker (through Photo access the first time), once.
+  const pickedOnOpen = useRef(false);
+  useEffect(() => {
+    if (params.pick !== '1' || pickedOnOpen.current) return;
+    pickedOnOpen.current = true;
+    void handlePickFromGallery();
+  }, [params.pick, handlePickFromGallery]);
 
   const handleCapture = useCallback(
     (image: PickedImage) => {
