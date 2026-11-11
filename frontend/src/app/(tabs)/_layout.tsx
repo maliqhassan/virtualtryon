@@ -22,10 +22,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" options={{ title: 'Today' }} />
       <Tabs.Screen name="wardrobe" options={{ title: 'Wardrobe' }} />
-      <Tabs.Screen
-        name="tryon"
-        options={{ title: 'Try-On', sceneStyle: { backgroundColor: themeColors.night } }}
-      />
+      <Tabs.Screen name="tryon" options={{ title: 'Try-On' }} />
       <Tabs.Screen name="shop" options={{ title: 'Shop' }} />
       <Tabs.Screen name="you" options={{ title: 'You' }} />
     </Tabs>

@@ -22,27 +22,17 @@ const ICONS: Record<string, string> = {
   you: 'person',
 };
 
-/** Light on most tabs; the bar turns dark on the Try-On stage. */
+/** The bar's colours. (It used to turn dark on Try-On; the studio hides it.) */
 const PALETTE = {
-  light: {
-    stage: themeColors.background,
-    bar: 'rgba(255, 255, 255, 0.94)',
-    border: 'rgba(22, 19, 15, 0.08)',
-    active: themeColors.inkPrimary,
-    inactive: themeColors.neutral400,
-    pill: 'rgba(22, 19, 15, 0.07)',
-  },
-  dark: {
-    stage: themeColors.night,
-    bar: 'rgba(28, 26, 23, 0.92)',
-    border: 'rgba(255, 255, 255, 0.08)',
-    active: themeColors.nightText,
-    inactive: themeColors.inkSecondary,
-    pill: 'rgba(255, 255, 255, 0.1)',
-  },
+  stage: themeColors.background,
+  bar: 'rgba(255, 255, 255, 0.94)',
+  border: 'rgba(22, 19, 15, 0.08)',
+  active: themeColors.inkPrimary,
+  inactive: themeColors.neutral400,
+  pill: 'rgba(22, 19, 15, 0.07)',
 } as const;
 
-type Palette = (typeof PALETTE)[keyof typeof PALETTE];
+type Palette = typeof PALETTE;
 
 const BAR_SHADOW = '0px 10px 28px rgba(22, 19, 15, 0.14)';
 
@@ -171,8 +161,10 @@ function CenterItem({
  * so it never overlaps the system buttons on any phone.
  */
 export function FloatingTabBar({ state, descriptors, navigation, insets }: TabBarProps) {
+  // The Try-On studio is full screen, with its own back button (handoff v2.1 change 4).
+  if (state.routes[state.index]?.name === CENTER) return null;
   const bottomGap = Math.max(insets.bottom, 12);
-  const palette = state.routes[state.index]?.name === CENTER ? PALETTE.dark : PALETTE.light;
+  const palette = PALETTE;
 
   const routes = ORDER.map((name) => state.routes.find((route) => route.name === name)).filter(
     (route): route is (typeof state.routes)[number] => route !== undefined,

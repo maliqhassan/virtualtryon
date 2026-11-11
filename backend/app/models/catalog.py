@@ -44,6 +44,26 @@ class Product(Base):
     image_url: Mapped[str] = mapped_column(nullable=False)
     # Where to buy it on the store's own site; null for sample products.
     product_url: Mapped[str | None] = mapped_column(nullable=True)
+    # Who it's for, for the Try-On studio's Men/Women toggle: "men", "women"
+    # or "unisex" (shown for both).
+    audience: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="unisex", server_default="unisex"
+    )
+    # Occasion tags for the studio's chips, stored comma-wrapped
+    # (",casual,office,") so one portable LIKE finds a tag on SQLite and
+    # Postgres alike, without a join table for a handful of fixed words.
+    occasions: Mapped[str] = mapped_column(
+        String(100), nullable=False, default="", server_default=""
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
+
+    @property
+    def occasion_list(self) -> list[str]:
+        return [tag for tag in self.occasions.split(",") if tag]
+
+
+def occasions_column(tags: tuple[str, ...]) -> str:
+    """The stored form of a product's occasion tags: ",casual,office,"."""
+    return f",{','.join(tags)}," if tags else ""

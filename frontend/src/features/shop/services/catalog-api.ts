@@ -1,6 +1,6 @@
 import { apiClient } from '@/services/api/client';
 
-import type { Product, Store } from '../types';
+import type { Audience, Occasion, Product, Store } from '../types';
 
 type StoreDto = {
   id: string;
@@ -21,6 +21,8 @@ type ProductDto = {
   currency: string;
   image_url: string;
   product_url: string | null;
+  audience?: Audience;
+  occasions?: Occasion[];
 };
 
 function toStore(dto: StoreDto): Store {
@@ -45,6 +47,8 @@ function toProduct(dto: ProductDto): Product {
     currency: dto.currency,
     imageUrl: dto.image_url,
     productUrl: dto.product_url,
+    audience: dto.audience ?? 'unisex',
+    occasions: dto.occasions ?? [],
   };
 }
 
@@ -58,6 +62,17 @@ export async function listProducts(storeId: string | null, search = ''): Promise
   const path = storeId ? `/api/v1/stores/${storeId}/products` : '/api/v1/products';
   const response = await apiClient.get<ProductDto[]>(path, {
     params: search ? { q: search } : undefined,
+  });
+  return response.data.map(toProduct);
+}
+
+/** Every store's pieces for the Try-On studio: men's or women's (unisex in both), one occasion or all. */
+export async function listCollection(
+  audience: Exclude<Audience, 'unisex'>,
+  occasion: Occasion | null,
+): Promise<Product[]> {
+  const response = await apiClient.get<ProductDto[]>('/api/v1/products', {
+    params: occasion ? { audience, occasion } : { audience },
   });
   return response.data.map(toProduct);
 }

@@ -130,3 +130,52 @@ async def test_search_matches_title_store_and_category(client: AsyncClient) -> N
     assert by_store and all(p["store_name"] == "Northline Basics" for p in by_store)
     assert by_category and all(p["category"] == "Dresses" for p in by_category)
     assert wildcard == []  # "%" is searched as text, not as a wildcard
+
+
+@pytest.mark.usefixtures("catalog")
+async def test_audience_filter_includes_unisex_pieces(client: AsyncClient) -> None:
+    men = (await client.get("/api/v1/products", params={"audience": "men"})).json()
+    women = (await client.get("/api/v1/products", params={"audience": "women"})).json()
+
+    assert {p["audience"] for p in men} == {"men", "unisex"}
+    assert {p["audience"] for p in women} == {"women", "unisex"}
+    titles = {p["title"] for p in women}
+    assert "Plum wrap dress" in titles and "White oxford shirt" not in titles
+
+
+@pytest.mark.usefixtures("catalog")
+async def test_occasion_filter_matches_one_tag(client: AsyncClient) -> None:
+    wedding = (await client.get("/api/v1/products", params={"occasion": "wedding"})).json()
+    dresses_for_women = (
+        await client.get("/api/v1/products", params={"occasion": "dresses", "audience": "women"})
+    ).json()
+
+    assert wedding and all("wedding" in p["occasions"] for p in wedding)
+    assert {p["category"] for p in dresses_for_women} == {"Dresses"}
+
+
+async def test_filters_only_take_known_values(client: AsyncClient) -> None:
+    assert (await client.get("/api/v1/products", params={"audience": "kids"})).status_code == 422
+    bad = await client.get("/api/v1/products", params={"occasion": "%"})
+    assert bad.status_code == 422
+
+
+async def test_a_catalogue_seeded_before_tags_is_tagged_on_the_next_start() -> None:
+    from sqlalchemy import update
+
+    from app.models.catalog import Product
+
+    async with db_session.AsyncSessionLocal() as db:
+        await seed_sample_catalog(db, get_storage_service())
+        await db.execute(update(Product).values(audience="unisex", occasions=""))
+        await db.commit()
+        await seed_sample_catalog(db, get_storage_service())  # the next start
+
+    async with db_session.AsyncSessionLocal() as db:
+        from sqlalchemy import select
+
+        dress = (
+            await db.execute(select(Product).where(Product.title == "Plum wrap dress"))
+        ).scalar_one()
+        assert dress.audience == "women"
+        assert dress.occasion_list == ["dresses", "office"]

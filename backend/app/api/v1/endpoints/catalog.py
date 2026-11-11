@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.schemas.catalog import ProductResponse, StoreResponse
+from app.schemas.catalog import AudienceFilter, OccasionFilter, ProductResponse, StoreResponse
 from app.services.catalog import (
     ProductNotFoundError,
     StoreNotFoundError,
@@ -42,9 +42,13 @@ async def get_store_products(
 async def get_products(
     category: str | None = Query(default=None, max_length=100),
     q: str | None = Query(default=None, max_length=100, description="Search text"),
+    audience: AudienceFilter | None = Query(
+        default=None, description="men or women; unisex pieces are included in both"
+    ),
+    occasion: OccasionFilter | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ) -> list[ProductResponse]:
-    return await list_all_products(db, category, q.strip() if q else None)
+    return await list_all_products(db, category, q.strip() if q else None, audience, occasion)
 
 
 @router.get("/products/{product_id}", response_model=ProductResponse)

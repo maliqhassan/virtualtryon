@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw, ImageFilter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.repositories.catalog_repository import CatalogRepository
+from app.models.catalog import occasions_column
 from app.services.storage import StorageService
 
 logger = logging.getLogger(__name__)
@@ -131,6 +132,31 @@ SAMPLE_STORES: tuple[SampleStore, ...] = (
 )
 
 
+# Who each sample is for and its occasions, for the Try-On studio's
+# Men/Women toggle and chips. Keyed by title (unique among the samples) so
+# the same table tags a catalogue seeded before these columns existed.
+SAMPLE_TAGS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "Ivory linen kurta": ("men", ("casual", "wedding")),
+    "Saffron embroidered kurta": ("men", ("wedding",)),
+    "Emerald silk kurta": ("men", ("wedding",)),
+    "Charcoal waistcoat": ("men", ("office", "wedding")),
+    "Rose festive dress": ("women", ("dresses", "wedding")),
+    "Cream straight trousers": ("unisex", ("casual", "office")),
+    "White oxford shirt": ("men", ("office",)),
+    "Navy crew tee": ("unisex", ("casual",)),
+    "Heather grey tee": ("unisex", ("casual",)),
+    "Olive chinos": ("men", ("casual", "office")),
+    "Indigo denim jacket": ("unisex", ("casual",)),
+    "Stone shorts": ("unisex", ("casual",)),
+    "Clay hoodie": ("unisex", ("casual",)),
+    "Forest hoodie": ("unisex", ("casual",)),
+    "Rust overshirt": ("unisex", ("casual",)),
+    "Mustard knit tee": ("women", ("casual",)),
+    "Black wide trousers": ("women", ("casual", "office")),
+    "Plum wrap dress": ("women", ("dresses", "office")),
+}
+
+
 def _darker(c: Colour, amount: float = 0.72) -> Colour:
     return (int(c[0] * amount), int(c[1] * amount), int(c[2] * amount))
 
@@ -236,11 +262,23 @@ def draw_product(product: SampleProduct) -> bytes:
     return buffer.getvalue()
 
 
+def _stored_tags() -> dict[str, tuple[str, str]]:
+    return {
+        title: (audience, occasions_column(occasions))
+        for title, (audience, occasions) in SAMPLE_TAGS.items()
+    }
+
+
 async def seed_sample_catalog(db: AsyncSession, storage: StorageService) -> int:
     """Returns the number of products created (0 if a catalogue already exists)."""
     repo = CatalogRepository(db)
     if await repo.count_stores() > 0:
-        logger.info("catalog seed skipped: stores already exist")
+        # Seeded before audience/occasions existed: tag those samples now.
+        tagged = await repo.tag_untagged_products(
+            [store.slug for store in SAMPLE_STORES], _stored_tags()
+        )
+        await repo.commit()
+        logger.info("catalog seed skipped: stores already exist (%d tagged)", tagged)
         return 0
 
     created = 0
@@ -253,6 +291,7 @@ async def seed_sample_catalog(db: AsyncSession, storage: StorageService) -> int:
         )
         for product in sample.products:
             image_url = storage.save(draw_product(product), "png")
+            audience, occasions = _stored_tags().get(product.title, ("unisex", ""))
             await repo.add_product(
                 store_id=store.id,
                 title=product.title,
@@ -261,6 +300,8 @@ async def seed_sample_catalog(db: AsyncSession, storage: StorageService) -> int:
                 currency="USD",
                 image_url=image_url,
                 product_url=None,
+                audience=audience,
+                occasions=occasions,
             )
             created += 1
     await repo.commit()

@@ -29,6 +29,8 @@ def to_product_response(product: Product, store_name: str) -> ProductResponse:
         currency=product.currency,
         image_url=product.image_url,
         product_url=product.product_url,
+        audience=product.audience,
+        occasions=product.occasion_list,
     )
 
 
@@ -58,9 +60,15 @@ async def list_store_products(
 
 
 async def list_all_products(
-    db: AsyncSession, category: str | None = None, search: str | None = None
+    db: AsyncSession,
+    category: str | None = None,
+    search: str | None = None,
+    audience: str | None = None,
+    occasion: str | None = None,
 ) -> list[ProductResponse]:
-    rows = await CatalogRepository(db).list_products(category=category, search=search)
+    rows = await CatalogRepository(db).list_products(
+        category=category, search=search, audience=audience, occasion=occasion
+    )
     return [to_product_response(product, name) for product, name in rows]
 
 

@@ -7,6 +7,7 @@
     "@expo-google-fonts/instrument-serif": "^0.4.1",
     "@expo-google-fonts/manrope": "^0.4.3",
     "@expo/ui": "~57.0.26",
+    "@gorhom/bottom-sheet": "5.2.14",
     "@hookform/resolvers": "^5.5.7",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-firebase/app": "26.4.1",
