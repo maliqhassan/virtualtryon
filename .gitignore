@@ -29,3 +29,6 @@ migration_bundle/
 
 # Personal application documents, kept out of the repo
 portfolio/
+
+# Built APKs (see the build steps; too large for git)
+releases/
