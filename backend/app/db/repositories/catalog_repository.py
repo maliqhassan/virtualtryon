@@ -111,5 +111,8 @@ class CatalogRepository:
                 tagged += 1
         return tagged
 
+    async def flush(self) -> None:
+        await self._db.flush()
+
     async def commit(self) -> None:
         await self._db.commit()

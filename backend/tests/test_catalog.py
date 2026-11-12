@@ -193,6 +193,12 @@ async def test_the_old_sample_store_is_updated_for_the_us_on_the_next_start() ->
         # Roll the first store back to how it was first seeded.
         store = (await db.execute(select(Store).where(Store.slug == "aster-and-co"))).scalar_one()
         store.slug, store.name = "saffron-atelier", "Saffron Atelier"
+        # As first seeded: no tags on any of the store's products.
+        await db.execute(
+            update(Product)
+            .where(Product.store_id == store.id)
+            .values(audience="unisex", occasions="")
+        )
         for new_title, old_title in [
             ("Ivory linen shirt", "Ivory linen kurta"),
             ("Gold satin blazer", "Saffron embroidered kurta"),
@@ -227,6 +233,11 @@ async def test_the_old_sample_store_is_updated_for_the_us_on_the_next_start() ->
             await db.execute(select(Product).where(Product.title == "Ivory linen shirt"))
         ).scalar_one()
         assert shirt.occasion_list == ["casual", "office"]
+        # The store's unchanged products get their tags too.
+        rose = (
+            await db.execute(select(Product).where(Product.title == "Rose festive dress"))
+        ).scalar_one()
+        assert (rose.audience, rose.occasion_list) == ("women", ["dresses", "wedding"])
         kurtas = await db.execute(select(Product).where(Product.title.contains("kurta")))
         assert kurtas.first() is None
 

@@ -313,6 +313,9 @@ async def seed_sample_catalog(db: AsyncSession, storage: StorageService) -> int:
         replaced = await _update_old_store(repo, storage)
         if replaced:
             logger.info("catalog seed: old sample store updated (%d products)", replaced)
+        # Sessions don't autoflush: write the store's new slug before the
+        # tagging query below looks stores up by slug.
+        await repo.flush()
         # Seeded before audience/occasions existed: tag those samples now.
         tagged = await repo.tag_untagged_products(
             [store.slug for store in SAMPLE_STORES], _stored_tags()
