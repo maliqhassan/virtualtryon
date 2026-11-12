@@ -7,7 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
 import { IconButton } from '@/components/icon-button';
-import { StripeFill, type StripeTone } from '@/components/stripe-fill';
+import { PhotoFill } from '@/components/photo-fill';
+import type { StockPhoto } from '@/constants/stock-photos';
 import { themeColors } from '@/constants/theme';
 import { settlePhotoAccess, type PhotoAccessOutcome } from '@/lib/photo-access';
 
@@ -18,9 +19,9 @@ const PROMISES = [
 ];
 
 // The fanned photo cards: two behind, tilted, and the front one with the icon.
-const BACK_CARDS: { tone: StripeTone; style: object }[] = [
-  { tone: 'lilac', style: { transform: [{ translateX: -54 }, { rotate: '-9deg' }] } },
-  { tone: 'sage', style: { transform: [{ translateX: 54 }, { rotate: '9deg' }] } },
+const BACK_CARDS: { photo: StockPhoto; style: object }[] = [
+  { photo: 'lookNavyTee', style: { transform: [{ translateX: -54 }, { rotate: '-9deg' }] } },
+  { photo: 'lookYellow', style: { transform: [{ translateX: 54 }, { rotate: '9deg' }] } },
 ];
 
 /**
@@ -97,20 +98,20 @@ export function PhotoAccessScreen() {
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
         >
-          {BACK_CARDS.map(({ tone, style }) => (
+          {BACK_CARDS.map(({ photo, style }) => (
             <View
-              key={tone}
-              className="absolute top-[14px] h-[116px] w-[88px] overflow-hidden rounded-[18px]"
+              key={photo}
+              className="absolute top-[14px] h-[116px] w-[88px] overflow-hidden rounded-[18px] bg-muted"
               style={style}
             >
-              <StripeFill tone={tone} />
+              <PhotoFill photo={photo} />
             </View>
           ))}
           <View
-            className="h-[128px] w-[96px] items-center justify-end overflow-hidden rounded-[20px] pb-[10px]"
+            className="h-[128px] w-[96px] items-center justify-end overflow-hidden rounded-[20px] bg-muted pb-[10px]"
             style={{ boxShadow: '0px 14px 30px rgba(22, 19, 15, 0.14)' }}
           >
-            <StripeFill tone="blush" />
+            <PhotoFill photo="styleWMinimal" />
             <View className="h-[34px] w-[34px] items-center justify-center rounded-full bg-inverse">
               <AppIcon name="photo_library" size={18} color={themeColors.goldSoft} />
             </View>

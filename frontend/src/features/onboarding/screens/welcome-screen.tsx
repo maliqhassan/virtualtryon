@@ -5,7 +5,7 @@ import { type GestureResponderEvent, Pressable, Text, View } from 'react-native'
 import { AppButton } from '@/components/app-button';
 import { FadeInView } from '@/components/fade-in-view';
 import { GradientFill } from '@/components/gradient-fill';
-import { StripeFill } from '@/components/stripe-fill';
+import { PhotoFill } from '@/components/photo-fill';
 
 import { OnboardingFrame } from '../components/onboarding-frame';
 import { StoryBars } from '../components/story-bars';
@@ -17,21 +17,21 @@ const SLIDES = [
     a: 'Everything you own,',
     b: 'finally styled.',
     body: 'Photograph your clothes once. Noor learns your shape, shade and taste, then helps you dress every morning.',
-    image: '[ hero · warm flat-lay of a real closet ]',
+    photo: 'welcomeCloset',
   },
   {
     tag: '02 · Try before you wear',
     a: 'See it on you',
     b: 'before you buy.',
     body: 'Any piece from your wardrobe or any store, shown on your own photo in about a minute.',
-    image: '[ hero · try-on before / after ]',
+    photo: 'welcomeTryOn',
   },
   {
     tag: '03 · Meet Noor',
     a: 'A stylist who knows',
     b: 'your shape and shade.',
     body: 'Ask for a wedding look, shoes for Friday, or what colour suits you. Every answer comes with a reason.',
-    image: '[ hero · portrait in warm window light ]',
+    photo: 'welcomeStylist',
   },
 ] as const;
 
@@ -64,10 +64,7 @@ export function WelcomeScreen() {
         scroll={false}
         backdrop={
           <>
-            <StripeFill tone="dark" period={9} />
-            <Text className="absolute left-0 right-0 top-[120px] text-center font-mono text-[10px] text-[rgba(246,241,232,0.38)]">
-              {slide.image}
-            </Text>
+            <PhotoFill photo={slide.photo} position="center" fadeMs={300} />
             <GradientFill
               kind="linear"
               stops={[

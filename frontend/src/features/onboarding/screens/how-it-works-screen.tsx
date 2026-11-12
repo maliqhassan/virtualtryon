@@ -5,7 +5,8 @@ import { type GestureResponderEvent, Text, View } from 'react-native';
 import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
 import { FadeInView } from '@/components/fade-in-view';
-import { StripeFill, type StripeTone } from '@/components/stripe-fill';
+import { PhotoFill, PhotoLabel } from '@/components/photo-fill';
+import type { StockPhoto } from '@/constants/stock-photos';
 import { themeColors } from '@/constants/theme';
 
 import { OnboardingFrame } from '../components/onboarding-frame';
@@ -48,11 +49,11 @@ function Corner({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
   );
 }
 
-function Tile({ tone, label, flex = 1 }: { tone: StripeTone; label: string; flex?: number }) {
+function Tile({ photo, label, flex = 1 }: { photo: StockPhoto; label: string; flex?: number }) {
   return (
-    <View className="justify-end overflow-hidden rounded-[20px] p-[9px]" style={{ flex }}>
-      <StripeFill tone={tone} />
-      <Text className="font-mono text-[8px] text-neutral-500">{label}</Text>
+    <View className="justify-end overflow-hidden rounded-[20px] bg-muted p-[9px]" style={{ flex }}>
+      <PhotoFill photo={photo} position="center" />
+      <PhotoLabel>{label}</PhotoLabel>
     </View>
   );
 }
@@ -60,15 +61,11 @@ function Tile({ tone, label, flex = 1 }: { tone: StripeTone; label: string; flex
 function StepMockup({ step }: { step: number }) {
   if (step === 0) {
     return (
-      <View className="flex-1 items-center justify-center overflow-hidden rounded-[24px]">
-        <StripeFill tone="warm" period={8} />
+      <View className="flex-1 overflow-hidden rounded-[24px] bg-muted">
+        <PhotoFill photo="tipSoloFront" />
         {(['tl', 'tr', 'bl', 'br'] as const).map((corner) => (
           <Corner key={corner} position={corner} />
         ))}
-        <AppIcon name="accessibility_new" size={56} color="rgba(22, 19, 15, 0.18)" />
-        <Text className="mt-sm font-mono text-[9px] text-neutral-500">
-          [ your full-body photo ]
-        </Text>
       </View>
     );
   }
@@ -76,21 +73,18 @@ function StepMockup({ step }: { step: number }) {
     return (
       <View className="flex-1 flex-row gap-[6px]">
         <View className="flex-1 gap-[6px]">
-          <Tile tone="blush" label="wardrobe" />
-          <Tile tone="sage" label="lookbook" />
+          <Tile photo="welcomeCloset" label="wardrobe" />
+          <Tile photo="lookVelvet" label="lookbook" />
         </View>
         <View className="overflow-hidden rounded-[20px] bg-inverse" style={{ flex: 1.3 }}>
           <View className="absolute bottom-[44px] left-0 right-0 top-0">
-            <StripeFill tone="dark" period={8} />
+            <PhotoFill photo="welcomeTryOn" />
           </View>
           <View className="absolute left-[10px] right-[10px] top-[10px] flex-row gap-[3px]">
             <View className="h-[2px] flex-1 rounded-full bg-cream" />
             <View className="h-[2px] flex-1 rounded-full bg-[rgba(246,241,232,0.3)]" />
             <View className="h-[2px] flex-1 rounded-full bg-[rgba(246,241,232,0.3)]" />
           </View>
-          <Text className="absolute left-[10px] top-[24px] font-mono text-[8px] text-neutral-500">
-            [ spotted online ]
-          </Text>
           <View className="absolute bottom-[10px] left-[10px] right-[10px] flex-row items-center gap-[6px]">
             <AppIcon name="link" size={16} color={themeColors.goldSoft} />
             <Text className="font-sans-semibold text-[9.5px] text-night-text">paste any link</Text>
@@ -101,14 +95,15 @@ function StepMockup({ step }: { step: number }) {
   }
   return (
     <View className="flex-1 flex-row overflow-hidden rounded-[24px]">
-      <View className="flex-1 p-[10px]">
-        <StripeFill tone="warm" period={8} />
-        <Text className="font-mono-semibold text-[9px] text-ink-secondary">BEFORE</Text>
+      {/* The same person in two outfits, so it reads as a real before and after. */}
+      <View className="flex-1 bg-muted p-[10px]">
+        <PhotoFill photo="styleMMinimal" />
+        <PhotoLabel>BEFORE</PhotoLabel>
       </View>
       <View className="w-[2px] bg-surface" />
-      <View className="flex-1 items-end p-[10px]">
-        <StripeFill tone="blush" period={8} />
-        <Text className="font-mono-semibold text-[9px] text-[#8A5230]">AFTER</Text>
+      <View className="flex-1 bg-muted p-[10px]">
+        <PhotoFill photo="sameManAfter" />
+        <PhotoLabel>AFTER</PhotoLabel>
       </View>
       <View className="absolute bottom-md left-md right-md flex-row items-center gap-sm rounded-lg bg-[rgba(22,19,15,0.72)] px-md py-[10px]">
         <AppIcon name="auto_awesome" size={15} color={themeColors.goldSoft} />
@@ -156,16 +151,16 @@ export function HowItWorksScreen() {
           className="absolute -left-[58px] bottom-[30px] top-[30px] w-[70px] rounded-[24px] p-xs"
           style={DASHED}
         >
-          <View className="flex-1 overflow-hidden rounded-[19px]">
-            <StripeFill tone="warm" />
+          <View className="flex-1 overflow-hidden rounded-[19px] bg-muted">
+            <PhotoFill photo="lookYellow" position="center" />
           </View>
         </View>
         <View
           className="absolute -right-[58px] bottom-[30px] top-[30px] w-[70px] rounded-[24px] p-xs"
           style={DASHED}
         >
-          <View className="flex-1 overflow-hidden rounded-[19px]">
-            <StripeFill tone="lilac" />
+          <View className="flex-1 overflow-hidden rounded-[19px] bg-muted">
+            <PhotoFill photo="lookPinkTrousers" position="center" />
           </View>
         </View>
         <FadeInView key={step} className="absolute left-xxl right-xxl top-0">

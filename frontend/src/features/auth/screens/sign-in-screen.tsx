@@ -4,7 +4,8 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/app-icon';
 import { PressableScale } from '@/components/pressable-scale';
-import { StripeFill, type StripeTone } from '@/components/stripe-fill';
+import { PhotoFill } from '@/components/photo-fill';
+import type { StockPhoto } from '@/constants/stock-photos';
 import { themeColors } from '@/constants/theme';
 import { GOAL_HREF, markOnboardingSeen, OnboardingFrame } from '@/features/onboarding';
 
@@ -12,14 +13,16 @@ import { GoogleMark } from '../components/google-mark';
 import { useContinueWithGoogle } from '../hooks/use-account';
 import { signInErrorMessage } from '../services/auth-api';
 
-const COLLAGE: { tone: StripeTone; style: object; caption?: string }[] = [
-  { tone: 'warm', style: { left: 4, top: 36, height: 200, transform: [{ rotate: '-7deg' }] } },
-  { tone: 'lilac', style: { right: 4, top: 46, height: 196, transform: [{ rotate: '7deg' }] } },
+const COLLAGE: { photo: StockPhoto; style: object }[] = [
   {
-    tone: 'blush',
-    style: { alignSelf: 'center', top: 20, height: 210, zIndex: 2 },
-    caption: '[ look · satin gown ]',
+    photo: 'sameManAfter',
+    style: { left: 4, top: 36, height: 200, transform: [{ rotate: '-7deg' }] },
   },
+  {
+    photo: 'lookLavender',
+    style: { right: 4, top: 46, height: 196, transform: [{ rotate: '7deg' }] },
+  },
+  { photo: 'styleWWedding', style: { alignSelf: 'center', top: 20, height: 210, zIndex: 2 } },
 ];
 
 function ProviderButton({
@@ -84,16 +87,13 @@ export function SignInScreen() {
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
       >
-        {COLLAGE.map(({ tone, style, caption }) => (
+        {COLLAGE.map(({ photo, style }) => (
           <View
-            key={tone}
-            className="absolute w-[150px] justify-end overflow-hidden rounded-[22px] p-md"
+            key={photo}
+            className="absolute w-[150px] overflow-hidden rounded-[22px] bg-muted"
             style={[style, { boxShadow: '0px 14px 30px rgba(22, 19, 15, 0.12)' }]}
           >
-            <StripeFill tone={tone} />
-            {caption && (
-              <Text className="font-mono text-[8.5px] text-[rgba(22,19,15,0.4)]">{caption}</Text>
-            )}
+            <PhotoFill photo={photo} />
           </View>
         ))}
         <View

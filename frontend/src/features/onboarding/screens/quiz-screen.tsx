@@ -4,8 +4,9 @@ import { Pressable, Text, View } from 'react-native';
 import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
 import { FadeInView } from '@/components/fade-in-view';
+import { PhotoFill } from '@/components/photo-fill';
 import { PressableScale } from '@/components/pressable-scale';
-import { LIGHT_STRIPES, StripeFill } from '@/components/stripe-fill';
+import type { StockPhoto } from '@/constants/stock-photos';
 import { themeColors } from '@/constants/theme';
 import { selectionFeedback } from '@/lib/haptics';
 
@@ -14,22 +15,22 @@ import { StepHeader } from '../components/step-header';
 import { type StyleFor, useOnboardingPreferences } from '../preferences';
 import { HOW_IT_WORKS_HREF } from '../routes';
 
-const STYLES: Record<StyleFor, [string, string][]> = {
+const STYLES: Record<StyleFor, [string, StockPhoto][]> = {
   women: [
-    ['Classic', '[ photo · tailored blazer ]'],
-    ['Minimal', '[ photo · ivory co-ord ]'],
-    ['Wedding guest', '[ photo · satin gown ]'],
-    ['Smart casual', '[ photo · linen shirt, jeans ]'],
-    ['Modest chic', '[ photo · abaya, long coat ]'],
-    ['Street', '[ photo · oversized denim ]'],
+    ['Classic', 'styleWClassic'],
+    ['Minimal', 'styleWMinimal'],
+    ['Wedding guest', 'styleWWedding'],
+    ['Smart casual', 'styleWSmartCasual'],
+    ['Modest chic', 'styleWModest'],
+    ['Street', 'styleWStreet'],
   ],
   men: [
-    ['Suits & formal', '[ photo · navy suit ]'],
-    ['Minimal', '[ photo · tonal knit ]'],
-    ['Shirt & waistcoat', '[ photo · charcoal waistcoat ]'],
-    ['Smart casual', '[ photo · oxford, chinos ]'],
-    ['Old money', '[ photo · polo, loafers ]'],
-    ['Street', '[ photo · cargo, sneakers ]'],
+    ['Suits & formal', 'styleMSuits'],
+    ['Minimal', 'styleMMinimal'],
+    ['Shirt & waistcoat', 'styleMShirt'],
+    ['Smart casual', 'styleMSmartCasual'],
+    ['Old money', 'styleMOldMoney'],
+    ['Street', 'styleMStreet'],
   ],
 };
 
@@ -102,7 +103,7 @@ export function QuizScreen() {
       </View>
 
       <View className="mt-[18px] flex-row flex-wrap justify-between gap-y-md">
-        {STYLES[styleFor].map(([label, caption], index) => {
+        {STYLES[styleFor].map(([label, photo], index) => {
           const id = `${styleFor}:${label}`;
           const on = styles.includes(id);
           return (
@@ -125,11 +126,8 @@ export function QuizScreen() {
                     borderColor: on ? themeColors.inkPrimary : 'rgba(22, 19, 15, 0.2)',
                   }}
                 >
-                  <View className="aspect-[3/4] justify-end overflow-hidden rounded-[19px] p-[11px]">
-                    <StripeFill tone={LIGHT_STRIPES[index % 4]} />
-                    <Text className="font-mono text-[8.5px] text-[rgba(22,19,15,0.42)]">
-                      {caption}
-                    </Text>
+                  <View className="aspect-[3/4] justify-end overflow-hidden rounded-[19px] bg-muted p-[11px]">
+                    <PhotoFill photo={photo} />
                     {on && (
                       <View className="absolute right-[9px] top-[9px] h-[26px] w-[26px] items-center justify-center rounded-full bg-inverse">
                         <AppIcon name="check" size={16} color={themeColors.background} />

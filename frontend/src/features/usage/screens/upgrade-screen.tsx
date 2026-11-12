@@ -8,6 +8,7 @@ import { AppIcon } from '@/components/app-icon';
 import { GradientFill } from '@/components/gradient-fill';
 import { IconButton } from '@/components/icon-button';
 import { ScreenStatusBar } from '@/components/screen-status-bar';
+import { PhotoFill, PhotoLabel } from '@/components/photo-fill';
 import { StripeFill } from '@/components/stripe-fill';
 import { themeColors } from '@/constants/theme';
 import { selectionFeedback } from '@/lib/haptics';
@@ -59,17 +60,18 @@ export function UpgradeScreen() {
         <View className="h-[330px] overflow-hidden" accessibilityElementsHidden>
           <StripeFill tone="dark" period={10} />
           <View
-            className="absolute left-[22px] top-[70px] h-[220px] w-[42%] justify-end overflow-hidden rounded-[24px] p-md"
+            className="absolute left-[22px] top-[70px] h-[220px] w-[42%] justify-end overflow-hidden rounded-[24px] bg-night-surface p-md"
             style={{ transform: [{ rotate: '-4deg' }] }}
           >
-            <StripeFill tone="dark" period={8} />
-            <Text className="font-mono text-[8.5px] text-neutral-500">before · your photo</Text>
+            <PhotoFill photo="styleMMinimal" />
+            <PhotoLabel tone="dark">before · your photo</PhotoLabel>
           </View>
           <View
-            className="absolute right-[18px] top-[54px] h-[246px] w-[46%] justify-end overflow-hidden rounded-[24px] bg-[#4C371F] p-md"
+            className="absolute right-[18px] top-[54px] h-[246px] w-[46%] justify-end overflow-hidden rounded-[24px] bg-night-surface p-md"
             style={{ transform: [{ rotate: '3deg' }] }}
           >
-            <Text className="font-mono text-[8.5px] text-[#C9B896]">after · your try-on</Text>
+            <PhotoFill photo="sameManAfter" />
+            <PhotoLabel tone="dark">after · your try-on</PhotoLabel>
           </View>
           <GlassChip label="#Office" style={{ left: 12, top: 210 }} />
           <GlassChip label="#Rehearsal dinner" style={{ right: 14, top: 240 }} />

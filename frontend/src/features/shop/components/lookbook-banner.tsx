@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 
 import { GradientFill } from '@/components/gradient-fill';
 import { PressableScale } from '@/components/pressable-scale';
-import { StripeFill } from '@/components/stripe-fill';
+import { PhotoFill } from '@/components/photo-fill';
 
 import { LOOKBOOK_HREF } from '../routes';
 
@@ -18,7 +18,8 @@ export function LookbookBanner() {
       containerClassName="mb-xl mt-[14px]"
       className="h-[178px] overflow-hidden rounded-[24px] bg-[#2E2210]"
     >
-      <StripeFill tone="dark" period={10} />
+      {/* A wide banner on a tall photo: centred, so the dress shows. */}
+      <PhotoFill photo="lookVelvet" position="center" />
       <GradientFill
         kind="linear"
         horizontal
