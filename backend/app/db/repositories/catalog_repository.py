@@ -93,24 +93,6 @@ class CatalogRepository:
         await self._db.flush()
         return product
 
-    async def tag_untagged_products(
-        self, store_slugs: list[str], tags: dict[str, tuple[str, str]]
-    ) -> int:
-        """Sets audience/occasions by title on the given stores' products that
-        have no occasions yet (a sample catalogue seeded before the tags
-        existed). Other stores' products are never touched. Returns how many."""
-        result = await self._db.execute(
-            select(Product)
-            .join(Store, Store.id == Product.store_id)
-            .where(Product.occasions == "", Store.slug.in_(store_slugs))
-        )
-        tagged = 0
-        for product in result.scalars().all():
-            if product.title in tags:
-                product.audience, product.occasions = tags[product.title]
-                tagged += 1
-        return tagged
-
     async def flush(self) -> None:
         await self._db.flush()
 

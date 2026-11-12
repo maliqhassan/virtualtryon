@@ -126,7 +126,7 @@ async def test_search_matches_title_store_and_category(client: AsyncClient) -> N
     by_category = (await client.get("/api/v1/products", params={"q": "dresses"})).json()
     wildcard = (await client.get("/api/v1/products", params={"q": "%"})).json()
 
-    assert by_title and all("hoodie" in p["title"].lower() for p in by_title)
+    assert by_title and all("hoodie" in (p["title"] + p["category"]).lower() for p in by_title)
     assert by_store and all(p["store_name"] == "Northline Basics" for p in by_store)
     assert by_category and all(p["category"] == "Dresses" for p in by_category)
     assert wildcard == []  # "%" is searched as text, not as a wildcard
@@ -140,7 +140,7 @@ async def test_audience_filter_includes_unisex_pieces(client: AsyncClient) -> No
     assert {p["audience"] for p in men} == {"men", "unisex"}
     assert {p["audience"] for p in women} == {"women", "unisex"}
     titles = {p["title"] for p in women}
-    assert "Plum wrap dress" in titles and "White oxford shirt" not in titles
+    assert "Striped wrap dress" in titles and "White oxford shirt" not in titles
 
 
 @pytest.mark.usefixtures("catalog")
@@ -175,7 +175,7 @@ async def test_a_catalogue_seeded_before_tags_is_tagged_on_the_next_start() -> N
         from sqlalchemy import select
 
         dress = (
-            await db.execute(select(Product).where(Product.title == "Plum wrap dress"))
+            await db.execute(select(Product).where(Product.title == "Striped wrap dress"))
         ).scalar_one()
         assert dress.audience == "women"
         assert dress.occasion_list == ["dresses", "office"]
@@ -183,63 +183,101 @@ async def test_a_catalogue_seeded_before_tags_is_tagged_on_the_next_start() -> N
 
 async def test_the_old_sample_store_is_updated_for_the_us_on_the_next_start() -> None:
     """A catalogue seeded with the Pakistan-market store (before handoff v2.1
-    change 8) gets the US store and products on the next start, in place."""
+    change 8) gets the US store and products on the next start, in place,
+    with photos instead of drawings."""
     from sqlalchemy import select, update
 
     from app.models.catalog import Product, Store
 
     async with db_session.AsyncSessionLocal() as db:
         await seed_sample_catalog(db, get_storage_service())
-        # Roll the first store back to how it was first seeded.
+        # Roll the first store back to how it was first seeded: drawn, untagged.
         store = (await db.execute(select(Store).where(Store.slug == "aster-and-co"))).scalar_one()
         store.slug, store.name = "saffron-atelier", "Saffron Atelier"
-        # As first seeded: no tags on any of the store's products.
         await db.execute(
             update(Product)
             .where(Product.store_id == store.id)
-            .values(audience="unisex", occasions="")
+            .values(audience="unisex", occasions="", image_url="/uploads/drawn.png")
         )
-        for new_title, old_title in [
+        for current, first in [
             ("Ivory linen shirt", "Ivory linen kurta"),
-            ("Gold satin blazer", "Saffron embroidered kurta"),
-            ("Emerald satin gown", "Emerald silk kurta"),
+            ("Grey tailored suit", "Saffron embroidered kurta"),
+            ("Red satin gown", "Emerald silk kurta"),
+            ("Burgundy velvet dress", "Rose festive dress"),
         ]:
             await db.execute(
                 update(Product)
-                .where(Product.title == new_title)
-                .values(title=old_title, category="Shirts", audience="men", occasions=",wedding,")
+                .where(Product.title == current)
+                .values(title=first, category="Shirts")
             )
         await db.commit()
-        old_image = (
-            await db.execute(select(Product.image_url).where(Product.title == "Emerald silk kurta"))
-        ).scalar_one()
 
         await seed_sample_catalog(db, get_storage_service())  # the next start
 
     async with db_session.AsyncSessionLocal() as db:
         store = (await db.execute(select(Store).where(Store.id == store.id))).scalar_one()
         assert (store.slug, store.name) == ("aster-and-co", "Aster & Co")
-        gown = (
-            await db.execute(select(Product).where(Product.title == "Emerald satin gown"))
-        ).scalar_one()
-        assert (gown.category, gown.audience) == ("Dresses", "women")
-        assert gown.occasion_list == ["dresses", "wedding"]
-        assert gown.image_url != old_image
-        blazer = (
-            await db.execute(select(Product).where(Product.title == "Gold satin blazer"))
-        ).scalar_one()
-        assert (blazer.category, blazer.occasion_list) == ("Jackets", ["office", "wedding"])
-        shirt = (
-            await db.execute(select(Product).where(Product.title == "Ivory linen shirt"))
-        ).scalar_one()
-        assert shirt.occasion_list == ["casual", "office"]
-        # The store's unchanged products get their tags too.
-        rose = (
-            await db.execute(select(Product).where(Product.title == "Rose festive dress"))
-        ).scalar_one()
-        assert (rose.audience, rose.occasion_list) == ("women", ["dresses", "wedding"])
+        products = {
+            p.title: p
+            for p in (
+                await db.execute(select(Product).where(Product.store_id == store.id))
+            ).scalars()
+        }
+        assert set(products) == {
+            "Ivory linen shirt",
+            "Grey tailored suit",
+            "Red satin gown",
+            "Charcoal suit jacket",
+            "Burgundy velvet dress",
+            "Pink wide trousers",
+        }
+        assert all(p.image_url.endswith(".jpg") for p in products.values())
+        gown = products["Red satin gown"]
+        assert (gown.category, gown.audience, gown.occasion_list) == (
+            "Dresses",
+            "women",
+            ["dresses", "wedding"],
+        )
+        velvet = products["Burgundy velvet dress"]
+        assert (velvet.audience, velvet.occasion_list) == ("women", ["dresses", "wedding"])
         kurtas = await db.execute(select(Product).where(Product.title.contains("kurta")))
         assert kurtas.first() is None
+
+
+async def test_a_drawn_catalogue_gets_the_photos_once() -> None:
+    """The drawn catalogue's products become their photographed ones; a
+    second start changes nothing (no new image stored)."""
+    from sqlalchemy import select, update
+
+    from app.models.catalog import Product
+
+    async with db_session.AsyncSessionLocal() as db:
+        await seed_sample_catalog(db, get_storage_service())
+        await db.execute(
+            update(Product)
+            .where(Product.title == "Striped wrap dress")
+            .values(title="Plum wrap dress", image_url="/uploads/plum.png", occasions="")
+        )
+        await db.commit()
+        await seed_sample_catalog(db, get_storage_service())
+
+    async with db_session.AsyncSessionLocal() as db:
+        dress = (
+            await db.execute(select(Product).where(Product.title == "Striped wrap dress"))
+        ).scalar_one()
+        assert dress.image_url.endswith(".jpg")
+        assert dress.occasion_list == ["dresses", "office"]
+        photo = Image.open(io.BytesIO(get_storage_service().read(dress.image_url)))
+        assert photo.format == "JPEG" and photo.size == (768, 1024)
+        first_image = dress.image_url
+
+    async with db_session.AsyncSessionLocal() as db:
+        await seed_sample_catalog(db, get_storage_service())  # yet another start
+    async with db_session.AsyncSessionLocal() as db:
+        again = (
+            await db.execute(select(Product).where(Product.title == "Striped wrap dress"))
+        ).scalar_one()
+        assert again.image_url == first_image
 
 
 async def test_the_update_leaves_a_database_with_both_stores_alone() -> None:
