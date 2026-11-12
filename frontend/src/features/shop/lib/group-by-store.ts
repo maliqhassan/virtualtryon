@@ -2,7 +2,7 @@ import type { Garment } from '@/features/wardrobe';
 
 /** A store the user has added pieces from by pasting links ("Your stores"). */
 export type MyStore = {
-  /** The store's web address without "www.", e.g. "outfitters.com.pk"; the group key. */
+  /** The store's web address without "www.", e.g. "northfield.com"; the group key. */
   host: string;
   /** The store's own address as it was linked (scheme, www., port), for "Visit store". */
   homeUrl: string;

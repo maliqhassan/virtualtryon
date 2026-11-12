@@ -16,14 +16,14 @@ import { OutfitRow } from '../components/outfit-row';
 
 const OCCASIONS = [
   ['business_center', 'Office'],
-  ['celebration', 'Eid & weddings'],
+  ['celebration', 'Weddings'],
+  ['wine_bar', 'Date night'],
   ['flight', 'Travel'],
   ['school', 'Campus'],
   ['fitness_center', 'Active'],
-  ['mosque', 'Jummah'],
 ] as const;
 const FORMALITY = ['Relaxed', 'Smart', 'Formal'] as const;
-const MIX = ['Eastern', 'Western', 'Fusion'] as const;
+const MIX = ['Casual', 'Classic', 'Bold'] as const;
 
 function seedFor(text: string): number {
   let hash = 0;
@@ -75,7 +75,7 @@ function Chips<T extends string>({
 export function GenerateScreen() {
   const [occasion, setOccasion] = useState<string>(OCCASIONS[0][1]);
   const [formality, setFormality] = useState<(typeof FORMALITY)[number]>('Smart');
-  const [mix, setMix] = useState<(typeof MIX)[number]>('Fusion');
+  const [mix, setMix] = useState<(typeof MIX)[number]>('Classic');
   const [round, setRound] = useState<number | null>(null);
   const inWash = useLaundry((state) => state.garmentIds);
   const garments = (useGarmentsQuery().data ?? []).filter((g) => !inWash.includes(g.id));

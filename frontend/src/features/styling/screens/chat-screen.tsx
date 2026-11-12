@@ -11,7 +11,7 @@ import { WARDROBE_HREF } from '@/features/wardrobe';
 
 // The design's prompts, each sent to the screen that answers it today.
 const PROMPTS: [string, Href][] = [
-  ['I have a mehndi Friday', GENERATE_HREF],
+  ['I have a rehearsal dinner Friday', GENERATE_HREF],
   ['What colour suits me?', MY_PHOTO_HREF],
   ['Suggest shoes', WARDROBE_HREF],
 ];

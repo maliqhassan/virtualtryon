@@ -16,17 +16,17 @@ import { HOW_IT_WORKS_HREF } from '../routes';
 
 const STYLES: Record<StyleFor, [string, string][]> = {
   women: [
-    ['Eastern formal', '[ photo · embroidered kameez ]'],
+    ['Classic', '[ photo · tailored blazer ]'],
     ['Minimal', '[ photo · ivory co-ord ]'],
-    ['Bridal & mehndi', '[ photo · gold lehenga ]'],
+    ['Wedding guest', '[ photo · satin gown ]'],
     ['Smart casual', '[ photo · linen shirt, jeans ]'],
     ['Modest chic', '[ photo · abaya, long coat ]'],
     ['Street', '[ photo · oversized denim ]'],
   ],
   men: [
-    ['Sherwani & formal', '[ photo · ivory sherwani ]'],
+    ['Suits & formal', '[ photo · navy suit ]'],
     ['Minimal', '[ photo · tonal knit ]'],
-    ['Kurta & waistcoat', '[ photo · charcoal waistcoat ]'],
+    ['Shirt & waistcoat', '[ photo · charcoal waistcoat ]'],
     ['Smart casual', '[ photo · oxford, chinos ]'],
     ['Old money', '[ photo · polo, loafers ]'],
     ['Street', '[ photo · cargo, sneakers ]'],
@@ -41,7 +41,13 @@ const SEGMENTS: [StyleFor, string][] = [
 /** Step 2 of 5: a grid of style photos, multi-select, with a Women/Men toggle. */
 export function QuizScreen() {
   const { styleFor, styles, setStyleFor, toggleStyle } = useOnboardingPreferences();
-  const picked = styles.length;
+  // Only picks that match a tile here: picks saved under older style names
+  // (before the US-market labels) can't be unticked, so they don't count.
+  const picked = styles.filter((id) =>
+    (['women', 'men'] as const).some((who) =>
+      STYLES[who].some(([label]) => id === `${who}:${label}`),
+    ),
+  ).length;
   const picksLabel =
     picked < 3
       ? `${picked} picked · pick ${3 - picked} more for sharper suggestions`

@@ -24,11 +24,11 @@ export type PlanOffer = {
 
 export const PLAN_OFFERS: PlanOffer[] = [
   { id: 'free', name: 'Free', price: '$0', allowance: '1 free try-on' },
-  { id: 'pro', name: 'Pro', price: '$6.99 / month', allowance: '2 try-ons every day' },
+  { id: 'pro', name: 'Pro', price: '$9.99 / month', allowance: '2 try-ons every day' },
   {
     id: 'pro_plus',
     name: 'Pro Plus',
-    price: '$9.99 / month',
+    price: '$19.99 / month',
     allowance: '3 try-ons every day',
     highlight: true,
   },

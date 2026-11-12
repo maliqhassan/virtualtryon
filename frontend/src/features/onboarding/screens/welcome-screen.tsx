@@ -30,7 +30,7 @@ const SLIDES = [
     tag: '03 · Meet Noor',
     a: 'A stylist who knows',
     b: 'your shape and shade.',
-    body: 'Ask for a mehndi look, shoes for Friday, or what colour suits you. Every answer comes with a reason.',
+    body: 'Ask for a wedding look, shoes for Friday, or what colour suits you. Every answer comes with a reason.',
     image: '[ hero · portrait in warm window light ]',
   },
 ] as const;

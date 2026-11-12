@@ -69,6 +69,10 @@ class CatalogRepository:
         row = result.first()
         return (row[0], row[1]) if row is not None else None
 
+    async def get_store_by_slug(self, slug: str) -> Store | None:
+        result = await self._db.execute(select(Store).where(Store.slug == slug))
+        return result.scalar_one_or_none()
+
     async def get_store(self, store_id: UUID) -> Store | None:
         result = await self._db.execute(select(Store).where(Store.id == store_id))
         return result.scalar_one_or_none()

@@ -30,14 +30,14 @@ const ACTIONS: Action[] = [
   {
     id: 'chat',
     title: 'Ask Noor',
-    caption: '“Mehndi on Friday”',
+    caption: '“Rehearsal dinner Friday”',
     href: CHAT_HREF,
     goals: ['style', 'inspiration'],
   },
   {
     id: 'generate',
     title: 'Style an occasion',
-    caption: 'Office · Eid · Travel',
+    caption: 'Office · Date night · Travel',
     href: GENERATE_HREF,
     icon: { name: 'style', color: '#4A5578', tint: '#E7E9F0' },
     goals: ['events', 'wardrobe'],

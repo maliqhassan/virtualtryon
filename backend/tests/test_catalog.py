@@ -179,3 +179,70 @@ async def test_a_catalogue_seeded_before_tags_is_tagged_on_the_next_start() -> N
         ).scalar_one()
         assert dress.audience == "women"
         assert dress.occasion_list == ["dresses", "office"]
+
+
+async def test_the_old_sample_store_is_updated_for_the_us_on_the_next_start() -> None:
+    """A catalogue seeded with the Pakistan-market store (before handoff v2.1
+    change 8) gets the US store and products on the next start, in place."""
+    from sqlalchemy import select, update
+
+    from app.models.catalog import Product, Store
+
+    async with db_session.AsyncSessionLocal() as db:
+        await seed_sample_catalog(db, get_storage_service())
+        # Roll the first store back to how it was first seeded.
+        store = (await db.execute(select(Store).where(Store.slug == "aster-and-co"))).scalar_one()
+        store.slug, store.name = "saffron-atelier", "Saffron Atelier"
+        for new_title, old_title in [
+            ("Ivory linen shirt", "Ivory linen kurta"),
+            ("Gold satin blazer", "Saffron embroidered kurta"),
+            ("Emerald satin gown", "Emerald silk kurta"),
+        ]:
+            await db.execute(
+                update(Product)
+                .where(Product.title == new_title)
+                .values(title=old_title, category="Shirts", audience="men", occasions=",wedding,")
+            )
+        await db.commit()
+        old_image = (
+            await db.execute(select(Product.image_url).where(Product.title == "Emerald silk kurta"))
+        ).scalar_one()
+
+        await seed_sample_catalog(db, get_storage_service())  # the next start
+
+    async with db_session.AsyncSessionLocal() as db:
+        store = (await db.execute(select(Store).where(Store.id == store.id))).scalar_one()
+        assert (store.slug, store.name) == ("aster-and-co", "Aster & Co")
+        gown = (
+            await db.execute(select(Product).where(Product.title == "Emerald satin gown"))
+        ).scalar_one()
+        assert (gown.category, gown.audience) == ("Dresses", "women")
+        assert gown.occasion_list == ["dresses", "wedding"]
+        assert gown.image_url != old_image
+        blazer = (
+            await db.execute(select(Product).where(Product.title == "Gold satin blazer"))
+        ).scalar_one()
+        assert (blazer.category, blazer.occasion_list) == ("Jackets", ["office", "wedding"])
+        shirt = (
+            await db.execute(select(Product).where(Product.title == "Ivory linen shirt"))
+        ).scalar_one()
+        assert shirt.occasion_list == ["casual", "office"]
+        kurtas = await db.execute(select(Product).where(Product.title.contains("kurta")))
+        assert kurtas.first() is None
+
+
+async def test_the_update_leaves_a_database_with_both_stores_alone() -> None:
+    from sqlalchemy import select
+
+    from app.models.catalog import Store
+
+    async with db_session.AsyncSessionLocal() as db:
+        await seed_sample_catalog(db, get_storage_service())
+        db.add(Store(slug="saffron-atelier", name="Old", tagline="", accent_color="#000000"))
+        await db.commit()
+
+        await seed_sample_catalog(db, get_storage_service())  # must not fail
+
+    async with db_session.AsyncSessionLocal() as db:
+        slugs = set((await db.execute(select(Store.slug))).scalars())
+        assert {"saffron-atelier", "aster-and-co"} <= slugs

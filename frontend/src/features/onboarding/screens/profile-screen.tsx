@@ -86,7 +86,7 @@ export function ProfileScreen() {
         <View className="flex-1">
           <Text className="font-sans-bold text-[13.5px] text-cream">Define the waist</Text>
           <Text className="mt-xs font-sans text-[12.5px] leading-[19px] text-night-body">
-            Belted kurtas, waistcoats and tucked shirts. Skip boxy crops and icy pastels near the
+            Belted blazers, waistcoats and tucked shirts. Skip boxy crops and icy pastels near the
             face.
           </Text>
         </View>

@@ -9,4 +9,4 @@ export function productHref(productId: string): Href {
 }
 export const WISHLIST_HREF = '/wishlist' as Href;
 /** The seasonal editorial lookbook (one for now). */
-export const LOOKBOOK_HREF = '/lookbook/eid' as Href;
+export const LOOKBOOK_HREF = '/lookbook/holiday' as Href;

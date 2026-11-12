@@ -14,7 +14,7 @@ export function LookbookBanner() {
       onPress={() => router.push(LOOKBOOK_HREF)}
       pressedScale={0.98}
       accessibilityRole="button"
-      accessibilityLabel="Eid edit, open lookbook"
+      accessibilityLabel="Holiday edit, open lookbook"
       containerClassName="mb-xl mt-[14px]"
       className="h-[178px] overflow-hidden rounded-[24px] bg-[#2E2210]"
     >
@@ -30,7 +30,7 @@ export function LookbookBanner() {
       />
       <View className="absolute left-[18px] right-[120px] top-[18px]">
         <Text className="font-mono text-[9.5px] tracking-[1.7px] text-gold-soft">
-          EID EDIT · LOOKBOOK
+          HOLIDAY EDIT · LOOKBOOK
         </Text>
         <Text className="mt-[9px] font-display text-[28px] leading-[29px] text-[#F4EBD9]">
           Gold hour,{'\n'}

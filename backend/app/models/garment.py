@@ -30,7 +30,7 @@ class Garment(Base):
     # The store product page it was imported from (services/link_import.py);
     # None for photos the user uploaded. Powers "View in store".
     source_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
-    # That store's own name, from its page (e.g. "Outfitters"); groups items
+    # That store's own name, from its page (e.g. "Northfield"); groups items
     # under "Your stores" in the app's Shop tab.
     source_store: Mapped[str | None] = mapped_column(String(SOURCE_STORE_MAX_LENGTH), nullable=True)
     created_at: Mapped[datetime] = mapped_column(

@@ -80,7 +80,10 @@ export function SettingsScreen() {
           }}
           accessibilityLabel={`Style me for ${styleFor}. Tap to change`}
         />
-        <ListRow label="Language" action={{ label: 'English', color: themeColors.neutral500 }} />
+        <ListRow
+          label="Language"
+          action={{ label: 'English (US)', color: themeColors.neutral500 }}
+        />
       </ListCard>
 
       <ListSectionLabel>Privacy</ListSectionLabel>

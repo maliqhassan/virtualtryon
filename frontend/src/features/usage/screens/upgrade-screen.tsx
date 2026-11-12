@@ -72,7 +72,7 @@ export function UpgradeScreen() {
             <Text className="font-mono text-[8.5px] text-[#C9B896]">after · your try-on</Text>
           </View>
           <GlassChip label="#Office" style={{ left: 12, top: 210 }} />
-          <GlassChip label="#Mehndi night" style={{ right: 14, top: 240 }} />
+          <GlassChip label="#Rehearsal dinner" style={{ right: 14, top: 240 }} />
           <GradientFill
             kind="linear"
             stops={[

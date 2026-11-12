@@ -73,7 +73,7 @@ export function LookbookScreen() {
             onPress={() => router.back()}
           />
           <Text className="mt-xl font-mono text-[9.5px] tracking-[1.7px] text-gold-soft">
-            EID EDIT · {products.length} PIECES
+            HOLIDAY EDIT · {products.length} PIECES
           </Text>
           <Text
             className="mt-sm font-display text-[40px] leading-[41px]"

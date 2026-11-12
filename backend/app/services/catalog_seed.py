@@ -1,7 +1,9 @@
 """Creates the sample store catalogue: three fictional stores with drawn
 product images, so the Shop tab has something real to browse and try on
-before any actual store is connected. Idempotent: does nothing if stores
-already exist. Run with `python -m app.seed_catalog`.
+before any actual store is connected. Run with `python -m app.seed_catalog`
+(start.sh does, on every start). Idempotent: with stores already there it
+creates nothing, only brings an older sample catalogue up to date (the US
+store replacing the first one, and audience/occasion tags).
 
 The store names are invented. The app labels them as sample stores.
 """
@@ -44,24 +46,19 @@ class SampleStore:
 
 SAMPLE_STORES: tuple[SampleStore, ...] = (
     SampleStore(
-        slug="saffron-atelier",
-        name="Saffron Atelier",
-        tagline="Eastern wear for Eid, weddings and every day",
+        slug="aster-and-co",
+        name="Aster & Co",
+        tagline="Occasion wear for weddings, date nights and every day",
         accent_color="#B4713F",
         products=(
             SampleProduct(
-                "Ivory linen kurta", "Shirts", 4900, "kurta", (244, 238, 226), (239, 232, 220)
+                "Ivory linen shirt", "Shirts", 4900, "shirt", (244, 238, 226), (239, 232, 220)
             ),
             SampleProduct(
-                "Saffron embroidered kurta",
-                "Shirts",
-                6400,
-                "kurta",
-                (214, 150, 60),
-                (246, 236, 220),
+                "Gold satin blazer", "Jackets", 6400, "jacket", (214, 150, 60), (246, 236, 220)
             ),
             SampleProduct(
-                "Emerald silk kurta", "Shirts", 7800, "kurta", (46, 112, 80), (226, 236, 228)
+                "Emerald satin gown", "Dresses", 7800, "dress", (46, 112, 80), (226, 236, 228)
             ),
             SampleProduct(
                 "Charcoal waistcoat", "Jackets", 5500, "waistcoat", (58, 55, 50), (236, 231, 225)
@@ -136,9 +133,9 @@ SAMPLE_STORES: tuple[SampleStore, ...] = (
 # Men/Women toggle and chips. Keyed by title (unique among the samples) so
 # the same table tags a catalogue seeded before these columns existed.
 SAMPLE_TAGS: dict[str, tuple[str, tuple[str, ...]]] = {
-    "Ivory linen kurta": ("men", ("casual", "wedding")),
-    "Saffron embroidered kurta": ("men", ("wedding",)),
-    "Emerald silk kurta": ("men", ("wedding",)),
+    "Ivory linen shirt": ("men", ("casual", "office")),
+    "Gold satin blazer": ("unisex", ("office", "wedding")),
+    "Emerald satin gown": ("women", ("dresses", "wedding")),
     "Charcoal waistcoat": ("men", ("office", "wedding")),
     "Rose festive dress": ("women", ("dresses", "wedding")),
     "Cream straight trousers": ("unisex", ("casual", "office")),
@@ -162,9 +159,8 @@ def _darker(c: Colour, amount: float = 0.72) -> Colour:
 
 
 def _outline(shape: str) -> list[tuple[int, int]]:
-    if shape in ("shirt", "tee", "hoodie", "jacket", "kurta", "waistcoat"):
-        long = shape == "kurta"
-        bottom = 700 if long else 640
+    if shape in ("shirt", "tee", "hoodie", "jacket", "waistcoat"):
+        bottom = 640
         if shape == "waistcoat":
             return [
                 (220, 150),
@@ -225,17 +221,14 @@ def draw_product(product: SampleProduct) -> bytes:
     line = _darker(product.fill)
     draw.polygon(points, fill=product.fill, outline=line, width=3)
 
-    if product.shape in ("shirt", "kurta", "jacket"):
+    if product.shape in ("shirt", "jacket"):
         draw.line([(300, 160), (300, points[8][1] - 10)], fill=line, width=2)
-    if product.shape in ("shirt", "kurta"):
+    if product.shape == "shirt":
         draw.polygon(
             [(262, 118), (282, 168), (300, 150), (318, 168), (338, 118)],
             fill=product.fill,
             outline=line,
         )
-    if product.shape == "kurta":
-        for y in range(170, 330, 22):
-            draw.ellipse((292, y, 300, y + 8), fill=(180, 113, 63))
     if product.shape == "hoodie":
         draw.arc((244, 70, 356, 200), 180, 360, fill=line, width=4)
         draw.polygon([(232, 440), (368, 440), (384, 540), (216, 540)], outline=line, width=3)
@@ -269,10 +262,57 @@ def _stored_tags() -> dict[str, tuple[str, str]]:
     }
 
 
+# The first sample store was made for the Pakistan market; the app moved to
+# the US (handoff v2.1 change 8). A catalogue seeded before then is updated
+# in place on the next start: the store renamed, three products replaced
+# (found by their old titles), drawn again and tagged. The old drawings are
+# left in storage rather than risk deleting a file something still uses.
+_OLD_STORE_SLUG = "saffron-atelier"
+_NEW_STORE_SLUG = "aster-and-co"
+_REPLACED_TITLES = {
+    "Ivory linen kurta": "Ivory linen shirt",
+    "Saffron embroidered kurta": "Gold satin blazer",
+    "Emerald silk kurta": "Emerald satin gown",
+}
+
+
+async def _update_old_store(repo: CatalogRepository, storage: StorageService) -> int:
+    """Returns how many products were replaced (0 when there's nothing to do)."""
+    store = await repo.get_store_by_slug(_OLD_STORE_SLUG)
+    if store is None:
+        return 0
+    current = next(s for s in SAMPLE_STORES if s.slug == _NEW_STORE_SLUG)
+    if await repo.get_store_by_slug(_NEW_STORE_SLUG) is not None:
+        # Both exist (a partly reseeded database): leave them, rather than
+        # fail every start on the unique slug.
+        logger.warning("catalog seed: %s and %s both exist", _OLD_STORE_SLUG, _NEW_STORE_SLUG)
+        return 0
+    store.slug, store.name, store.tagline = current.slug, current.name, current.tagline
+    samples = {sample.title: sample for sample in current.products}
+    tags = _stored_tags()
+    replaced = 0
+    for product, _store_name in await repo.list_products(store_id=store.id):
+        new_title = _REPLACED_TITLES.get(product.title)
+        if new_title is None:
+            continue
+        sample = samples[new_title]
+        product.title = sample.title
+        product.category = sample.category
+        product.price_cents = sample.price_cents
+        product.image_url = storage.save(draw_product(sample), "png")
+        product.audience, product.occasions = tags[sample.title]
+        replaced += 1
+    return replaced
+
+
 async def seed_sample_catalog(db: AsyncSession, storage: StorageService) -> int:
-    """Returns the number of products created (0 if a catalogue already exists)."""
+    """Returns the number of products created (0 if a catalogue already
+    exists, which is then only updated in place; see the module docstring)."""
     repo = CatalogRepository(db)
     if await repo.count_stores() > 0:
+        replaced = await _update_old_store(repo, storage)
+        if replaced:
+            logger.info("catalog seed: old sample store updated (%d products)", replaced)
         # Seeded before audience/occasions existed: tag those samples now.
         tagged = await repo.tag_untagged_products(
             [store.slug for store in SAMPLE_STORES], _stored_tags()

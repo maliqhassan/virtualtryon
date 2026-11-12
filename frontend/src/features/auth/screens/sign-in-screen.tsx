@@ -18,7 +18,7 @@ const COLLAGE: { tone: StripeTone; style: object; caption?: string }[] = [
   {
     tone: 'blush',
     style: { alignSelf: 'center', top: 20, height: 210, zIndex: 2 },
-    caption: '[ look · ivory kurta ]',
+    caption: '[ look · satin gown ]',
   },
 ];
 
