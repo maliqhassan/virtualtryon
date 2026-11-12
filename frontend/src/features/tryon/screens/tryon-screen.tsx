@@ -5,11 +5,8 @@ import { Share, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
-import { AppImage } from '@/components/app-image';
 import { AppScaffold } from '@/components/app-scaffold';
-import { BreathingOrb } from '@/components/breathing-orb';
 import { FadeInView } from '@/components/fade-in-view';
-import { NightGlow } from '@/components/gradient-fill';
 import { IconButton } from '@/components/icon-button';
 import { themeColors } from '@/constants/theme';
 import { MY_PHOTO_HREF, displayUrl, useMyPhotoQuery } from '@/features/my-photo';
@@ -21,11 +18,14 @@ import { resolveMediaUrl } from '@/lib/media-url';
 import { openExternalLink } from '@/lib/open-link';
 
 import { CompareToggle, type CompareMode } from '../components/compare-toggle';
+import { GeneratingView } from '../components/generating-view';
 import { ResultCanvas } from '../components/result-canvas';
 import { useStartTryOn } from '../hooks/use-start-tryon';
 import { useTryOnJobQuery } from '../hooks/use-tryon-job-query';
 import { TRY_ON_HOME_HREF, tryOnJobHref } from '../routes';
 import { MissingPhotoError, TryOnLimitReachedError } from '../services/tryon-job';
+
+const RING_HOLD_MS = 700;
 
 /** Back to the existing Try-On tab (keeping its state), not a new copy of it. */
 function goHome() {
@@ -68,6 +68,19 @@ export function TryOnScreen() {
     if (finished) queryClient.invalidateQueries({ queryKey: USAGE_QUERY_KEY });
   }, [finished, queryClient]);
 
+  // Which completed job's result is showing: set a moment after completion,
+  // so the generating ring is seen reaching 100% first.
+  // A job already finished when the screen opens (cached) shows straight away.
+  const [revealedJobId, setRevealedJobId] = useState<string | null>(() =>
+    job?.status === 'completed' ? job.id : null,
+  );
+  const completedId = job?.status === 'completed' ? job.id : null;
+  useEffect(() => {
+    if (!completedId) return;
+    const timer = setTimeout(() => setRevealedJobId(completedId), RING_HOLD_MS);
+    return () => clearTimeout(timer);
+  }, [completedId]);
+
   const handleShare = useCallback(async () => {
     try {
       await Share.share({ message: 'I tried this on with AI Stylist!' });
@@ -106,78 +119,19 @@ export function TryOnScreen() {
     );
   }
 
-  if (!job || job.status === 'queued' || job.status === 'processing') {
-    const step = !job
-      ? 'Starting your try-on'
-      : job.status === 'queued'
-        ? 'Waiting for a free spot'
-        : 'Draping fabric to your frame';
-    const stepNumber = !job ? 1 : job.status === 'queued' ? 1 : 2;
+  // The ring stays up a moment at 100% once the job completes, so it visibly
+  // finishes before the result appears.
+  const pending = !job || job.status === 'queued' || job.status === 'processing';
+  if (pending || (job.status === 'completed' && revealedJobId !== job.id)) {
     return (
-      <View className="flex-1 bg-night">
-        <NightGlow center={{ x: 0.5, y: 0.4 }} />
-        <AppScaffold dark scroll={false}>
-          <View className="self-start">
-            <IconButton icon="close" tone="glass" accessibilityLabel="Close" onPress={goHome} />
-          </View>
-          <Text
-            className="mt-lg font-display text-[32px] leading-[34px] text-cream"
-            accessibilityRole="header"
-          >
-            Dressing you in{'\n'}
-            <Text className="font-display-italic text-gold-soft">
-              {garment?.title ?? 'your outfit'}
-            </Text>
-          </Text>
-          <View className="mt-[22px] flex-row gap-[10px] opacity-70">
-            <View className="flex-1">
-              <AppImage
-                uri={photoUrl ? resolveMediaUrl(photoUrl) : null}
-                accessibilityLabel="Your photo"
-                aspectRatio={3 / 4}
-                borderRadius={18}
-                placeholderText=" "
-              />
-            </View>
-            <View className="flex-1">
-              <AppImage
-                uri={garment ? resolveMediaUrl(garment.imageUrl) : null}
-                accessibilityLabel={garment?.title ?? 'Clothing item'}
-                aspectRatio={3 / 4}
-                borderRadius={18}
-                placeholderText=" "
-              />
-            </View>
-          </View>
-
-          <View
-            className="flex-1 items-center justify-center gap-lg"
-            accessibilityLiveRegion="polite"
-          >
-            {jobQuery.pollingTimedOut ? (
-              <View className="items-center gap-md px-lg">
-                <Text className="text-center font-sans text-night-body">
-                  This is taking longer than usual. Your try-on is still in the queue and will
-                  finish on its own.
-                </Text>
-                <AppButton
-                  label="Check again"
-                  variant="ghostDark"
-                  onPress={() => jobQuery.refetch()}
-                />
-              </View>
-            ) : (
-              <>
-                <BreathingOrb size={84} />
-                <Text className="font-sans-semibold text-[13.5px] text-night-text">{step}</Text>
-                <Text className="font-mono text-[10.5px] text-neutral-500">
-                  step {stepNumber} of 3 · usually under a minute
-                </Text>
-              </>
-            )}
-          </View>
-        </AppScaffold>
-      </View>
+      <GeneratingView
+        status={job?.status}
+        portraitUri={photoUrl ? resolveMediaUrl(photoUrl) : null}
+        pieceTitle={garment?.title ?? null}
+        timedOut={jobQuery.pollingTimedOut && job?.status !== 'completed'}
+        onCheckAgain={() => void jobQuery.refetch()}
+        onClose={goHome}
+      />
     );
   }
 
