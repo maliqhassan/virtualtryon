@@ -4,15 +4,9 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { AppIcon } from '@/components/app-icon';
 import { AppImage } from '@/components/app-image';
 import { themeColors } from '@/constants/theme';
-import {
-  MY_PHOTO_HREF,
-  PHOTO_ANGLES,
-  addPortraitHref,
-  displayUrl,
-  useMyPhotosQuery,
-} from '@/features/my-photo';
+import { displayUrl, usePortraits } from '@/features/my-photo';
 import { TRY_ON_HOME_HREF } from '@/features/tryon';
-import { WARDROBE_HREF } from '@/features/wardrobe';
+import { wardrobeTabHref } from '@/features/wardrobe';
 import { resolveMediaUrl } from '@/lib/media-url';
 
 const TILE_RATIO = 96 / 128;
@@ -23,13 +17,8 @@ const TILE_RATIO = 96 / 128;
  * ink outline and the "in use" tag. Tapping a photo opens Try-On.
  */
 export function PortraitsRail() {
-  const photos = useMyPhotosQuery().data ?? [];
-  // Front first, then side and back, as on My photo.
-  const ordered = PHOTO_ANGLES.flatMap(({ angle }) => photos.filter((p) => p.angle === angle));
-  // "Add" fills the first missing view, never silently replacing the front
-  // photo in use. With all three added it opens My photo to choose.
-  const missing = PHOTO_ANGLES.find(({ angle }) => !photos.some((p) => p.angle === angle));
-  const addHref = missing ? addPortraitHref(missing.angle) : MY_PHOTO_HREF;
+  // Front, side, back; "Add" fills the first missing view (null until loaded).
+  const { ordered, addHref } = usePortraits();
 
   return (
     <View className="mt-[22px]">
@@ -37,7 +26,11 @@ export function PortraitsRail() {
         <Text className="font-sans-bold text-[17px] text-ink-primary" accessibilityRole="header">
           My portraits
         </Text>
-        <Pressable onPress={() => router.push(WARDROBE_HREF)} accessibilityRole="link" hitSlop={8}>
+        <Pressable
+          onPress={() => router.push(wardrobeTabHref('portraits'))}
+          accessibilityRole="link"
+          hitSlop={8}
+        >
           <Text className="font-sans-bold text-[12px] text-neutral-500">See all</Text>
         </Pressable>
       </View>
@@ -49,7 +42,8 @@ export function PortraitsRail() {
         contentContainerClassName="gap-[9px] px-xl pb-xs"
       >
         <Pressable
-          onPress={() => router.push(addHref)}
+          onPress={() => addHref && router.push(addHref)}
+          disabled={!addHref}
           accessibilityRole="button"
           accessibilityLabel="Add a portrait"
           className="h-[128px] w-[96px] items-center justify-center gap-xs rounded-[18px] border-[1.5px] border-dashed border-neutral-300 bg-surface"

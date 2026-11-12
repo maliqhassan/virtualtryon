@@ -67,7 +67,7 @@ export function SavedLookDetailsScreen() {
           This saved look may have been deleted.
         </Text>
         <Link href={LOOKS_HREF} className="mt-lg font-sans-semibold text-sm text-primary">
-          Back to History →
+          Back to your outfits →
         </Link>
       </AppScaffold>
     );

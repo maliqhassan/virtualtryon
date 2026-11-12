@@ -2,7 +2,14 @@ import type { Href } from 'expo-router';
 
 /** Route strings for this feature, centralized as `Href` casts so screens
  * don't repeat them (same convention as saved-looks/routes.ts). */
-export const WARDROBE_HREF = '/wardrobe' as Href;
+export type WardrobeTab = 'outfits' | 'portraits' | 'clothes';
+/** Wardrobe on one of its tabs (handoff v2.1 change 7: the tab lives in the URL). */
+export function wardrobeTabHref(tab: WardrobeTab): Href {
+  return { pathname: '/wardrobe', params: { tab } } as Href;
+}
+/** Wardrobe's Clothes, named explicitly: the tab screen keeps its last
+ * `tab` param, so a bare "/wardrobe" could reopen Outfits or Portraits. */
+export const WARDROBE_HREF = wardrobeTabHref('clothes');
 export const ADD_GARMENT_HREF = '/garment/add' as Href;
 /** With returnToTryOn, the new piece comes back selected on the Try On screen. */
 export function addGarmentHref(options: { returnToTryOn?: boolean } = {}): Href {

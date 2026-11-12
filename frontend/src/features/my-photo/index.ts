@@ -1,16 +1,7 @@
-import type { Href } from 'expo-router';
-
-import type { PhotoAngle } from './types';
-
 // Public API of the my-photo feature, for other features to import.
+export { PortraitsGrid } from './components/portraits-grid';
 export { MY_PHOTO_QUERY_KEY, useMyPhotoQuery, useMyPhotosQuery } from './hooks/use-my-photo';
+export { usePortraits } from './hooks/use-portraits';
+export { MY_PHOTO_HREF, addPortraitHref, myPhotoHref } from './routes';
 export { PHOTO_ANGLES, displayUrl } from './types';
 export type { MyPhoto, PhotoAngle } from './types';
-export const MY_PHOTO_HREF = '/my-photo' as Href;
-export function myPhotoHref(angle: PhotoAngle): Href {
-  return { pathname: '/my-photo', params: { angle } } as Href;
-}
-/** My photo on that view, opening the photo picker straight away (Today's "Add portrait"). */
-export function addPortraitHref(angle: PhotoAngle): Href {
-  return { pathname: '/my-photo', params: { angle, pick: '1' } } as Href;
-}

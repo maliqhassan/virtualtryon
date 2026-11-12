@@ -15,5 +15,7 @@ export {
   addGarmentHref,
   garmentDetailsHref,
   tryOnGarmentHref,
+  wardrobeTabHref,
 } from './routes';
+export type { WardrobeTab } from './routes';
 export type { Garment } from './types';
