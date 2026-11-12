@@ -47,6 +47,15 @@
           "photosPermission": "VirtualTryOn uses your photo library to select images for virtual try-on."
         }
       ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "VirtualTryOn uses your photo library to select images for virtual try-on.",
+          "savePhotosPermission": "VirtualTryOn saves your try-ons to your photos when you tap Save.",
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": []
+        }
+      ],
       "expo-secure-store",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",

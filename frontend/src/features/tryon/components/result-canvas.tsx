@@ -8,28 +8,53 @@ type ResultCanvasProps = {
   /** The image to show; null shows a striped placeholder with `placeholderCaption`. */
   uri: string | null;
   placeholderCaption?: string;
-  /** Laid over the bottom of the image (the glass caption on the result). */
-  overlay?: ReactNode;
+  accessibilityLabel: string;
+  /** A small tag top-left ("Before"). */
+  tag?: string;
+  /** Laid over the bottom-left corner (the glass chip). */
+  bottomLeft?: ReactNode;
+  /** Laid over the bottom-right corner (send and eye). */
+  bottomRight?: ReactNode;
 };
 
-/** The large try-on image on the dark stage, 3:4.15 at radius 28. */
-export function ResultCanvas({ uri, placeholderCaption, overlay }: ResultCanvasProps) {
+/** The large try-on image on the light result screen, 3:4.15 at radius 28. */
+export function ResultCanvas({
+  uri,
+  placeholderCaption,
+  accessibilityLabel,
+  tag,
+  bottomLeft,
+  bottomRight,
+}: ResultCanvasProps) {
   return (
-    <View className="w-full overflow-hidden rounded-hero" style={{ aspectRatio: 3 / 4.15 }}>
+    <View
+      className="w-full overflow-hidden rounded-hero bg-muted"
+      style={{ aspectRatio: 3 / 4.15 }}
+    >
       {uri ? (
         <Image
           source={{ uri }}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
-          accessibilityLabel="Try-on result"
+          accessibilityLabel={accessibilityLabel}
         />
       ) : (
         <View className="flex-1 items-center justify-center">
-          <StripeFill tone="dark" period={9} />
-          <Text className="font-mono text-[10px] text-neutral-500">{placeholderCaption}</Text>
+          <StripeFill tone="warm" />
+          <Text className="font-mono text-[10px] text-ink-secondary">{placeholderCaption}</Text>
         </View>
       )}
-      {overlay && <View className="absolute bottom-md left-md right-md">{overlay}</View>}
+      {tag && (
+        <Text className="absolute left-[14px] top-[14px] overflow-hidden rounded-full bg-[rgba(22,19,15,0.7)] px-[11px] py-[6px] font-sans-bold text-[11px] text-cream">
+          {tag}
+        </Text>
+      )}
+      {(bottomLeft || bottomRight) && (
+        <View className="absolute bottom-[14px] left-[14px] right-[14px] flex-row items-end justify-between gap-sm">
+          <View className="flex-shrink">{bottomLeft}</View>
+          {bottomRight}
+        </View>
+      )}
     </View>
   );
 }

@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Share, Text, View } from 'react-native';
+import { Platform, Pressable, Share, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
 import { AppIcon } from '@/components/app-icon';
@@ -11,15 +11,15 @@ import { IconButton } from '@/components/icon-button';
 import { themeColors } from '@/constants/theme';
 import { MY_PHOTO_HREF, displayUrl, useMyPhotoQuery } from '@/features/my-photo';
 import { useSaveLookFromTryOn } from '@/features/saved-looks';
-import { useProductQuery } from '@/features/shop';
-import { UPGRADE_HREF, USAGE_QUERY_KEY } from '@/features/usage';
+import { productHref, useProductQuery } from '@/features/shop';
+import { CreditsPill, UPGRADE_HREF, USAGE_QUERY_KEY, useUsageQuery } from '@/features/usage';
 import { useGarmentsQuery } from '@/features/wardrobe';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { openExternalLink } from '@/lib/open-link';
 
-import { CompareToggle, type CompareMode } from '../components/compare-toggle';
 import { GeneratingView } from '../components/generating-view';
 import { ResultCanvas } from '../components/result-canvas';
+import { useSaveToPhotos } from '../hooks/use-save-to-photos';
 import { useStartTryOn } from '../hooks/use-start-tryon';
 import { useTryOnJobQuery } from '../hooks/use-tryon-job-query';
 import { TRY_ON_HOME_HREF, tryOnJobHref } from '../routes';
@@ -33,9 +33,10 @@ function goHome() {
 }
 
 /**
- * One screen for a try-on's whole life, on the dark stage: "generating"
- * while the job is queued/processing, then the result (or a failure). A
- * failed try-on doesn't use up the user's allowance; the server enforces that.
+ * One screen for a try-on's whole life: "generating" (a blurred portrait
+ * and progress ring) while the job is queued/processing, then the light
+ * result (handoff v2.1 change 6), or a failure. A failed try-on doesn't use
+ * up the user's allowance; the server enforces that.
  */
 export function TryOnScreen() {
   const { jobId } = useLocalSearchParams<{ jobId: string }>();
@@ -44,8 +45,10 @@ export function TryOnScreen() {
   const photoQuery = useMyPhotoQuery();
   const garmentsQuery = useGarmentsQuery();
   const saveLook = useSaveLookFromTryOn();
+  const savePhoto = useSaveToPhotos();
+  const usage = useUsageQuery().data;
   const retry = useStartTryOn();
-  const [compareMode, setCompareMode] = useState<CompareMode>('after');
+  const [compareMode, setCompareMode] = useState<'before' | 'after'>('after');
 
   const job = jobQuery.data ?? null;
   const productQuery = useProductQuery(job?.productId);
@@ -166,78 +169,138 @@ export function TryOnScreen() {
   }
 
   const saved = saveLook.isSuccess;
+  const resultUrl = job.generatedImageUrl ? resolveMediaUrl(job.generatedImageUrl) : null;
+  const showingBefore = compareMode === 'before';
+  // "Shop this piece": the store product's page, or the page it was pasted from.
+  const shopPiece = job.productId
+    ? () => router.push(productHref(job.productId as string))
+    : storeUrl
+      ? () => openExternalLink(storeUrl)
+      : null;
+  // Photos only after Looks has it, so a failed save never leaves a copy in
+  // the library (and a retry doesn't add a second). Not on web: no library.
+  const canSavePhoto = !!resultUrl && Platform.OS !== 'web';
+  const savePhotoNow = () => {
+    if (canSavePhoto && resultUrl) savePhoto.mutate(resultUrl);
+  };
+  const save = () => {
+    if (saved || saveLook.isPending) return;
+    saveLook.mutate(job.id, { onSuccess: savePhotoNow });
+  };
+  const photoRetry = savePhoto.data === 'denied' || savePhoto.isError;
+  const photoNote =
+    savePhoto.data === 'denied'
+      ? 'Saved to Looks. Allow photo access in Settings to also save it to your photos.'
+      : savePhoto.isError
+        ? 'Saved to Looks, but it couldn’t be added to your photos.'
+        : savePhoto.data === 'saved'
+          ? 'Saved to Looks and your photos.'
+          : null;
+
   return (
-    <AppScaffold dark>
+    <AppScaffold>
       <View className="flex-row items-center justify-between">
-        <IconButton icon="arrow_back" tone="glass" accessibilityLabel="Back" onPress={goHome} />
-        <CompareToggle mode={compareMode} onChange={setCompareMode} />
-        <IconButton
-          icon="ios_share"
-          tone="glass"
-          accessibilityLabel="Share"
-          onPress={handleShare}
-        />
+        <IconButton icon="arrow_back" accessibilityLabel="Back" onPress={goHome} />
+        <Text className="font-mono text-[10px] uppercase tracking-[1.6px] text-primary">
+          Your new look
+        </Text>
+        {usage ? <CreditsPill usage={usage} /> : <View className="w-[42px]" />}
       </View>
 
       <FadeInView key={compareMode} className="mt-[14px]">
-        {compareMode === 'after' ? (
-          <ResultCanvas
-            uri={job.generatedImageUrl ? resolveMediaUrl(job.generatedImageUrl) : null}
-            placeholderCaption="[ result image not available ]"
-            overlay={
-              <View className="rounded-xxl border border-[rgba(255,255,255,0.12)] bg-[rgba(28,26,23,0.72)] px-lg py-[14px]">
-                <View className="flex-row items-center gap-sm">
-                  <AppIcon name="auto_awesome" size={16} color={themeColors.goldSoft} />
-                  <Text
-                    className="flex-1 font-sans-bold text-[13.5px] text-cream"
-                    numberOfLines={1}
-                  >
-                    {garment?.title ?? 'Your try-on'}
-                  </Text>
-                </View>
-                <Text className="mt-[6px] font-sans text-[12px] leading-[18px] text-night-body">
-                  {storeName ? `From ${storeName}. ` : ''}Save it to compare later, or flip to
-                  Before to see your original photo.
-                </Text>
-              </View>
-            }
-          />
-        ) : (
-          <ResultCanvas
-            uri={photoUrl ? resolveMediaUrl(photoUrl) : null}
-            placeholderCaption="[ your original photo ]"
-          />
-        )}
+        <ResultCanvas
+          uri={showingBefore ? (photoUrl ? resolveMediaUrl(photoUrl) : null) : resultUrl}
+          accessibilityLabel={showingBefore ? 'Your original photo' : 'Your try-on'}
+          placeholderCaption={
+            showingBefore ? '[ your original photo ]' : '[ result image not available ]'
+          }
+          tag={showingBefore ? 'Before' : undefined}
+          bottomLeft={
+            // The design's fit score ("91 · Suits you") needs result analysis,
+            // which doesn't exist yet; the piece's name stands in, never a made-up number.
+            <View className="flex-row items-center gap-[6px] self-start rounded-full border border-[rgba(255,255,255,0.18)] bg-[rgba(28,26,23,0.55)] px-md py-[7px]">
+              <AppIcon name="auto_awesome" size={15} color={themeColors.goldSoft} />
+              <Text numberOfLines={1} className="flex-shrink font-sans-bold text-[12px] text-cream">
+                {garment?.title ?? 'Your try-on'}
+              </Text>
+            </View>
+          }
+          bottomRight={
+            <View className="flex-row gap-sm">
+              <IconButton
+                icon="send"
+                tone="glass"
+                accessibilityLabel="Share"
+                onPress={handleShare}
+              />
+              <IconButton
+                icon={showingBefore ? 'visibility_off' : 'visibility'}
+                tone="glass"
+                accessibilityLabel={showingBefore ? 'Show the try-on' : 'Show your original photo'}
+                onPress={() => setCompareMode(showingBefore ? 'after' : 'before')}
+              />
+            </View>
+          }
+        />
       </FadeInView>
 
+      <View className="mt-[14px] flex-row gap-md rounded-[18px] border border-callout-border bg-callout-bg px-lg py-[14px]">
+        <AppIcon name="tips_and_updates" size={19} color={themeColors.primary} />
+        <Text className="flex-1 font-sans text-[12.5px] leading-[19px] text-ink-body">
+          {storeName ? `From ${storeName}. ` : ''}Tap the eye to compare with your original photo.
+          Saved looks stay in Wardrobe → Outfits.
+        </Text>
+      </View>
+
       <View className="mt-[14px]">
+        {/* Not `disabled` once saved: a disabled outlined button is drawn
+            faded, and "Saved" should read as done, not unavailable. */}
         <AppButton
-          variant={saved ? 'saved' : 'accent'}
+          variant={saved ? 'secondary' : 'primary'}
           icon={saved ? 'check_circle' : 'bookmark'}
-          label={saved ? 'Saved to Looks' : saveLook.isPending ? 'Saving…' : 'Save to Looks'}
-          onPress={() => saveLook.mutate(job.id)}
-          disabled={saved || saveLook.isPending}
+          label={saved ? 'Saved' : saveLook.isPending ? 'Saving…' : 'Save'}
+          onPress={save}
+          disabled={saveLook.isPending}
+          accessibilityLabel={saved ? 'Saved to Looks' : 'Save to Looks and your photos'}
         />
       </View>
-      {saveLook.isError && (
+      {saveLook.isError ? (
         <Text className="mt-sm text-center font-sans text-sm text-error" accessibilityRole="alert">
           Couldn’t save this look. Please try again.
         </Text>
-      )}
-      <View className="mt-[9px] flex-row gap-[9px]">
-        {storeUrl && (
-          <View className="flex-1">
-            <AppButton
-              label="View in store"
-              variant="ghostDark"
-              onPress={() => openExternalLink(storeUrl)}
-            />
+      ) : (
+        saved &&
+        photoNote && (
+          <View className="mt-sm items-center gap-xs">
+            <Text
+              className="text-center font-sans text-[12px] text-ink-secondary"
+              accessibilityLiveRegion="polite"
+            >
+              {photoNote}
+            </Text>
+            {photoRetry && (
+              <Pressable onPress={savePhotoNow} accessibilityRole="button" hitSlop={8}>
+                <Text className="font-sans-bold text-[12.5px] text-primary">
+                  {savePhoto.isPending ? 'Saving…' : 'Save to photos'}
+                </Text>
+              </Pressable>
+            )}
           </View>
-        )}
-        <View className="flex-1">
-          <AppButton label="Try another" variant="ghostDark" onPress={goHome} />
-        </View>
+        )
+      )}
+      <View className="mt-[10px]">
+        <AppButton label="Try a new outfit" variant="secondary" onPress={goHome} />
       </View>
+      {shopPiece && (
+        <Pressable
+          onPress={shopPiece}
+          accessibilityRole="link"
+          hitSlop={8}
+          className="mt-lg items-center"
+        >
+          <Text className="font-sans-bold text-[13px] text-primary">Shop this piece →</Text>
+        </Pressable>
+      )}
     </AppScaffold>
   );
 }
