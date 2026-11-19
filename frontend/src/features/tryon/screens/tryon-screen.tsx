@@ -201,7 +201,7 @@ export function TryOnScreen() {
     <AppScaffold>
       <View className="flex-row items-center justify-between">
         <IconButton icon="arrow_back" accessibilityLabel="Back" onPress={goHome} />
-        <Text className="font-mono text-[10px] uppercase tracking-[1.6px] text-primary">
+        <Text className="font-mono text-[11px] uppercase tracking-[1.6px] text-primary">
           Your new look
         </Text>
         {usage ? <CreditsPill usage={usage} /> : <View className="w-[42px]" />}

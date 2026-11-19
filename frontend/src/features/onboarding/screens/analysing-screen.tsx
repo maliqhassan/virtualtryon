@@ -75,7 +75,7 @@ export function AnalysingScreen() {
             style={{ width: `${Math.round((done / STEPS.length) * 100)}%` }}
           />
         </View>
-        <Text className="mt-md font-mono text-[10.5px] text-neutral-500">about 4 seconds</Text>
+        <Text className="mt-md font-mono text-[11px] text-neutral-400">about 4 seconds</Text>
       </View>
     </OnboardingFrame>
   );

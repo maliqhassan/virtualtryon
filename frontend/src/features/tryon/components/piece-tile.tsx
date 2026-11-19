@@ -79,7 +79,7 @@ export function AddPieceTile({ onPress }: { onPress: () => void }) {
     >
       <View className="aspect-[3/4] items-center justify-center gap-xs rounded-[16px] border-[1.5px] border-dashed border-neutral-300 bg-surface">
         <AppIcon name="add" size={26} color={themeColors.inkPrimary} />
-        <Text className="font-sans-semibold text-[10.5px] text-ink-secondary">Add clothes</Text>
+        <Text className="font-sans-semibold text-[11px] text-ink-secondary">Add clothes</Text>
       </View>
     </Pressable>
   );

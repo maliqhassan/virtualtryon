@@ -1,11 +1,12 @@
-"""DB access for UserPhoto rows. Every read/delete is scoped by `user_id`.
-A user's "current" photo is simply their most recent one.
+"""DB access for UserPhoto rows (a user's model photos). Every read/delete
+is scoped by `user_id`. Without a choice from the app, a try-on uses the
+user's most recent photo.
 """
 
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user_photo import UserPhoto
@@ -22,38 +23,50 @@ class UserPhotoRepository:
         await self._db.refresh(photo)
         return photo
 
-    async def get_latest_for_user(self, user_id: UUID, angle: str = "front") -> UserPhoto | None:
+    async def get_latest_for_user(self, user_id: UUID) -> UserPhoto | None:
+        """The user's newest model photo: what a try-on uses when the app
+        doesn't name one."""
         result = await self._db.execute(
             select(UserPhoto)
-            .where(UserPhoto.user_id == user_id, UserPhoto.angle == angle)
+            .where(UserPhoto.user_id == user_id)
             .order_by(UserPhoto.created_at.desc())
             .limit(1)
         )
         return result.scalar_one_or_none()
 
+    async def get_by_id_for_user(self, photo_id: UUID, user_id: UUID) -> UserPhoto | None:
+        """None for a photo that doesn't exist or belongs to someone else."""
+        result = await self._db.execute(
+            select(UserPhoto).where(UserPhoto.id == photo_id, UserPhoto.user_id == user_id)
+        )
+        return result.scalar_one_or_none()
+
     async def list_for_user(self, user_id: UUID) -> list[UserPhoto]:
-        result = await self._db.execute(select(UserPhoto).where(UserPhoto.user_id == user_id))
+        """Newest first."""
+        result = await self._db.execute(
+            select(UserPhoto)
+            .where(UserPhoto.user_id == user_id)
+            .order_by(UserPhoto.created_at.desc())
+        )
         return list(result.scalars().all())
+
+    async def count_for_user(self, user_id: UUID) -> int:
+        result = await self._db.execute(
+            select(func.count()).select_from(UserPhoto).where(UserPhoto.user_id == user_id)
+        )
+        return int(result.scalar_one())
 
     async def stage_delete_all_for_user(self, user_id: UUID) -> None:
         """Staged only: the caller commits, so several deletes can share one transaction."""
         await self._db.execute(delete(UserPhoto).where(UserPhoto.user_id == user_id))
 
-    async def delete_others_with_angle(self, user_id: UUID, keep_id: UUID, angle: str) -> list[str]:
-        """Deletes the user's other photos of the same view; returns their file
-        paths (originals and cut-outs) so the caller can remove the files."""
-        result = await self._db.execute(
-            select(UserPhoto).where(
-                UserPhoto.user_id == user_id,
-                UserPhoto.angle == angle,
-                UserPhoto.id != keep_id,
-            )
-        )
-        old = list(result.scalars().all())
-        for photo in old:
-            await self._db.delete(photo)
+    async def delete(self, photo: UserPhoto) -> list[str]:
+        """Deletes one photo row; returns its file paths for the caller to
+        remove once this has committed."""
+        paths = photo_files(photo)
+        await self._db.delete(photo)
         await self._db.commit()
-        return [path for photo in old for path in photo_files(photo)]
+        return paths
 
 
 def photo_files(photo: UserPhoto) -> list[str]:

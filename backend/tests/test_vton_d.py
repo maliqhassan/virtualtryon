@@ -176,7 +176,8 @@ def test_network_failure_is_unavailable() -> None:
 def test_no_key_makes_no_request() -> None:
     calls: list[httpx.Request] = []
     client = VtonDInferenceClient(
-        api_key="", transport=httpx.MockTransport(lambda r: calls.append(r) or httpx.Response(200))
+        api_key="",
+        transport=httpx.MockTransport(lambda r: calls.append(r) or httpx.Response(200)),
     )
     with pytest.raises(TryOnServiceError, match="isn’t set up"):
         client.infer(_request())
@@ -236,7 +237,8 @@ async def test_daily_cap_pauses_try_ons_for_everyone(
     now = datetime.now(UTC)
     async with db_session.AsyncSessionLocal() as db:
         already = await InferenceJobRepository(db).count_counted_since(
-            datetime.combine(now.date(), time.min, tzinfo=UTC), stale_before=now - STALE_JOB_AFTER
+            datetime.combine(now.date(), time.min, tzinfo=UTC),
+            stale_before=now - STALE_JOB_AFTER,
         )
     monkeypatch.setattr(settings, "TRYON_DAILY_LIMIT", already + 2)
 

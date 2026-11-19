@@ -4,8 +4,10 @@ pytest>=8.3,<9.0
 pytest-asyncio>=0.24,<1.0
 httpx>=0.27,<1.0
 
-black>=24.10,<25.0
-ruff>=0.7,<1.0
+# Exact versions: CI enforces both, so a new release can't turn it red on
+# its own. Upgrade on purpose, together with any code changes they ask for.
+black==24.10.0
+ruff==0.16.0
 isort>=5.13,<6.0
 mypy>=1.13,<2.0
 

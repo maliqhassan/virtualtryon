@@ -87,7 +87,7 @@ function StepMockup({ step }: { step: number }) {
           </View>
           <View className="absolute bottom-[10px] left-[10px] right-[10px] flex-row items-center gap-[6px]">
             <AppIcon name="link" size={16} color={themeColors.goldSoft} />
-            <Text className="font-sans-semibold text-[9.5px] text-night-text">paste any link</Text>
+            <Text className="font-sans-semibold text-[11px] text-night-text">paste any link</Text>
           </View>
         </View>
       </View>

@@ -38,6 +38,10 @@ class AIInferenceRequest(BaseModel):
 
     user_image: Image.Image
     clothing_image: Image.Image
+    # What the clothing is, for providers that use words as well as the photo
+    # to tell a jacket from a dress (Genlook). Optional: others ignore it.
+    clothing_title: str | None = None
+    clothing_category: str | None = None
 
 
 class AIInferenceResponse(BaseModel):

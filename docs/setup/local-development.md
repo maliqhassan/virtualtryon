@@ -5,14 +5,23 @@
 | Tool | Used for | Verified on this machine? |
 |---|---|---|
 | Node.js 24.x + npm | frontend | ✅ (v24.14.1) |
-| Python 3.11+ | backend, ai | ❌ not installed — see below |
-| Docker Desktop (with Compose v2) | postgres, redis, backend, ai | ❌ not installed — see below |
+| Python 3.11+ | backend, ai | ✅ (3.13 in `backend/.venv`; production runs 3.11) |
+| PostgreSQL | backend database | ❌ not installed: tests run on SQLite here (below) |
+| Docker Desktop (with Compose v2) | postgres, redis, backend, ai | ❌ not installed |
+| Android SDK + JDK | release APKs (`frontend/scripts/build-apk.ps1`) | ✅ |
 | Git | version control | ✅ (2.53.0) |
 
-This foundation was scaffolded on a machine without Python or Docker CLIs
-available, so the backend/ai setup below is written and configured but
-**not yet executed or verified**. Run it once those tools are installed and
-report back if anything doesn't match.
+Updated 2026-11-19. The backend tests need Postgres (`DATABASE_URL`;
+`tests/conftest.py` connects to it). This machine has none, so they've been
+run here through an untracked script that points them at SQLite instead;
+it isn't part of the repository. SQLite misses Postgres-only behaviour
+(enum types, `FOR UPDATE`, timezone-aware comparisons), so **CI is the real
+check**: `.github/workflows/ci.yml` applies the migrations and runs every
+test on Postgres 16 for each push to `main` (ADR 0017).
+
+Google sign-in, the camera and saving to photos need a real build (the
+release APK), not Expo Go: Expo Go doesn't include the native Firebase and
+Google modules.
 
 ## Frontend
 
@@ -29,9 +38,10 @@ npm start           # then press i / a / w, or scan the QR code with Expo Go
 cd backend
 python -m venv .venv
 .venv\Scripts\activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -r requirements-dev.txt
+pip install -r requirements-dev.txt ../ai   # ../ai: the shared try-on package (`src.*`)
 cp .env.example .env            # then fill in DATABASE_URL/REDIS_URL if not using Docker for them
-alembic upgrade head              # applies migrations (none exist yet — this is a no-op until the first model)
+alembic upgrade head              # applies the migrations in alembic/versions/
+pytest -q                         # needs DATABASE_URL pointing at a Postgres you can write to
 uvicorn app.main:app --reload
 ```
 

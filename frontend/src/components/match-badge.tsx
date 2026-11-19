@@ -21,7 +21,7 @@ export function MatchBadge({ score }: { score: number }) {
   const tone = TONES[label];
   return (
     <Text
-      className="self-start overflow-hidden rounded-full px-[7px] py-xs font-mono-semibold text-[9.5px]"
+      className="self-start overflow-hidden rounded-full px-[7px] py-xs font-mono-semibold text-[11px]"
       style={{ color: tone.fg, backgroundColor: tone.bg }}
       accessibilityLabel={`Match ${score}, ${label}`}
     >

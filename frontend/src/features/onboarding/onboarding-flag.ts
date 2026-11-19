@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { getStoredToken, setStoredToken } from '@/lib/secure-token-store';
+import { deleteStoredToken, getStoredToken, setStoredToken } from '@/lib/secure-token-store';
 
 /**
  * Whether the first-launch intro has been seen. Stored with the app's
@@ -11,6 +11,11 @@ const KEY = 'onboarding_seen';
 
 export async function markOnboardingSeen(): Promise<void> {
   await setStoredToken(KEY, '1');
+}
+
+/** After the account is deleted, the phone starts again from the intro. */
+export async function resetOnboardingSeen(): Promise<void> {
+  await deleteStoredToken(KEY);
 }
 
 /** `null` while loading. */

@@ -25,7 +25,7 @@ function Tile({ garment, caption }: { garment?: Garment; caption: string }) {
       ) : (
         <StripeFill tone="dark" period={8} />
       )}
-      <Text className="font-mono text-[9px] text-neutral-500" numberOfLines={1}>
+      <Text className="font-mono text-[11px] text-neutral-400" numberOfLines={1}>
         {garment ? '' : caption}
       </Text>
     </View>
@@ -87,9 +87,7 @@ export function OutfitHero({ outfit, seed, wearing, onShuffle, onWear }: OutfitH
             {!empty && (
               <View className="absolute left-[11px] top-[11px] flex-row items-center gap-[5px] rounded-full bg-[rgba(18,17,15,0.55)] px-[10px] py-[6px]">
                 <AppIcon name="verified" size={13} color={themeColors.goldSoft} />
-                <Text className="font-mono-semibold text-[10.5px] text-night-text">
-                  your pieces
-                </Text>
+                <Text className="font-mono-semibold text-[11px] text-night-text">your pieces</Text>
               </View>
             )}
           </View>
@@ -101,7 +99,7 @@ export function OutfitHero({ outfit, seed, wearing, onShuffle, onWear }: OutfitH
       </FadeInView>
 
       <View className="px-xl pb-xl pt-lg">
-        <Text className="font-mono text-[10px] uppercase tracking-[1.6px] text-gold-overline">
+        <Text className="font-mono text-[11px] uppercase tracking-[1.6px] text-gold-overline">
           Today’s outfit
         </Text>
         <Text
@@ -150,7 +148,7 @@ export function OutfitHero({ outfit, seed, wearing, onShuffle, onWear }: OutfitH
             disabled={empty}
           />
         </View>
-        <Text className="mt-[11px] font-mono text-[10.5px] text-ink-secondary">
+        <Text className="mt-[11px] font-mono text-[11px] text-neutral-400">
           {wearing
             ? 'wearing this today · it stays until tomorrow'
             : 'changes every morning · shuffle any time'}

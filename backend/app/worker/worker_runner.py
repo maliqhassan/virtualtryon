@@ -28,8 +28,10 @@ class WorkerRunner:
     """Repeatedly calls WorkerService.run_once(), sleeping
     `poll_interval_seconds` between iterations. `request_shutdown()` (or a
     registered OS signal handler calling it) stops the loop after the
-    current iteration finishes — never mid-iteration, so a shutdown never
-    leaves a job stranded in `processing`. The sleep itself is
+    current iteration finishes — never mid-iteration. A worker killed
+    mid-job anyway (a deploy, a crash) leaves that job in `processing`;
+    the next pass fails it once it's older than PROCESSING_TIMEOUT
+    (app/worker/job_processor.py). The sleep itself is
     interruptible, so a shutdown request doesn't wait out a potentially
     long poll interval either.
     """

@@ -54,7 +54,7 @@ export function BrandSplash() {
         <Text className="mt-[10px] font-display-italic text-[19px] text-[#C9B896]">
           dress with certainty
         </Text>
-        <Text className="absolute bottom-[70px] font-mono text-[9.5px] tracking-[1.9px] text-ink-secondary">
+        <Text className="absolute bottom-[70px] font-mono text-[11px] tracking-[1.9px] text-neutral-400">
           TAP TO BEGIN
         </Text>
       </Pressable>

@@ -13,7 +13,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.repositories.profile_repository import ProfileRepository
 from app.models.profile import Profile
-from app.schemas.profile import CreateProfileRequest, ProfileResponse, UpdateProfileRequest
+from app.schemas.profile import (
+    CreateProfileRequest,
+    ProfileResponse,
+    UpdateProfileRequest,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -36,6 +36,10 @@ class VerifiedIdentity:
     provider: str
     email: str | None
     email_verified: bool
+    # When the person last actually signed in with Google (seconds since the
+    # epoch). Tokens are refreshed hourly; this only moves on a real sign-in,
+    # so it shows whether they just confirmed who they are.
+    auth_time: int | None = None
 
 
 class InvalidIdentityError(Exception):
@@ -86,11 +90,15 @@ def _identity(claims: dict) -> VerifiedIdentity:
     if not isinstance(uid, str) or not uid or len(uid) > 128 or not isinstance(firebase, dict):
         raise InvalidIdentityError
     email = claims.get("email")
+    auth_time = claims.get("auth_time")
     return VerifiedIdentity(
         uid=uid,
         provider=str(firebase.get("sign_in_provider", "")),
         email=email if isinstance(email, str) and email else None,
         email_verified=claims.get("email_verified") is True,
+        auth_time=(
+            auth_time if isinstance(auth_time, int) and not isinstance(auth_time, bool) else None
+        ),
     )
 
 

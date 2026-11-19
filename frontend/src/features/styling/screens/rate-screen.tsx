@@ -34,7 +34,7 @@ export function RateScreen() {
       <View className="aspect-[4/5] items-center justify-center overflow-hidden rounded-hero">
         <StripeFill tone="blush" period={9} />
         <AppIcon name="photo_camera" size={44} color="rgba(22, 19, 15, 0.25)" />
-        <Text className="mt-sm font-mono text-[10px] text-neutral-500">[ your selfie ]</Text>
+        <Text className="mt-sm font-mono text-[11px] text-neutral-500">[ your selfie ]</Text>
       </View>
       <View className="mt-lg gap-sm">
         {PARTS.map(([icon, title, body]) => (

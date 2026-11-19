@@ -64,7 +64,7 @@ export function TodayScreen() {
       <AppScaffold inTabs>
         <View className="flex-row items-start justify-between">
           <View className="flex-1">
-            <Text className="font-mono text-[10px] uppercase tracking-[1.6px] text-primary">
+            <Text className="font-mono text-[11px] uppercase tracking-[1.6px] text-primary">
               {WEEKDAY.format(now)} · {DAY_MONTH.format(now)}
             </Text>
             <Text
@@ -133,7 +133,7 @@ export function TodayScreen() {
               <View className="h-[92px] overflow-hidden rounded-md">
                 <StripeFill tone={LIGHT_STRIPES[index % 4]} />
               </View>
-              <Text className="mx-xs mt-sm font-mono-semibold text-[9.5px] uppercase text-neutral-400">
+              <Text className="mx-xs mt-sm font-mono-semibold text-[11px] uppercase text-neutral-500">
                 {SHORT_DAY.format(date)}
               </Text>
               <Text className="mx-xs mb-xxs mt-xxs font-sans-bold text-[12px] leading-[16px] text-ink-primary">

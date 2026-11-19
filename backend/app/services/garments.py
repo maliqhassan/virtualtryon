@@ -14,6 +14,7 @@ from app.models.garment import Garment
 from app.schemas.garment import GarmentResponse, GarmentUpdate
 from app.services.image_validation import ImageUpload, validate_image
 from app.services.storage import get_storage_service
+from app.services.upload_limits import ensure_upload_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ async def create_garment(
     source_store: str | None = None,
 ) -> GarmentResponse:
     extension = validate_image(image)
+    ensure_upload_allowed(user_id)
 
     storage = get_storage_service()
     image_url = storage.save(image.content, extension)

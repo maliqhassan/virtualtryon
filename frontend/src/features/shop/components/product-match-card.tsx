@@ -53,7 +53,7 @@ export function ProductMatchCard({ product, onPress }: { product: Product; onPre
         <View className="flex-row justify-between gap-[6px]">
           <Text
             numberOfLines={1}
-            className="flex-1 font-mono text-[9.5px] uppercase tracking-[1.2px] text-neutral-400"
+            className="flex-1 font-mono text-[11px] uppercase tracking-[1.2px] text-neutral-500"
           >
             {product.storeName}
           </Text>
@@ -86,10 +86,13 @@ export function ProductMatchCard({ product, onPress }: { product: Product; onPre
         >
           {match?.reason ?? `${product.category} · try it on your photo before you buy.`}
         </Text>
-        <View className="mt-[9px] flex-row items-center justify-between">
+        <View className="mt-[9px] flex-row items-center justify-between gap-sm">
           <Text className="font-sans-bold text-[14.5px] text-ink-primary">{price}</Text>
           {match && (
-            <Text className="rounded-full bg-muted px-[7px] py-xs font-mono-semibold text-[9.5px] text-ink-secondary">
+            <Text
+              className="shrink rounded-full bg-muted px-[7px] py-xs font-mono-semibold text-[11px] text-ink-secondary"
+              numberOfLines={1}
+            >
               colour {match.colour} · fit {match.fit}
             </Text>
           )}

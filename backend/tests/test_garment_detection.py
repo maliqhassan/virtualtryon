@@ -32,13 +32,21 @@ RECORDED_ANSWER = {
                         {
                             "box": [0.1, 0.2, 0.4, 0.4],
                             "entities": [
-                                {"kind": "classes", "name": "classes", "classes": {"top": 0.88}}
+                                {
+                                    "kind": "classes",
+                                    "name": "classes",
+                                    "classes": {"top": 0.88},
+                                }
                             ],
                         },
                         {
                             "box": [0.2, 0.6, 0.2, 0.3],
                             "entities": [
-                                {"kind": "classes", "name": "classes", "classes": {"pants": 0.91}}
+                                {
+                                    "kind": "classes",
+                                    "name": "classes",
+                                    "classes": {"pants": 0.91},
+                                }
                             ],
                         },
                         {
@@ -110,7 +118,12 @@ async def test_clothing_wins_over_accessories_in_the_same_photo(client, use_dete
     # The real answer for their sample outfit photo, uploaded as a file.
     use_detector(
         FakeDetector(
-            [Label("top", 0.88), Label("pants", 0.91), Label("scarf", 0.96), Label("bag", 0.95)]
+            [
+                Label("top", 0.88),
+                Label("pants", 0.91),
+                Label("scarf", 0.96),
+                Label("bag", 0.95),
+            ]
         )
     )
     response = await _detect(client)
@@ -205,7 +218,8 @@ async def test_real_detector_reads_their_answer():
 
 async def test_real_detector_turns_bad_answers_into_detection_errors():
     detector = Api4aiFashionDetector(
-        "test-key", transport=httpx.MockTransport(lambda _: httpx.Response(429, json={}))
+        "test-key",
+        transport=httpx.MockTransport(lambda _: httpx.Response(429, json={})),
     )
     with pytest.raises(DetectionError):
         await detector.detect(ImageUpload(_jpeg(), "image/jpeg", "piece.jpg"))

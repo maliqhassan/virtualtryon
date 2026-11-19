@@ -21,7 +21,10 @@ from app.models.garment import SOURCE_STORE_MAX_LENGTH
 
 MAX_TITLE_LENGTH = 200
 
-_PRODUCT_TYPES = {"product", "productgroup"}  # Shopify describes variants as a ProductGroup
+_PRODUCT_TYPES = {
+    "product",
+    "productgroup",
+}  # Shopify describes variants as a ProductGroup
 _LIST_TYPES = {"itemlist", "collectionpage", "offercatalog", "searchresultspage"}
 _OG_PRODUCT_TYPES = {"product", "og:product", "product.item", "product.group"}
 
@@ -168,11 +171,20 @@ _CATEGORY_KEYWORDS: list[tuple[str, str]] = [
     ("Jackets", r"jackets?|coats?|blazers?|parkas?|gilets?|waistcoats?|puffers?"),
     ("Dresses", r"dress(es)?|gowns?|frocks?|abayas?|jumpsuits?|maxis?|kaftans?"),
     ("Shorts", r"shorts"),
-    ("Pants", r"jeans|pants?|trousers?|chinos?|joggers?|leggings?|shalwars?|palazzos?|skirts?"),
+    (
+        "Pants",
+        r"jeans|pants?|trousers?|chinos?|joggers?|leggings?|shalwars?|palazzos?|skirts?",
+    ),
     ("Shirts", r"shirts?|tops?|blouses?|tunics?|kurtas?|kurtis?"),
-    ("Shoes", r"shoes?|sneakers?|trainers?|sandals?|heels?|boots?|loafers?|slippers?|khussas?"),
+    (
+        "Shoes",
+        r"shoes?|sneakers?|trainers?|sandals?|heels?|boots?|loafers?|slippers?|khussas?",
+    ),
     ("Bags", r"bags?|totes?|clutch(es)?|backpacks?|purses?|wallets?"),
-    ("Accessories", r"caps?|hats?|scarf|scarves|belts?|watch(es)?|sunglasses|dupattas?|shawls?"),
+    (
+        "Accessories",
+        r"caps?|hats?|scarf|scarves|belts?|watch(es)?|sunglasses|dupattas?|shawls?",
+    ),
 ]
 
 

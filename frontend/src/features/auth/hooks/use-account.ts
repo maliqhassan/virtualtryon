@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { resetOnboardingSeen } from '@/features/onboarding';
 import { emitIdentityChange } from '@/lib/identity-events';
 import { clearSession } from '@/services/api/session';
 
-import { continueWithGoogle, getAccount } from '../services/auth-api';
-import { signOutOfGoogle } from '../services/google-sign-in';
+import { continueWithGoogle, deleteAccount, getAccount } from '../services/auth-api';
+import { confirmWithGoogle, signOutOfGoogle } from '../services/google-sign-in';
+import type { Account } from '../types';
 
 const ACCOUNT_KEY = ['account'] as const;
 
@@ -46,5 +48,35 @@ export function useSignOut() {
       await signOutOfGoogle();
     },
     onSuccess: identityChanged,
+  });
+}
+
+/** Runs every step even if one fails: the account is already gone. */
+async function forgetDeletedAccount(): Promise<void> {
+  await Promise.allSettled([clearSession(), signOutOfGoogle(), resetOnboardingSeen()]);
+}
+
+/**
+ * Deletes the account and everything in it (backend ADR 0015). A Google
+ * account confirms with a fresh Google sign-in first (the server refuses
+ * otherwise). Afterwards the phone forgets the session, the guest id and
+ * the intro, so the app starts over. Resolves to false when the user
+ * closes the Google picker (nothing deleted).
+ */
+export function useDeleteAccount() {
+  const identityChanged = useIdentityChanged();
+  return useMutation({
+    mutationFn: async (account: Account): Promise<boolean> => {
+      if (account.authProvider === 'google') {
+        if (!(await confirmWithGoogle(deleteAccount))) return false;
+      } else {
+        await deleteAccount(null);
+      }
+      await forgetDeletedAccount();
+      return true;
+    },
+    onSuccess: async (deleted) => {
+      if (deleted) await identityChanged();
+    },
   });
 }

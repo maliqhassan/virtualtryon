@@ -71,7 +71,7 @@ export function PackingScreen() {
                 key={index}
                 className="flex-row items-center gap-md rounded-[18px] border border-border bg-surface p-sm"
               >
-                <Text className="w-[46px] font-mono-semibold text-[10.5px] text-neutral-500">
+                <Text className="w-[46px] font-mono-semibold text-[11px] text-neutral-500">
                   DAY {index + 1}
                 </Text>
                 <View className="flex-1 flex-row gap-xs">

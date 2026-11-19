@@ -60,6 +60,12 @@ class InferenceJobRepository:
         result = await self._db.execute(select(InferenceJob).where(InferenceJob.id == job_id))
         return result.scalar_one_or_none()
 
+    async def get_status(self, job_id: UUID) -> InferenceJobStatus | None:
+        """The job's current status read from the database (not the session's
+        cached copy), or None if the job no longer exists."""
+        result = await self._db.scalar(select(InferenceJob.status).where(InferenceJob.id == job_id))
+        return result
+
     async def list_queued(self) -> list[InferenceJob]:
         """Unscoped, across every guest — the worker (app/worker/) processes
         whatever is queued regardless of whose it is; same reasoning as
@@ -104,15 +110,41 @@ class InferenceJobRepository:
             .values(user_image_storage_key="", generated_image_url=None)
         )
 
+    async def fail_processing_started_before(
+        self, started_before: datetime, error_message: str, failed_at: datetime
+    ) -> int:
+        """Marks every job that has been `processing` since before
+        `started_before` as failed, in one UPDATE, and returns how many."""
+        result = await self._db.execute(
+            update(InferenceJob)
+            .where(
+                InferenceJob.status == InferenceJobStatus.PROCESSING,
+                InferenceJob.started_at < started_before,
+            )
+            .values(
+                status=InferenceJobStatus.FAILED,
+                error_message=error_message,
+                completed_at=failed_at,
+            )
+        )
+        await self._db.commit()
+        return int(getattr(result, "rowcount", 0) or 0)
+
     async def complete_unless_redacted(
         self, job_id: UUID, generated_image_url: str, completed_at: datetime
     ) -> bool:
         """Marks the job completed in one conditional UPDATE, but only if its
         images haven't been redacted (the user deleted their data while it
-        ran). Returns False if nothing was updated."""
+        ran), and only while it's still `processing`: a job already failed as
+        stuck stays failed, since the app has shown that and offered a retry.
+        Returns False if nothing was updated."""
         result = await self._db.execute(
             update(InferenceJob)
-            .where(InferenceJob.id == job_id, InferenceJob.user_image_storage_key != "")
+            .where(
+                InferenceJob.id == job_id,
+                InferenceJob.user_image_storage_key != "",
+                InferenceJob.status == InferenceJobStatus.PROCESSING,
+            )
             .values(
                 status=InferenceJobStatus.COMPLETED,
                 generated_image_url=generated_image_url,

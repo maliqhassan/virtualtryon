@@ -16,4 +16,10 @@ export async function getGoogleIdToken(): Promise<string | null> {
   throw new GoogleSignInError('unavailable');
 }
 
+export async function confirmWithGoogle(
+  _action: (idToken: string) => Promise<void>,
+): Promise<boolean> {
+  throw new GoogleSignInError('unavailable');
+}
+
 export async function signOutOfGoogle(): Promise<void> {}

@@ -8,16 +8,16 @@ VirtualTryOn: AI-powered virtual clothing try-on. Three independently
 deployable services in one repo — see
 [docs/architecture/overview.md](./docs/architecture/overview.md) for why.
 
-**Current phase:** planning complete, no features implemented yet. Foundation
-(scaffolding), the design system (`design/react-native/`), and a full
-development roadmap (`docs/roadmap/`) all exist; no auth, no domain API
-endpoints, no screens beyond a placeholder home screen. Check
-[PROJECT_STATUS.md](./PROJECT_STATUS.md) before assuming something exists —
-folder structure often anticipates features that aren't built yet (most
-`components/`, `features/`, `services/`, `models/`, `schemas/` folders are
-intentionally near-empty with a `README.md` explaining what belongs there).
-**All feature work starts at [docs/roadmap/phase-a-core-loop.md](./docs/roadmap/phase-a-core-loop.md)
-Milestone 1**, and every feature — from here on, no exceptions — goes
+**Current phase:** a working app, live for testing. Built and deployed
+(Render, from `main`): Google sign-in (the only sign-in), guests whose
+things move into their account, wardrobe, own photos, real try-ons through
+VTON-D (testing provider), saved looks, a sample-store catalogue, the
+Design v2/v2.1 screens, account deletion and abuse limits. Several screens
+are honest placeholders for models that don't exist yet (Ask Noor, Rate my
+fit, match scores). **Check [PROJECT_STATUS.md](./PROJECT_STATUS.md) before
+assuming something exists**, and `docs/decisions/` for why it's built the
+way it is. `docs/roadmap/` is the original plan; the code and ADRs have
+moved past parts of it. Every feature — from here on, no exceptions — goes
 through the protocol immediately below.
 
 ## Feature Implementation Protocol
@@ -83,9 +83,12 @@ Every feature closes with all five, presented together, before it's considered d
 
 ## Repo-wide rules
 
-- Don't guess at undecided architecture (auth strategy, object storage,
-  sync-vs-queued inference, CI/CD). If it's not in `docs/decisions/`, it
-  hasn't been decided — ask, or flag it as an open question, rather than
+- Don't guess at undecided architecture. Decided so far: auth (Google via
+  Firebase, ADRs 0012, 0016), queued inference (a polling worker, ADRs 0005,
+  0008), hosting (Render, ADR 0009), CI (GitHub Actions, ADR 0017). Still
+  open, for example: object storage (local disk today), making deploys wait
+  for CI, the production try-on provider. If it's not in `docs/decisions/`,
+  it hasn't been decided — ask, or flag it as an open question, rather than
   picking one silently.
 - Record genuinely architectural decisions as a new ADR in
   `docs/decisions/`, numbered sequentially. Don't edit past ADRs to reflect
@@ -103,7 +106,7 @@ Every feature closes with all five, presented together, before it's considered d
 - Also has its own [frontend/CLAUDE.md](./frontend/CLAUDE.md) →
   [frontend/AGENTS.md](./frontend/AGENTS.md): **read that before writing
   Expo/React Native code** — Expo's APIs have changed significantly across
-  recent SDKs (this project is on SDK 54) and training data is likely stale.
+  recent SDKs (this project is on SDK 57) and training data is likely stale.
 - Routes live in `src/app/` and stay thin — logic goes in `src/features/`.
 - Style with NativeWind (`className`), not `StyleSheet.create`, unless a
   value is genuinely runtime-computed.
@@ -111,7 +114,8 @@ Every feature closes with all five, presented together, before it's considered d
   state → `useState`. Don't mirror server data into Zustand.
 - Path alias `@/*` → `src/*`. Full conventions:
   [docs/architecture/frontend.md](./docs/architecture/frontend.md).
-- Before marking frontend work done: `npm run typecheck && npm run lint`.
+- Before marking frontend work done: `npm run typecheck && npm run lint &&
+  npm run format:check` (CI runs the same).
 
 ### backend/ (FastAPI, async)
 
@@ -139,7 +143,9 @@ Every feature closes with all five, presented together, before it's considered d
 
 ## Local dev
 
-`docs/setup/local-development.md` has full instructions and a table of
-what's actually been verified on the machine this was scaffolded on
-(Python and Docker were not installed there — backend/ai steps are
-configured but unexecuted; verify before trusting them blindly).
+`docs/setup/local-development.md` has full instructions. Backend tests
+need Postgres (`DATABASE_URL`). The main development machine has Python but
+no Postgres or Docker, so tests have been run there through an untracked
+SQLite workaround that isn't in the repository; CI
+(`.github/workflows/ci.yml`) runs them on real Postgres and is the check
+that counts. Deployment notes: `docs/setup/deploy-render.md`.

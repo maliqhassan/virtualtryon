@@ -93,7 +93,7 @@ export function GeneratingView({
           )}
         </View>
 
-        <Text className="pb-xl text-center font-mono text-[10.5px] text-neutral-400">
+        <Text className="pb-xl text-center font-mono text-[11px] text-neutral-400">
           1 credit · refunded automatically if it fails
         </Text>
       </SafeAreaView>

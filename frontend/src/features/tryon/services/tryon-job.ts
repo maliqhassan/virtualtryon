@@ -57,19 +57,40 @@ export class MissingPhotoError extends Error {
   }
 }
 
-/** Only the clothing (a wardrobe garment or a store product) is sent: the
- * server uses the caller's saved photo. */
-export async function createTryOnJob(input: CreateTryOnJobInput): Promise<TryOnJob> {
+/** The photo picked for the try-on was deleted (on another phone, say): the
+ * user still has photos, so this isn't "add your photo". */
+export class PhotoGoneError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PhotoGoneError';
+  }
+}
+
+/** The clothing (a wardrobe garment or a store product), and which of the
+ * user's photos to use: the server checks that photo is theirs, and uses
+ * their newest when none is named. */
+export async function createTryOnJob(
+  input: CreateTryOnJobInput & { userPhotoId?: string },
+): Promise<TryOnJob> {
   try {
-    const body =
-      'garmentId' in input ? { garment_id: input.garmentId } : { product_id: input.productId };
+    const body = {
+      ...('garmentId' in input ? { garment_id: input.garmentId } : { product_id: input.productId }),
+      ...(input.userPhotoId ? { user_photo_id: input.userPhotoId } : {}),
+    };
     const response = await apiClient.post<InferenceJobDto>(BASE_PATH, body);
     return toTryOnJob(response.data);
   } catch (error) {
     // eslint-disable-next-line import/no-named-as-default-member -- axios.isAxiosError is the documented API; the rule false-positives on axios's dual export shape.
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 402) throw new TryOnLimitReachedError();
-      if (error.response?.status === 409) throw new MissingPhotoError();
+      if (error.response?.status === 409) {
+        const conflict = (error.response.data as { detail?: { code?: string; message?: string } })
+          ?.detail;
+        if (conflict?.code === 'photo_gone') {
+          throw new PhotoGoneError(conflict.message ?? 'That photo isn’t there any more.');
+        }
+        throw new MissingPhotoError();
+      }
       // The server's daily cap for all users on a real try-on provider.
       const detail = (error.response?.data as { detail?: { code?: string; message?: string } })
         ?.detail;

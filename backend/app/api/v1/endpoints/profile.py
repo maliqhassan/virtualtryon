@@ -8,7 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.profile import CreateProfileRequest, ProfileResponse, UpdateProfileRequest
+from app.schemas.profile import (
+    CreateProfileRequest,
+    ProfileResponse,
+    UpdateProfileRequest,
+)
 from app.services.profiles import (
     ProfileAlreadyExistsError,
     ProfileNotFoundError,

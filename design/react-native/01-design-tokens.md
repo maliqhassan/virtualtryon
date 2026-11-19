@@ -15,12 +15,12 @@ The source is a light/dark **theme** — every token has two values sharing hue 
 ```css
 /* frontend/src/global.css — add alongside the existing @tailwind directives */
 :root {
-  --color-primary: #B4713F;
+  --color-primary: #9A6136; /* spec #B4713F; darker for WCAG AA, see design/figma/01-foundation.md "Contrast amendments" */
   --color-primary-pressed: #95592E;
   --color-secondary: #4A5578;
   --color-accent: #C9A227;
 
-  --color-success: #3E8F63;
+  --color-success: #357A54; /* spec #3E8F63; darker for WCAG AA */
   --color-success-fg: #2E7050;
   --color-success-bg: #DCF0E4;
   --color-warning: #C9922E;
@@ -46,7 +46,7 @@ The source is a light/dark **theme** — every token has two values sharing hue 
   --color-neutral-200: #E2DED6;
   --color-neutral-300: #C9C3B9;
   --color-neutral-400: #A39B90;
-  --color-neutral-500: #8A8278;
+  --color-neutral-500: #736D64; /* spec #8A8278; darker for WCAG AA */
   --color-neutral-600: #6B655D;
   --color-neutral-700: #4E4841;
   --color-neutral-800: #3B372F;
@@ -55,7 +55,7 @@ The source is a light/dark **theme** — every token has two values sharing hue 
   --color-text-primary: #16130F;
   --color-text-body: #4E4841;
   --color-text-secondary: #6B655D;
-  --color-text-muted: #8A8278;
+  --color-text-muted: #736D64; /* light screens; on the dark stage use neutral-400 */
   --color-text-placeholder: #A39B90;
   --color-text-disabled: #C9C3B9;
   --color-text-on-primary: #F6F4F0;

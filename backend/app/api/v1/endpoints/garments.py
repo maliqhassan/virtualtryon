@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.api.uploads import read_image_upload
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.garment import (
@@ -17,7 +18,11 @@ from app.schemas.garment import (
     GarmentResponse,
     GarmentUpdate,
 )
-from app.services.garment_detection import GarmentDetector, detect_category, get_garment_detector
+from app.services.garment_detection import (
+    GarmentDetector,
+    detect_category,
+    get_garment_detector,
+)
 from app.services.garments import (
     GarmentNotFoundError,
     create_garment,
@@ -25,23 +30,22 @@ from app.services.garments import (
     list_garments,
     update_garment,
 )
-from app.services.image_validation import ImageUpload, UnsupportedImageError
+from app.services.image_validation import UnsupportedImageError
 from app.services.link_import import (
     InvalidLinkError,
     LinkImportLimitError,
     import_garment_from_link,
 )
 from app.services.product_page import NoProductImageError, NotAProductPageError
-from app.services.safe_fetch import BlockedUrlError, FetchError, PageFetcher, get_page_fetcher
+from app.services.safe_fetch import (
+    BlockedUrlError,
+    FetchError,
+    PageFetcher,
+    get_page_fetcher,
+)
 from app.services.usage import UsageLimitReachedError
 
 router = APIRouter()
-
-
-async def _to_image_upload(file: UploadFile) -> ImageUpload:
-    return ImageUpload(
-        content=await file.read(), content_type=file.content_type, filename=file.filename
-    )
 
 
 @router.get("", response_model=list[GarmentResponse])
@@ -70,7 +74,7 @@ async def create_new_garment(
             category=category,
             color=color,
             season=season,
-            image=await _to_image_upload(image),
+            image=await read_image_upload(image),
         )
     except UnsupportedImageError as exc:
         raise HTTPException(
@@ -86,7 +90,9 @@ async def detect_garment_category(
 ) -> CategoryGuessResponse:
     try:
         guess = await detect_category(
-            user_id=current_user.id, image=await _to_image_upload(image), detector=detector
+            user_id=current_user.id,
+            image=await read_image_upload(image),
+            detector=detector,
         )
     except UnsupportedImageError as exc:
         raise HTTPException(

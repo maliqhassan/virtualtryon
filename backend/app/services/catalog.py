@@ -50,7 +50,10 @@ async def list_stores(db: AsyncSession) -> list[StoreResponse]:
 
 
 async def list_store_products(
-    db: AsyncSession, store_id: UUID, category: str | None = None, search: str | None = None
+    db: AsyncSession,
+    store_id: UUID,
+    category: str | None = None,
+    search: str | None = None,
 ) -> list[ProductResponse]:
     repo = CatalogRepository(db)
     if await repo.get_store(store_id) is None:

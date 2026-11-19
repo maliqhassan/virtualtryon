@@ -4,19 +4,34 @@ interface and gets swapped in at get_storage_service() (__init__.py) —
 nothing above that point (SavedLook's model, schema, or endpoints) changes.
 """
 
+import shutil
 import uuid
 from pathlib import Path
 
-from .base import StorageService
+from .base import StorageFullError, StorageService
+
+# Free space always left on the disk. Saving stops before the disk is
+# completely full, so no file is ever left half-written and the server keeps
+# room for temporary files. Uploads and try-on results stop together; the
+# per-user and per-address limits are what keep it from getting here.
+DEFAULT_RESERVE_BYTES = 150 * 1024 * 1024
 
 
 class LocalStorageProvider(StorageService):
-    def __init__(self, base_dir: Path, url_prefix: str = "/uploads") -> None:
+    def __init__(
+        self,
+        base_dir: Path,
+        url_prefix: str = "/uploads",
+        reserve_bytes: int = DEFAULT_RESERVE_BYTES,
+    ) -> None:
         self._base_dir = base_dir
         self._url_prefix = url_prefix
+        self._reserve_bytes = reserve_bytes
         self._base_dir.mkdir(parents=True, exist_ok=True)
 
     def save(self, content: bytes, extension: str) -> str:
+        if shutil.disk_usage(self._base_dir).free - len(content) < self._reserve_bytes:
+            raise StorageFullError("Not enough free disk space for this file")
         filename = f"{uuid.uuid4()}.{extension.lstrip('.')}"
         (self._base_dir / filename).write_bytes(content)
         return f"{self._url_prefix}/{filename}"

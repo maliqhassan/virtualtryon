@@ -24,7 +24,8 @@ from app.schemas.saved_look import (
 )
 from app.services.clothing import resolve_job_clothing
 from app.services.image_validation import ImageUpload, validate_image
-from app.services.storage import get_storage_service
+from app.services.storage import get_storage_service, save_together
+from app.services.upload_limits import ensure_upload_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -61,11 +62,16 @@ async def create_saved_look(
     # Validate all three before saving any — a bad third image should never
     # leave the first two orphaned on disk.
     extensions = [validate_image(image) for image in (user_image, clothing_image, generated_image)]
+    ensure_upload_allowed(user_id, photos=3)
 
-    storage = get_storage_service()
-    user_image_url = storage.save(user_image.content, extensions[0])
-    clothing_image_url = storage.save(clothing_image.content, extensions[1])
-    generated_image_url = storage.save(generated_image.content, extensions[2])
+    user_image_url, clothing_image_url, generated_image_url = save_together(
+        get_storage_service(),
+        [
+            (user_image.content, extensions[0]),
+            (clothing_image.content, extensions[1]),
+            (generated_image.content, extensions[2]),
+        ],
+    )
 
     repo = SavedLookRepository(db)
     look = await repo.create(
@@ -125,7 +131,12 @@ async def create_saved_look_from_job(
 
     try:
         user_image_url, clothing_image_url, generated_image_url = await asyncio.to_thread(
-            copy_all, [job.user_image_storage_key, clothing.image_url, job.generated_image_url]
+            copy_all,
+            [
+                job.user_image_storage_key,
+                clothing.image_url,
+                job.generated_image_url,
+            ],
         )
     except FileNotFoundError as exc:
         raise TryOnNotSaveableError("The images for this try-on are no longer available.") from exc

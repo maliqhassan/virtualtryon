@@ -20,6 +20,7 @@ from app.services.inference_jobs import (
     InferenceJobNotFoundError,
     InvalidGarmentReferenceError,
     NoUserPhotoError,
+    PhotoNotAvailableError,
     create_inference_job,
     get_inference_job,
     list_inference_jobs,
@@ -49,6 +50,11 @@ async def create_new_inference_job(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except InferenceJobNotFoundError as exc:  # the caller's user row vanished mid-request
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except PhotoNotAvailableError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "photo_gone", "message": str(exc)},
+        ) from exc
     except NoUserPhotoError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except UsageLimitReachedError as exc:

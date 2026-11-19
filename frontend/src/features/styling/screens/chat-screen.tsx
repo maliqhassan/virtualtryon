@@ -38,7 +38,7 @@ export function ChatScreen() {
         </View>
         <View className="flex-1">
           <Text className="font-sans-bold text-[15px] text-ink-primary">Noor</Text>
-          <Text className="font-mono text-[10px] text-neutral-500">your stylist · coming soon</Text>
+          <Text className="font-mono text-[11px] text-neutral-500">your stylist · coming soon</Text>
         </View>
         <IconButton icon="close" accessibilityLabel="Close" onPress={() => router.back()} />
       </View>

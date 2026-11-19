@@ -4,17 +4,17 @@
  * options, icon colours and SVG strokes. Keep in sync with those files.
  */
 export const themeColors = {
-  primary: '#b4713f',
+  primary: '#9a6136',
   background: '#f6f4f0',
   surface: '#ffffff',
   border: 'rgba(22, 19, 15, 0.08)',
   error: '#b4402e',
-  success: '#3e8f63',
+  success: '#357a54',
   inkPrimary: '#16130f',
   inkSecondary: '#6b655d',
   neutral300: '#c9c3b9',
   neutral400: '#a39b90',
-  neutral500: '#8a8278',
+  neutral500: '#736d64',
   // The dark stage (Try-On, Plans, the onboarding photo steps).
   cream: '#f6f1e8',
   night: '#12110f',

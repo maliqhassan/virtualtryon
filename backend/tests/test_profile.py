@@ -84,7 +84,9 @@ async def test_get_profile_returns_existing(client: AsyncClient) -> None:
     assert response.json()["display_name"] == "Ken"
 
 
-async def test_create_profile_conflict_when_one_already_exists(client: AsyncClient) -> None:
+async def test_create_profile_conflict_when_one_already_exists(
+    client: AsyncClient,
+) -> None:
     _created, device_id = await _create_profile(client)
 
     second = await client.post(

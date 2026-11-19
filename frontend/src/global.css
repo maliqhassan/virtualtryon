@@ -6,12 +6,14 @@
   /* Design tokens — see design/react-native/01-design-tokens.md §1.
      Only what's in use so far is defined; filled in incrementally per
      screen, not all at once (see docs/roadmap Milestone 1's rationale). */
-  --color-primary: #b4713f;
+  /* Clay and success are a step darker than the original design (#b4713f,
+     #3e8f63) so text and button labels pass WCAG AA (4.5:1). */
+  --color-primary: #9a6136;
   --color-background: #f6f4f0;
   --color-surface: #ffffff;
   --color-border: rgba(22, 19, 15, 0.08);
   --color-error: #b4402e;
-  --color-success: #3e8f63;
+  --color-success: #357a54;
   --color-ink-primary: #16130f;
   --color-ink-body: #4e4841;
   --color-ink-secondary: #6b655d;

@@ -120,30 +120,31 @@ async def test_photo_rejected_by_full_body_check_returns_422(
     assert response.json()["detail"] == NOT_FULL_BODY_MESSAGE
 
 
-async def test_replacing_photo_deletes_the_old_one(client: AsyncClient) -> None:
+async def _add_photo(client: AsyncClient, headers: dict | None = None, color=(4, 5, 6)):
+    return await client.post(
+        "/api/v1/user-photos",
+        files={"image": ("p.jpg", _jpeg_bytes(color), "image/jpeg")},
+        headers=headers or {},
+    )
+
+
+async def test_adding_a_photo_keeps_the_others(client: AsyncClient) -> None:
     from app.services.storage import get_storage_service
 
-    first = await client.post(
-        "/api/v1/user-photos", files={"image": ("a.jpg", _jpeg_bytes(), "image/jpeg")}
-    )
-    device_id = first.headers["x-device-id"]
-    await client.post(
-        "/api/v1/user-photos",
-        files={"image": ("b.jpg", _jpeg_bytes((4, 5, 6)), "image/jpeg")},
-        headers={"X-Device-Id": device_id},
-    )
+    first = await _add_photo(client)
+    headers = {"X-Device-Id": first.headers["x-device-id"]}
+    second = await _add_photo(client, headers, (9, 9, 9))
 
-    try:
-        get_storage_service().read(first.json()["storage_key"])
-        raise AssertionError("the replaced photo's file should have been deleted")
-    except FileNotFoundError:
-        pass
+    photos = (await client.get("/api/v1/user-photos", headers=headers)).json()
+
+    assert [p["id"] for p in photos] == [second.json()["id"], first.json()["id"]]  # newest first
+    assert get_storage_service().read(first.json()["storage_key"])  # still on disk
 
 
-async def test_side_and_back_views_are_kept_separately(client: AsyncClient) -> None:
-    front = await client.post(
-        "/api/v1/user-photos", files={"image": ("f.jpg", _jpeg_bytes(), "image/jpeg")}
-    )
+async def test_old_apps_can_still_send_a_view_but_nothing_is_replaced(
+    client: AsyncClient,
+) -> None:
+    front = await _add_photo(client)
     headers = {"X-Device-Id": front.headers["x-device-id"]}
     side = await client.post(
         "/api/v1/user-photos",
@@ -158,16 +159,79 @@ async def test_side_and_back_views_are_kept_separately(client: AsyncClient) -> N
         headers=headers,
     )
 
-    views = (await client.get("/api/v1/user-photos", headers=headers)).json()
-    current = (await client.get("/api/v1/user-photos/current", headers=headers)).json()
-
-    assert side.json()["angle"] == "side"
+    assert side.status_code == 201
     assert bad.status_code == 422
-    assert [v["angle"] for v in views] == ["front", "side"]
-    assert current["id"] == front.json()["id"]  # try-ons still use the front photo
+    assert len((await client.get("/api/v1/user-photos", headers=headers)).json()) == 2
 
 
-async def test_cutout_is_stored_when_background_removal_works(client: AsyncClient) -> None:
+async def test_photos_are_limited_to_ten(client: AsyncClient) -> None:
+    first = await _add_photo(client)
+    headers = {"X-Device-Id": first.headers["x-device-id"]}
+    for n in range(9):
+        assert (await _add_photo(client, headers, (n, n, n))).status_code == 201
+
+    refused = await _add_photo(client, headers)
+
+    assert refused.status_code == 409
+    assert "up to 10" in refused.json()["detail"]
+    assert len((await client.get("/api/v1/user-photos", headers=headers)).json()) == 10
+
+
+async def test_one_photo_can_be_deleted(client: AsyncClient) -> None:
+    from app.services.storage import get_storage_service
+
+    keep = await _add_photo(client)
+    headers = {"X-Device-Id": keep.headers["x-device-id"]}
+    gone = await _add_photo(client, headers, (9, 9, 9))
+
+    deleted = await client.delete(f"/api/v1/user-photos/{gone.json()['id']}", headers=headers)
+
+    assert deleted.status_code == 204
+    photos = (await client.get("/api/v1/user-photos", headers=headers)).json()
+    assert [p["id"] for p in photos] == [keep.json()["id"]]
+    try:
+        get_storage_service().read(gone.json()["storage_key"])
+        raise AssertionError("the deleted photo's file should be gone")
+    except FileNotFoundError:
+        pass
+
+
+async def test_someone_elses_photo_cannot_be_deleted(client: AsyncClient) -> None:
+    theirs = await _add_photo(client)
+    mine = await _add_photo(client)  # a different guest
+    me = {"X-Device-Id": mine.headers["x-device-id"]}
+
+    response = await client.delete(f"/api/v1/user-photos/{theirs.json()['id']}", headers=me)
+
+    assert response.status_code == 404
+    owner = {"X-Device-Id": theirs.headers["x-device-id"]}
+    assert len((await client.get("/api/v1/user-photos", headers=owner)).json()) == 1
+
+
+async def test_every_photo_must_pass_the_full_body_check(client: AsyncClient) -> None:
+    from app.main import app
+    from app.services.photo_quality import PhotoRejectedError, get_full_body_checker
+
+    class RejectingChecker:
+        def check(self, image_bytes: bytes) -> None:
+            raise PhotoRejectedError("not full body")
+
+    app.dependency_overrides[get_full_body_checker] = RejectingChecker
+    try:
+        side = await client.post(
+            "/api/v1/user-photos",
+            files={"image": ("s.jpg", _jpeg_bytes(), "image/jpeg")},
+            data={"angle": "side"},
+        )
+    finally:
+        app.dependency_overrides.pop(get_full_body_checker, None)
+
+    assert side.status_code == 422
+
+
+async def test_cutout_is_stored_when_background_removal_works(
+    client: AsyncClient,
+) -> None:
     from app.main import app
     from app.services.photo_background import get_background_remover
     from app.services.storage import get_storage_service
@@ -179,7 +243,8 @@ async def test_cutout_is_stored_when_background_removal_works(client: AsyncClien
     app.dependency_overrides[get_background_remover] = FakeRemover
     try:
         response = await client.post(
-            "/api/v1/user-photos", files={"image": ("a.jpg", _jpeg_bytes(), "image/jpeg")}
+            "/api/v1/user-photos",
+            files={"image": ("a.jpg", _jpeg_bytes(), "image/jpeg")},
         )
     finally:
         app.dependency_overrides.pop(get_background_remover, None)

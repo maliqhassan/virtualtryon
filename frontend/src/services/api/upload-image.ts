@@ -72,11 +72,20 @@ async function buildFormData(
   return formData;
 }
 
+/** The server is out of room for new photos (backend main.py). */
+const STORAGE_FULL = 507;
+
+/** A server error that may clear on its own, so worth retrying and shown
+ * generically. Others (like "storage full") show the server's own message. */
+function isTransientServerError(status: number): boolean {
+  return status >= 500 && status !== STORAGE_FULL;
+}
+
 function isRetriableAxiosError(error: unknown): boolean {
   // eslint-disable-next-line import/no-named-as-default-member -- axios.isAxiosError is the documented API; the rule false-positives on axios's dual export shape.
   if (!axios.isAxiosError(error)) return false;
   if (!error.response) return true; // no response at all — network error / timeout, worth retrying
-  return error.response.status >= 500; // server error — worth retrying
+  return isTransientServerError(error.response.status);
 }
 
 function extractErrorDetail(data: unknown): string | undefined {
@@ -86,6 +95,11 @@ function extractErrorDetail(data: unknown): string | undefined {
     // parsing that shape isn't worth it against a backend that doesn't
     // exist yet to test it — falls back to a generic message instead.
     if (typeof detail === 'string') return detail;
+    // Errors the app can act on come as { code, message } (e.g. too many new guests).
+    if (detail && typeof detail === 'object' && 'message' in detail) {
+      const message = (detail as { message: unknown }).message;
+      if (typeof message === 'string') return message;
+    }
   }
   return undefined;
 }
@@ -106,7 +120,7 @@ function classifyUploadError(error: unknown): Error {
         },
       );
     }
-    if (error.response.status >= 500) {
+    if (isTransientServerError(error.response.status)) {
       return new Error(`Server error (${error.response.status}). Please try again later.`);
     }
     return new Error(

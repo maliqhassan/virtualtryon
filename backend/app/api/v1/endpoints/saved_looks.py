@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.api.uploads import read_image_upload
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.saved_look import (
@@ -15,7 +16,7 @@ from app.schemas.saved_look import (
     SavedLookUpdate,
     SaveLookFromJobRequest,
 )
-from app.services.image_validation import ImageUpload, UnsupportedImageError
+from app.services.image_validation import UnsupportedImageError
 from app.services.saved_looks import (
     SavedLookNotFoundError,
     TryOnNotFoundError,
@@ -28,14 +29,6 @@ from app.services.saved_looks import (
 )
 
 router = APIRouter()
-
-
-async def _to_image_upload(file: UploadFile) -> ImageUpload:
-    return ImageUpload(
-        content=await file.read(),
-        content_type=file.content_type,
-        filename=file.filename,
-    )
 
 
 @router.get("", response_model=list[SavedLookResponse])
@@ -60,9 +53,9 @@ async def create_look(
             db=db,
             user_id=current_user.id,
             title=title,
-            user_image=await _to_image_upload(user_image),
-            clothing_image=await _to_image_upload(clothing_image),
-            generated_image=await _to_image_upload(generated_image),
+            user_image=await read_image_upload(user_image),
+            clothing_image=await read_image_upload(clothing_image),
+            generated_image=await read_image_upload(generated_image),
         )
     except UnsupportedImageError as exc:
         raise HTTPException(

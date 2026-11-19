@@ -29,7 +29,7 @@ export function GoalScreen() {
       }
     >
       <StepHeader step={1} />
-      <Text className="mt-[28px] font-mono text-[10px] uppercase tracking-[1.6px] text-primary">
+      <Text className="mt-[28px] font-mono text-[11px] uppercase tracking-[1.6px] text-primary">
         Let’s begin
       </Text>
       <Text

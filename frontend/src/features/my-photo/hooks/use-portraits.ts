@@ -1,37 +1,39 @@
 import type { Href } from 'expo-router';
 
-import { MY_PHOTO_HREF, addPortraitHref } from '../routes';
-import { PHOTO_ANGLES, type MyPhoto } from '../types';
+import { ADD_PORTRAIT_HREF, MY_PHOTO_HREF } from '../routes';
+import { useSelectedPhoto } from '../selected-photo-store';
+import { MAX_MODEL_PHOTOS, type MyPhoto } from '../types';
 
-import { useMyPhotosQuery } from './use-my-photo';
+import { pickInUse, useMyPhotosQuery } from './use-my-photo';
 
 /**
- * The user's portraits for Today's rail and Wardrobe's Portraits tab: in
- * view order (front, side, back), and where "Add portrait" goes. Add fills
- * the first missing view, so it never silently replaces the front photo in
- * use; with all three it opens My photo to choose. `addHref` is null until
- * the photos have loaded, so a slow or failed request can't make it look
- * as if the front view were missing.
+ * The user's model photos for Today's rail, Wardrobe's Portraits tab and the
+ * Try-On studio: newest first, which one try-ons use, how to pick another,
+ * and where "Add" goes. With the maximum already saved, Add opens My photos
+ * (to delete one) instead of the picker. `addHref` is null until the photos
+ * have loaded.
  */
 export function usePortraits(): {
   ordered: MyPhoto[];
+  inUseId: string | null;
+  select: (photoId: string) => void;
   addHref: Href | null;
+  isFull: boolean;
   isLoading: boolean;
   isError: boolean;
   refetch: () => void;
 } {
   const query = useMyPhotosQuery();
-  const photos = query.data ?? [];
-  const ordered = PHOTO_ANGLES.flatMap(({ angle }) => photos.filter((p) => p.angle === angle));
-  const missing = PHOTO_ANGLES.find(({ angle }) => !photos.some((p) => p.angle === angle));
-  const addHref = query.isSuccess
-    ? missing
-      ? addPortraitHref(missing.angle)
-      : MY_PHOTO_HREF
-    : null;
+  const selectedId = useSelectedPhoto((state) => state.photoId);
+  const select = useSelectedPhoto((state) => state.select);
+  const ordered = query.data ?? [];
+  const isFull = ordered.length >= MAX_MODEL_PHOTOS;
   return {
     ordered,
-    addHref,
+    inUseId: pickInUse(ordered, selectedId)?.id ?? null,
+    select,
+    addHref: query.isSuccess ? (isFull ? MY_PHOTO_HREF : ADD_PORTRAIT_HREF) : null,
+    isFull,
     isLoading: query.isLoading,
     isError: query.isError,
     refetch: () => void query.refetch(),

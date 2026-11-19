@@ -7,16 +7,33 @@ leaks into endpoint code. get_existing_user is the same lookup without
 issuing a new guest, for sign-in, which must not create rows on its own.
 """
 
-from fastapi import Depends, Header, HTTPException, Response, status
+from fastapi import Depends, Header, HTTPException, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.security import read_session_token
 from app.db.repositories.user_repository import UserRepository
 from app.db.session import get_db
 from app.models.user import User
-from app.services.guest_identity import DEVICE_ID_HEADER, resolve_or_create_guest
+from app.services.guest_identity import (
+    DEVICE_ID_HEADER,
+    GuestLimitError,
+    resolve_or_create_guest,
+)
 
 _BEARER = "bearer "
+
+
+def caller_address(request: Request) -> str:
+    """The caller's real address, for per-address abuse limits. Read from
+    the header set by the proxy in front (CLIENT_IP_HEADER in config.py),
+    never from X-Forwarded-For, whose first entry the client controls."""
+    header = get_settings().CLIENT_IP_HEADER
+    if header:
+        forwarded = request.headers.get(header, "").strip()
+        if forwarded:
+            return forwarded
+    return request.client.host if request.client else "unknown"
 
 
 def _session_expired() -> HTTPException:
@@ -41,6 +58,7 @@ async def _user_from_token(repo: UserRepository, authorization: str) -> User:
 
 
 async def get_current_user(
+    request: Request,
     response: Response,
     db: AsyncSession = Depends(get_db),
     x_device_id: str | None = Header(default=None, alias=DEVICE_ID_HEADER),
@@ -50,7 +68,18 @@ async def get_current_user(
     if authorization is not None:
         return await _user_from_token(repo, authorization)
 
-    user, new_device_id = await resolve_or_create_guest(repo, x_device_id)
+    try:
+        user, new_device_id = await resolve_or_create_guest(
+            repo, x_device_id, caller_address(request)
+        )
+    except GuestLimitError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={
+                "code": "too_many_new_guests",
+                "message": "Too many new sign-ups from your network. Please try again later.",
+            },
+        ) from exc
     if new_device_id is not None:
         response.headers[DEVICE_ID_HEADER] = new_device_id
     return user

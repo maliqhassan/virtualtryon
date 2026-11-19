@@ -13,7 +13,12 @@ from app.models.user import Plan
 from app.services import link_import, plans
 from app.services.attempt_limiter import SlidingWindowLimiter
 from app.services.plans import AllowancePeriod, PlanAllowance
-from app.services.safe_fetch import BlockedUrlError, FetchedResource, FetchError, get_page_fetcher
+from app.services.safe_fetch import (
+    BlockedUrlError,
+    FetchedResource,
+    FetchError,
+    get_page_fetcher,
+)
 
 PRODUCT_URL = "https://shop.example.pk/products/linen-kurta"
 IMAGE_URL = "https://cdn.example.pk/linen-kurta.webp"
@@ -121,7 +126,9 @@ async def test_uploaded_garments_have_no_source_url(client: AsyncClient) -> None
         (
             {
                 PRODUCT_URL: FetchedResource(
-                    PRODUCT_URL, "text/html", _product_html(image="data:image/png;base64,AA")
+                    PRODUCT_URL,
+                    "text/html",
+                    _product_html(image="data:image/png;base64,AA"),
                 )
             },
             422,
@@ -213,7 +220,9 @@ async def test_no_try_ons_left_means_no_fetch(
     client: AsyncClient, use_fetcher, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setitem(
-        plans.PLAN_ALLOWANCES, Plan.FREE, PlanAllowance(limit=0, period=AllowancePeriod.LIFETIME)
+        plans.PLAN_ALLOWANCES,
+        Plan.FREE,
+        PlanAllowance(limit=0, period=AllowancePeriod.LIFETIME),
     )
     fetcher = use_fetcher(FakeFetcher(_store()))
 
@@ -235,7 +244,9 @@ async def test_imported_item_can_be_tried_on(client: AsyncClient, use_fetcher) -
     )
 
     job = await client.post(
-        "/api/v1/inference-jobs", json={"garment_id": imported.json()["id"]}, headers=headers
+        "/api/v1/inference-jobs",
+        json={"garment_id": imported.json()["id"]},
+        headers=headers,
     )
 
     assert job.status_code == 201, job.text

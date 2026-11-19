@@ -42,7 +42,7 @@ export function UsagePill({ usage, dark = false }: { usage: Usage; dark?: boolea
       hitSlop={6}
       className={`self-start rounded-full px-[11px] py-[7px] ${tone}`}
     >
-      <Text className={`font-mono-semibold text-[10.5px] ${textColor}`}>{pillText(usage)}</Text>
+      <Text className={`font-mono-semibold text-[11px] ${textColor}`}>{pillText(usage)}</Text>
     </Pressable>
   );
 }

@@ -41,7 +41,7 @@ export function ResultCanvas({
       ) : (
         <View className="flex-1 items-center justify-center">
           <StripeFill tone="warm" />
-          <Text className="font-mono text-[10px] text-ink-secondary">{placeholderCaption}</Text>
+          <Text className="font-mono text-[11px] text-ink-secondary">{placeholderCaption}</Text>
         </View>
       )}
       {tag && (

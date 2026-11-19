@@ -45,7 +45,7 @@ export function PhotoLabel({
 }) {
   return (
     <Text
-      className={`self-start overflow-hidden rounded-full px-sm py-[3px] font-mono-semibold text-[8.5px] ${
+      className={`self-start overflow-hidden rounded-full px-sm py-[3px] font-mono-semibold text-[11px] ${
         tone === 'light'
           ? 'bg-[rgba(246,244,240,0.88)] text-ink-secondary'
           : 'bg-[rgba(18,17,15,0.6)] text-night-body'

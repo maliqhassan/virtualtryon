@@ -31,7 +31,7 @@ function Row({ garment, inWash }: { garment: Garment; inWash: boolean }) {
         <Text className="font-sans-bold text-[13.5px] text-ink-primary" numberOfLines={1}>
           {garment.title}
         </Text>
-        <Text className="mt-xxs font-mono text-[10.5px] text-neutral-500">{garment.category}</Text>
+        <Text className="mt-xxs font-mono text-[11px] text-neutral-500">{garment.category}</Text>
       </View>
       <AppIcon
         name={inWash ? 'local_laundry_service' : 'add_circle'}

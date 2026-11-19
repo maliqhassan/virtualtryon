@@ -50,12 +50,14 @@ class User(Base):
     device_id: Mapped[str | None] = mapped_column(
         String(64), unique=True, index=True, nullable=True
     )
-    # Set when a guest claims an account with email + password (ADR 0010).
+    # The account's email: from Google sign-in (verified), or from the removed
+    # email + password sign-in (ADRs 0010, 0016) on older accounts.
     # Stored lower-cased, so the unique index is case-insensitive in effect.
     email: Mapped[str | None] = mapped_column(
         String(EMAIL_MAX_LENGTH), unique=True, index=True, nullable=True
     )
-    # argon2id hash; None for guests and Google accounts.
+    # Legacy: argon2id hash from the removed email sign-in (ADR 0016). Never
+    # set any more; cleared when Google takes the account over.
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     # The Firebase user id, set by Google sign-in (ADR 0012). Firebase keeps
     # it stable for a Google account even if its email changes.

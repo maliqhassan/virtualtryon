@@ -7,7 +7,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.schemas.catalog import AudienceFilter, OccasionFilter, ProductResponse, StoreResponse
+from app.schemas.catalog import (
+    AudienceFilter,
+    OccasionFilter,
+    ProductResponse,
+    StoreResponse,
+)
 from app.services.catalog import (
     ProductNotFoundError,
     StoreNotFoundError,

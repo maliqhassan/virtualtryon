@@ -19,7 +19,10 @@ _PRUNE_ABOVE_KEYS = 10_000
 
 class SlidingWindowLimiter:
     def __init__(
-        self, limit: int, window_seconds: float, clock: Callable[[], float] = time.monotonic
+        self,
+        limit: int,
+        window_seconds: float,
+        clock: Callable[[], float] = time.monotonic,
     ) -> None:
         self.limit = limit
         self._window = window_seconds

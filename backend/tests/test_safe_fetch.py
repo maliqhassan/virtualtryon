@@ -4,7 +4,12 @@ import httpx
 import pytest
 
 from app.services import safe_fetch
-from app.services.safe_fetch import BlockedUrlError, FetchError, SafeFetcher, is_public_address
+from app.services.safe_fetch import (
+    BlockedUrlError,
+    FetchError,
+    SafeFetcher,
+    is_public_address,
+)
 
 PUBLIC_IP = "93.184.216.34"
 
@@ -28,7 +33,15 @@ def _never_called(request: httpx.Request) -> httpx.Response:
 
 @pytest.mark.parametrize(
     "address",
-    ["127.0.0.1", "10.1.2.3", "172.16.0.9", "192.168.1.4", "169.254.169.254", "100.64.0.1", "::1"]
+    [
+        "127.0.0.1",
+        "10.1.2.3",
+        "172.16.0.9",
+        "192.168.1.4",
+        "169.254.169.254",
+        "100.64.0.1",
+        "::1",
+    ]
     + ["fe80::1", "fd00::1", "::ffff:127.0.0.1", "0.0.0.0", "224.0.0.1"],
 )
 def test_internal_addresses_are_not_public(address: str) -> None:
@@ -93,7 +106,8 @@ async def test_redirects_are_followed_and_rechecked() -> None:
         return httpx.Response(200, headers={"content-type": "text/html"}, text="page")
 
     fetcher = _fetcher(
-        {"short.example.com": [PUBLIC_IP], "shop.example.com": ["93.184.216.35"]}, handler
+        {"short.example.com": [PUBLIC_IP], "shop.example.com": ["93.184.216.35"]},
+        handler,
     )
     result = await fetcher.fetch("https://short.example.com/x", max_bytes=1000, accept="*/*")
     assert result.url == "https://shop.example.com/item"
@@ -143,7 +157,9 @@ async def test_pages_can_be_cut_off_instead_of_refused() -> None:
 async def test_charset_is_reported() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(
-            200, headers={"content-type": 'text/html; charset="windows-1252"'}, content=b"x"
+            200,
+            headers={"content-type": 'text/html; charset="windows-1252"'},
+            content=b"x",
         )
 
     fetcher = _fetcher({"shop.example.com": [PUBLIC_IP]}, handler)

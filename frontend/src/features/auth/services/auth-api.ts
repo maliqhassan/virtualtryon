@@ -77,3 +77,45 @@ export async function getAccount(): Promise<Account> {
   const response = await apiClient.get<AccountDto>('/api/v1/auth/me');
   return toAccount(response.data);
 }
+
+const DELETE_MESSAGES = {
+  // A different Google account, or the confirmation took too long.
+  confirmation_required:
+    'Please confirm with the Google account you’re signed in with, then try again.',
+  unavailable: 'We can’t check your Google sign-in right now. Please try again.',
+  failed: 'Couldn’t delete your account. Please try again.',
+  network: 'Couldn’t reach the server. Check your connection and try again.',
+} as const;
+
+export class DeleteAccountError extends Error {
+  constructor(readonly code: keyof typeof DELETE_MESSAGES) {
+    super(DELETE_MESSAGES[code]);
+    this.name = 'DeleteAccountError';
+  }
+}
+
+/** Deletes the account and everything in it on our server (backend ADR 0015).
+ * A Google account sends the token from a Google sign-in made just now. */
+export async function deleteAccount(idToken: string | null): Promise<void> {
+  try {
+    await apiClient.delete('/api/v1/account', {
+      data: idToken ? { id_token: idToken } : undefined,
+    });
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      const code = (error.response.data as { detail?: { code?: string } } | undefined)?.detail
+        ?.code;
+      if (code === 'confirmation_required') throw new DeleteAccountError('confirmation_required');
+      if (error.response.status === 503) throw new DeleteAccountError('unavailable');
+      throw new DeleteAccountError('failed');
+    }
+    throw new DeleteAccountError('network');
+  }
+}
+
+export function deleteAccountErrorMessage(error: unknown): string | null {
+  if (error instanceof DeleteAccountError || error instanceof GoogleSignInError) {
+    return error.message;
+  }
+  return error ? DELETE_MESSAGES.failed : null;
+}

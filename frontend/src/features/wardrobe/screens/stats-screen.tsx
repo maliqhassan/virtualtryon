@@ -16,7 +16,7 @@ function Tile({ value, label }: { value: number; label: string }) {
   return (
     <View className="flex-1 rounded-[18px] border border-[rgba(22,19,15,0.07)] bg-surface p-[13px]">
       <Text className="font-display text-[26px] leading-[27px] text-ink-primary">{value}</Text>
-      <Text className="mt-[5px] font-mono text-[9.5px] uppercase text-neutral-500">{label}</Text>
+      <Text className="mt-[5px] font-mono text-[11px] uppercase text-neutral-500">{label}</Text>
     </View>
   );
 }
@@ -60,7 +60,7 @@ export function StatsScreen() {
             <View key={category}>
               <View className="flex-row justify-between">
                 <Text className="font-sans-semibold text-[13px] text-ink-primary">{category}</Text>
-                <Text className="font-mono text-[10.5px] text-neutral-500">{count}</Text>
+                <Text className="font-mono text-[11px] text-neutral-500">{count}</Text>
               </View>
               <View className="mt-xs h-[6px] rounded-full bg-muted">
                 <View

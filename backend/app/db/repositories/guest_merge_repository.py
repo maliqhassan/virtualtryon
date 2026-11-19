@@ -4,36 +4,20 @@ emptied guest: used when a guest signs in to an account they already had
 the sign-in land together or not at all.
 
 Stored files don't move: storage keys aren't per user, so only the owning
-rows change. Photos are kept to one per view, as uploads do
-(UserPhotoRepository.delete_others_with_angle): the newest of each view
-stays, and the files of the others are returned for the caller to delete
-once the transaction has committed.
+rows change. Every model photo moves, even past the per-user limit
+(MAX_PHOTOS_PER_USER): nothing of the user's is deleted without asking; they
+just can't add more until they're under it again.
 """
 
-from collections.abc import Iterator
 from uuid import UUID
 
-from sqlalchemy import Column, Table, delete, select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.base import Base
-from app.db.repositories.user_photo_repository import photo_files
+from app.db.repositories.ownership import owner_columns
 from app.models.inference_job import InferenceJob
 from app.models.profile import Profile
 from app.models.user import User
-from app.models.user_photo import UserPhoto
-
-
-def _owner_columns() -> Iterator[tuple[Table, Column]]:
-    """Every column pointing at users.id, read from the models, so a table
-    added later is moved too instead of blocking the guest's deletion.
-    Profiles are left out: one per user, handled separately."""
-    for table in Base.metadata.sorted_tables:
-        if table.name in (User.__tablename__, Profile.__tablename__):
-            continue
-        for column in table.columns:
-            if any(fk.column.table.name == User.__tablename__ for fk in column.foreign_keys):
-                yield table, column
 
 
 class GuestMergeRepository:
@@ -41,15 +25,16 @@ class GuestMergeRepository:
         self._db = db
 
     async def move_everything(self, guest: User, account_id: UUID) -> list[str]:
-        """Returns the file paths of photos the account no longer keeps."""
-        for table, column in _owner_columns():
+        """Returns file paths to delete after the commit: none today (every
+        photo is kept), kept in the signature for the caller in auth.py."""
+        # Profiles are left out: one per user, handled separately.
+        for table, column in owner_columns(skip=(Profile.__tablename__,)):
             await self._db.execute(
                 update(table).where(column == guest.id).values({column.name: account_id})
             )
         await self._move_profile(guest.id, account_id)
-        superseded = await self._keep_newest_photo_per_view(account_id)
         await self._db.delete(guest)
-        return superseded
+        return []
 
     async def _move_profile(self, guest_id: UUID, account_id: UUID) -> None:
         """The account's own style profile wins; the guest's moves only if the
@@ -71,19 +56,3 @@ class GuestMergeRepository:
             .values(profile_id=account_profile)
         )
         await self._db.execute(delete(Profile).where(Profile.id == guest_profile))
-
-    async def _keep_newest_photo_per_view(self, account_id: UUID) -> list[str]:
-        result = await self._db.execute(
-            select(UserPhoto)
-            .where(UserPhoto.user_id == account_id)
-            .order_by(UserPhoto.created_at.desc())
-        )
-        seen: set[str] = set()
-        superseded: list[str] = []
-        for photo in result.scalars().all():
-            if photo.angle in seen:
-                superseded.extend(photo_files(photo))
-                await self._db.delete(photo)
-            else:
-                seen.add(photo.angle)
-        return superseded

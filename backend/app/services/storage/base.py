@@ -10,12 +10,18 @@ for this exact interface.
 from abc import ABC, abstractmethod
 
 
+class StorageFullError(Exception):
+    """Raised by `save` when the storage can't take more files. Part of the
+    interface, so callers handle it the same whatever the implementation."""
+
+
 class StorageService(ABC):
     @abstractmethod
     def save(self, content: bytes, extension: str) -> str:
         """Persist `content` and return its URL/path. `extension` (e.g.
         "jpg") is used to name the stored file — never a client-supplied
-        filename directly, to avoid path traversal."""
+        filename directly, to avoid path traversal. Raises StorageFullError
+        when there's no room for it."""
         raise NotImplementedError
 
     @abstractmethod

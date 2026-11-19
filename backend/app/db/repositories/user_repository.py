@@ -35,11 +35,6 @@ class UserRepository:
         self._db.add(user)
         return user
 
-    def stage_new_email_user(self, email: str, password_hash: str) -> User:
-        user = User(auth_provider=AuthProvider.EMAIL, email=email, password_hash=password_hash)
-        self._db.add(user)
-        return user
-
     async def create_guest(self, device_id: str) -> User:
         user = User(auth_provider=AuthProvider.GUEST, device_id=device_id)
         self._db.add(user)

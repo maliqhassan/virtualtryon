@@ -33,7 +33,7 @@ function Stat({ value, label, accent }: { value: string; label: string; accent?:
       >
         {value}
       </Text>
-      <Text className="mt-[5px] font-mono text-[9.5px] text-neutral-500">{label}</Text>
+      <Text className="mt-[5px] font-mono text-[11px] text-neutral-500">{label}</Text>
     </View>
   );
 }
@@ -84,7 +84,7 @@ export function YouScreen() {
           >
             {name}
           </Text>
-          <Text className="mt-[5px] font-mono text-[10.5px] text-neutral-500" numberOfLines={1}>
+          <Text className="mt-[5px] font-mono text-[11px] text-neutral-500" numberOfLines={1}>
             {signedIn ? account.email : 'guest · not signed in'}
           </Text>
         </View>
@@ -104,10 +104,10 @@ export function YouScreen() {
         className="rounded-[24px] bg-inverse px-xl py-[18px]"
       >
         <View className="flex-row justify-between">
-          <Text className="font-mono text-[10px] tracking-[1.6px] text-gold-overline">
+          <Text className="font-mono text-[11px] tracking-[1.6px] text-gold-overline">
             STYLE PROFILE · SAMPLE
           </Text>
-          <Text className="font-mono-semibold text-[10.5px] text-neutral-500">
+          <Text className="font-mono-semibold text-[11px] text-neutral-400">
             {photo ? 'rescan' : 'add photo'}
           </Text>
         </View>
@@ -152,7 +152,7 @@ export function YouScreen() {
           ]}
         />
         <View className="flex-1">
-          <Text className="font-mono text-[9.5px] uppercase tracking-[1.3px] text-[rgba(26,21,9,0.65)]">
+          <Text className="font-mono text-[11px] uppercase tracking-[1.3px] text-[rgba(26,21,9,0.65)]">
             {usage ? `${PLAN_NAMES[usage.plan]} plan · ${describeUsage(usage)}` : 'Your plan'}
           </Text>
           <Text className="mt-[6px] font-display text-[23px] leading-[25px] text-[#1A1509]">
@@ -217,7 +217,7 @@ export function YouScreen() {
         </ListCard>
       </View>
 
-      <Text className="mt-xl text-center font-mono text-[10.5px] text-neutral-400">
+      <Text className="mt-xl text-center font-mono text-[11px] text-neutral-500">
         AI Stylist · v1.0.0
       </Text>
     </AppScaffold>

@@ -239,7 +239,10 @@ async def test_the_old_sample_store_is_updated_for_the_us_on_the_next_start() ->
             ["dresses", "wedding"],
         )
         velvet = products["Burgundy velvet dress"]
-        assert (velvet.audience, velvet.occasion_list) == ("women", ["dresses", "wedding"])
+        assert (velvet.audience, velvet.occasion_list) == (
+            "women",
+            ["dresses", "wedding"],
+        )
         kurtas = await db.execute(select(Product).where(Product.title.contains("kurta")))
         assert kurtas.first() is None
 

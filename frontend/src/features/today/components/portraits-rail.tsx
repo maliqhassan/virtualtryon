@@ -7,18 +7,19 @@ import { themeColors } from '@/constants/theme';
 import { displayUrl, usePortraits } from '@/features/my-photo';
 import { TRY_ON_HOME_HREF } from '@/features/tryon';
 import { wardrobeTabHref } from '@/features/wardrobe';
+import { selectionFeedback } from '@/lib/haptics';
 import { resolveMediaUrl } from '@/lib/media-url';
 
 const TILE_RATIO = 96 / 128;
 
 /**
  * "My portraits" (handoff v2.1 change 3): an "Add portrait" tile, then the
- * user's photos. The front one is what every try-on uses, so it carries the
- * ink outline and the "in use" tag. Tapping a photo opens Try-On.
+ * user's photos, newest first. The one try-ons use carries the ink outline
+ * and the "in use" tag. Tapping a photo makes it the one in use and opens
+ * Try-On with it.
  */
 export function PortraitsRail() {
-  // Front, side, back; "Add" fills the first missing view (null until loaded).
-  const { ordered, addHref } = usePortraits();
+  const { ordered, inUseId, select, addHref, isFull } = usePortraits();
 
   return (
     <View className="mt-[22px]">
@@ -45,21 +46,27 @@ export function PortraitsRail() {
           onPress={() => addHref && router.push(addHref)}
           disabled={!addHref}
           accessibilityRole="button"
-          accessibilityLabel="Add a portrait"
+          accessibilityLabel={isFull ? 'Manage your portraits' : 'Add a portrait'}
           className="h-[128px] w-[96px] items-center justify-center gap-xs rounded-[18px] border-[1.5px] border-dashed border-neutral-300 bg-surface"
         >
           <AppIcon name="add" size={28} color={themeColors.inkPrimary} />
-          <Text className="font-sans-semibold text-[11px] text-ink-secondary">Add portrait</Text>
+          <Text className="font-sans-semibold text-[11px] text-ink-secondary">
+            {isFull ? 'Manage' : 'Add portrait'}
+          </Text>
         </Pressable>
 
-        {ordered.map((photo) => {
-          const inUse = photo.angle === 'front';
+        {ordered.map((photo, index) => {
+          const inUse = photo.id === inUseId;
           return (
             <Pressable
               key={photo.id}
-              onPress={() => router.push(TRY_ON_HOME_HREF)}
+              onPress={() => {
+                selectionFeedback();
+                select(photo.id);
+                router.push(TRY_ON_HOME_HREF);
+              }}
               accessibilityRole="button"
-              accessibilityLabel={`${photo.angle} portrait${inUse ? ', in use for try-ons' : ''}. Try something on`}
+              accessibilityLabel={`Portrait ${index + 1}${inUse ? ', in use for try-ons' : ''}. Try something on with it`}
               className="h-[128px] w-[96px]"
             >
               <AppImage
@@ -74,7 +81,7 @@ export function PortraitsRail() {
                     pointerEvents="none"
                     className="absolute inset-0 rounded-[18px] border-[2.5px] border-inverse"
                   />
-                  <Text className="absolute bottom-[7px] left-[7px] overflow-hidden rounded-full bg-inverse px-[6px] py-[3px] font-mono-semibold text-[9px] text-ink-onPrimary">
+                  <Text className="absolute bottom-[7px] left-[7px] overflow-hidden rounded-full bg-inverse px-[6px] py-[3px] font-mono-semibold text-[11px] text-ink-onPrimary">
                     in use
                   </Text>
                 </>

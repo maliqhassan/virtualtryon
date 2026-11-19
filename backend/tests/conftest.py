@@ -10,8 +10,10 @@ from app.main import app
 from app.models.user import Plan
 from app.services import plans
 from app.services.garment_detection import NoDetector, get_garment_detector
+from app.services.guest_identity import reset_guest_limits
 from app.services.photo_background import NoBackgroundRemoval, get_background_remover
 from app.services.plans import AllowancePeriod, PlanAllowance
+from app.services.upload_limits import reset_upload_limits
 
 REAL_FREE_ALLOWANCE = plans.PLAN_ALLOWANCES[Plan.FREE]
 
@@ -54,6 +56,9 @@ def _test_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
       (test_usage.py restores the real limit with `real_allowances`).
     """
     settings = get_settings()
+    # Every test calls from the same address; limits start fresh per test.
+    reset_guest_limits()
+    reset_upload_limits()
     monkeypatch.setattr(settings, "TRYON_PROVIDER", "catvton")
     # No server-wide daily cap (test_vton_d covers it) and no real key, so
     # nothing here can reach the paid try-on API.

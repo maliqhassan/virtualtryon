@@ -55,25 +55,30 @@ function loadModules(): Promise<Modules> {
   return modules;
 }
 
-/** The Firebase ID token for the account the user picks, or null when they
- * close the picker. */
-export async function getGoogleIdToken(): Promise<string | null> {
+type FirebaseUser = Parameters<Modules['auth']['deleteUser']>[0];
+
+/**
+ * Google's account picker, then a Firebase sign-in; runs `run` with the
+ * Firebase user and signs out of Firebase afterwards (our server keeps the
+ * session; Firebase's own isn't used after this). Null when the user closes
+ * the picker. Problems signing in become GoogleSignInError; errors from
+ * `run` (e.g. our server's answer) pass through unchanged.
+ */
+async function withGoogleUser<T>(
+  run: (user: FirebaseUser, auth: Modules['auth']) => Promise<T>,
+): Promise<T | null> {
   const { google, auth } = await loadModules();
   const { GoogleSignin, isCancelledResponse, isErrorWithCode, statusCodes } = google;
+  const firebase = auth.getAuth();
+  let user: FirebaseUser;
   try {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const response = await GoogleSignin.signIn();
     if (isCancelledResponse(response)) return null;
     const googleToken = response.data.idToken;
     if (!googleToken) throw new GoogleSignInError('failed');
-
-    const firebase = auth.getAuth();
     const credential = auth.GoogleAuthProvider.credential(googleToken);
-    const { user } = await auth.signInWithCredential(firebase, credential);
-    const idToken = await user.getIdToken();
-    // Our server keeps the session; Firebase's own isn't used after this.
-    await auth.signOut(firebase);
-    return idToken;
+    user = (await auth.signInWithCredential(firebase, credential)).user;
   } catch (error) {
     if (error instanceof GoogleSignInError) throw error;
     if (isErrorWithCode(error)) {
@@ -84,6 +89,37 @@ export async function getGoogleIdToken(): Promise<string | null> {
     }
     throw new GoogleSignInError('failed');
   }
+  try {
+    return await run(user, auth);
+  } finally {
+    await auth.signOut(firebase).catch(() => undefined);
+  }
+}
+
+/** The Firebase ID token for the account the user picks, or null when they
+ * close the picker. */
+export async function getGoogleIdToken(): Promise<string | null> {
+  return withGoogleUser((user) => user.getIdToken());
+}
+
+/**
+ * Confirms it's really them with a fresh Google sign-in, then runs
+ * `action` with that sign-in's token (deleting the account on our server,
+ * which checks the token is fresh and for the same account). After it
+ * succeeds the Firebase user is deleted too, which Firebase allows only
+ * right after a sign-in. That step is best effort: our server's data is
+ * already gone, and Firebase holds only the account's id and email.
+ * Resolves to false when the user closes the picker.
+ */
+export async function confirmWithGoogle(
+  action: (idToken: string) => Promise<void>,
+): Promise<boolean> {
+  const done = await withGoogleUser(async (user, auth) => {
+    await action(await user.getIdToken());
+    await auth.deleteUser(user).catch(() => undefined);
+    return true;
+  });
+  return done ?? false;
 }
 
 /** Forgets the Google account on this phone, so the picker shows next time. */

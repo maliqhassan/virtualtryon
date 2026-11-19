@@ -2,8 +2,8 @@
 #
 # Run from anywhere, in PowerShell:
 #   powershell -ExecutionPolicy Bypass -File D:\reactapps\virtualtryon\frontend\scripts\build-apk.ps1
-# Add -Prebuild after changing app.json or a native package (regenerates
-# frontend\android first; slower, 20-30 min instead of about 5).
+# Regenerates frontend\android first (slower, 20-30 min instead of about 5)
+# when app.json or package.json changed since it was made, or with -Prebuild.
 #
 # The APK is signed with the debug key: fine to install on your own phone,
 # not for the Play Store (that needs an upload key and an .aab).
@@ -16,7 +16,17 @@ $project = Split-Path -Parent $frontend
 $android = Join-Path $frontend 'android'
 $sdk = Join-Path $env:LOCALAPPDATA 'Android\Sdk'
 
-if ($Prebuild -or -not (Test-Path $android)) {
+# Regenerate the native project when it's missing, when asked, or when
+# app.json / package.json changed since it was made (permissions, the
+# scheme, plugins and native packages all live there).
+$nativeMarker = Join-Path $android 'app\build.gradle'
+$stale = (Test-Path $nativeMarker) -and (
+    @('app.json', 'package.json') | Where-Object {
+        (Get-Item (Join-Path $frontend $_)).LastWriteTime -gt (Get-Item $nativeMarker).LastWriteTime
+    }
+)
+if ($stale) { Write-Host 'app.json or package.json changed: regenerating the native project.' }
+if ($Prebuild -or $stale -or -not (Test-Path $android)) {
     Push-Location $frontend
     npx expo prebuild --platform android --no-install
     if ($LASTEXITCODE -ne 0) { Pop-Location; throw 'expo prebuild failed' }

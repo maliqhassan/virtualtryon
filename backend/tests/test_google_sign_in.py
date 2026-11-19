@@ -13,7 +13,11 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from httpx import AsyncClient
 from PIL import Image
 
+import app.db.session as db_session
+from app.core.security import create_session_token
+from app.db.repositories.user_repository import UserRepository
 from app.main import app
+from app.models.user import AuthProvider, User
 from app.services.auth import reset_attempt_limits
 from app.services.firebase_identity import (
     DisabledVerifier,
@@ -25,7 +29,6 @@ from app.services.firebase_identity import (
 )
 
 PROJECT = "virtualtryon-test"
-PASSWORD = "correct horse battery"
 
 
 class FakeVerifier:
@@ -95,6 +98,16 @@ async def test_first_google_sign_in_creates_an_account(client, use_verifier) -> 
     assert me.json()["email"] == identity.email
 
 
+async def test_signing_in_without_a_guest_creates_no_guest(client, use_verifier) -> None:
+    use_verifier(FakeVerifier({"t": _google()}))
+
+    response = await _sign_in(client, "t")
+
+    assert response.status_code == 200
+    assert response.json()["created"] is True
+    assert "x-device-id" not in response.headers
+
+
 async def test_a_guest_keeps_their_wardrobe(client, use_verifier) -> None:
     guest = {"X-Device-Id": (await client.get("/api/v1/usage")).headers["x-device-id"]}
     garment = await client.post(
@@ -129,6 +142,21 @@ async def test_signing_in_again_returns_the_same_account(client, use_verifier) -
     assert again.json()["created"] is False
     garments = (await client.get("/api/v1/garments", headers=_bearer(again.json()))).json()
     assert [g["id"] for g in garments] == [garment.json()["id"]]
+
+
+async def _old_email_account(email: str) -> dict[str, str]:
+    """An account from the removed email + password sign-in (ADR 0016),
+    still in the database; returns a session for it."""
+    async with db_session.AsyncSessionLocal() as db:
+        user = User(auth_provider=AuthProvider.EMAIL, email=email, password_hash="argon2-hash")
+        db.add(user)
+        await db.commit()
+        return {"Authorization": f"Bearer {create_session_token(user.id, user.session_version)}"}
+
+
+async def _stored_user(email: str) -> User | None:
+    async with db_session.AsyncSessionLocal() as db:
+        return await UserRepository(db).get_by_email(email)
 
 
 async def _new_guest(client: AsyncClient) -> dict[str, str]:
@@ -216,34 +244,55 @@ async def test_a_guests_style_profile_moves_when_the_account_has_none(client, us
     assert profile["display_name"] == "Guest"
 
 
-async def test_one_photo_per_view_is_kept_and_the_older_file_removed(client, use_verifier) -> None:
-    from app.services.storage import get_storage_service
+async def _photo(client, headers):
+    response = await client.post(
+        "/api/v1/user-photos", files={"image": ("p.png", _png(), "image/png")}, headers=headers
+    )
+    assert response.status_code == 201
+    return response.json()
 
+
+async def test_a_guests_photos_join_the_accounts(client, use_verifier) -> None:
     use_verifier(FakeVerifier({"t": _google()}))
     account = (await _sign_in(client, "t")).json()
-    older = await client.post(
-        "/api/v1/user-photos",
-        files={"image": ("old.png", _png(), "image/png")},
-        headers=_bearer(account),
-    )
+    older = await _photo(client, _bearer(account))
     guest = await _new_guest(client)
-    newer = await client.post(
-        "/api/v1/user-photos",
-        files={"image": ("new.png", _png(), "image/png")},
-        headers=guest,
-    )
+    newer = await _photo(client, guest)
 
     body = (await _sign_in(client, "t", headers=guest)).json()
 
     photos = (await client.get("/api/v1/user-photos", headers=_bearer(body))).json()
-    assert [p["id"] for p in photos] == [newer.json()["id"]]
-    with pytest.raises(FileNotFoundError):
-        get_storage_service().read(older.json()["storage_key"])
+    assert [p["id"] for p in photos] == [newer["id"], older["id"]]
+
+
+async def test_merging_never_deletes_photos_even_past_the_limit(client, use_verifier) -> None:
+    from app.services.storage import get_storage_service
+
+    use_verifier(FakeVerifier({"t": _google()}))
+    account = (await _sign_in(client, "t")).json()
+    oldest = await _photo(client, _bearer(account))
+    for _ in range(9):
+        await _photo(client, _bearer(account))
+    guest = await _new_guest(client)
+    await _photo(client, guest)
+
+    body = (await _sign_in(client, "t", headers=guest)).json()
+
+    photos = (await client.get("/api/v1/user-photos", headers=_bearer(body))).json()
+    assert len(photos) == 11
+    assert get_storage_service().read(oldest["storage_key"])
+    # Over the limit: no more until they delete one.
+    refused = await client.post(
+        "/api/v1/user-photos",
+        files={"image": ("p.png", _png(), "image/png")},
+        headers=_bearer(body),
+    )
+    assert refused.status_code == 409
 
 
 async def test_google_taking_over_an_email_account_also_merges(client, use_verifier) -> None:
     email = f"merge-{uuid.uuid4().hex[:8]}@gmail.com"
-    await client.post("/api/v1/auth/email", json={"email": email, "password": PASSWORD})
+    await _old_email_account(email)
     guest = await _new_guest(client)
     piece = await _add_garment(client, guest, "Guest scarf")
     use_verifier(FakeVerifier({"t": _google(email=email)}))
@@ -272,35 +321,40 @@ async def test_a_signed_in_caller_is_not_merged(client, use_verifier) -> None:
 
 async def test_takes_over_an_email_account_and_removes_its_password(client, use_verifier) -> None:
     email = f"owner-{uuid.uuid4().hex[:8]}@gmail.com"
-    squatter = await client.post("/api/v1/auth/email", json={"email": email, "password": PASSWORD})
+    squatter = await _old_email_account(email)
     use_verifier(FakeVerifier({"t": _google(email=email.upper())}))
 
     body = (await _sign_in(client, "t")).json()
 
     assert body["created"] is False
-    assert body["account"] == {"email": email, "auth_provider": "google", "plan": "free"}
-    # Whoever registered the address is signed out everywhere: their old
-    # session no longer works, and neither does the password.
-    old_session = await client.get("/api/v1/auth/me", headers=_bearer(squatter.json()))
+    assert body["account"] == {
+        "email": email,
+        "auth_provider": "google",
+        "plan": "free",
+    }
+    # Whoever registered the address is signed out everywhere, and the
+    # password is gone.
+    old_session = await client.get("/api/v1/auth/me", headers=squatter)
     assert old_session.status_code == 401
     assert old_session.json()["detail"]["code"] == "session_expired"
-    again = await client.post("/api/v1/auth/email", json={"email": email, "password": PASSWORD})
-    assert again.status_code == 401
+    stored = await _stored_user(email)
+    assert stored is not None and stored.password_hash is None
     me = await client.get("/api/v1/auth/me", headers=_bearer(body))
     assert me.json()["email"] == email
 
 
 async def test_an_unverified_email_is_not_trusted(client, use_verifier) -> None:
     email = f"someone-{uuid.uuid4().hex[:8]}@gmail.com"
-    await client.post("/api/v1/auth/email", json={"email": email, "password": PASSWORD})
+    await _old_email_account(email)
     use_verifier(FakeVerifier({"t": _google(email=email, verified=False)}))
 
     body = (await _sign_in(client, "t")).json()
 
     assert body["created"] is True
     assert body["account"]["email"] is None
-    still = await client.post("/api/v1/auth/email", json={"email": email, "password": PASSWORD})
-    assert still.status_code == 200
+    # The email account is untouched.
+    stored = await _stored_user(email)
+    assert stored is not None and stored.auth_provider == AuthProvider.EMAIL
 
 
 async def test_other_firebase_sign_in_methods_are_refused(client, use_verifier) -> None:
@@ -369,7 +423,14 @@ async def test_real_verifier_accepts_a_genuine_token() -> None:
         _token(sub=""),
         "not-a-jwt",
     ],
-    ids=["wrong-key", "wrong-audience", "wrong-issuer", "expired", "no-user", "garbage"],
+    ids=[
+        "wrong-key",
+        "wrong-audience",
+        "wrong-issuer",
+        "expired",
+        "no-user",
+        "garbage",
+    ],
 )
 async def test_real_verifier_refuses_bad_tokens(token: str) -> None:
     with pytest.raises(InvalidIdentityError):

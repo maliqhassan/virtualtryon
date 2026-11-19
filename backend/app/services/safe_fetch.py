@@ -146,7 +146,10 @@ class SafeFetcher:
     ) -> FetchedResource:
         current = url
         async with httpx.AsyncClient(
-            transport=self._transport, timeout=TIMEOUT, follow_redirects=False, trust_env=False
+            transport=self._transport,
+            timeout=TIMEOUT,
+            follow_redirects=False,
+            trust_env=False,
         ) as client:
             for _ in range(MAX_REDIRECTS + 1):
                 pinned = await self._pin(current)

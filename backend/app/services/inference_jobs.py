@@ -54,6 +54,11 @@ class NoUserPhotoError(ValueError):
     """Raised on create when the user hasn't uploaded their photo yet."""
 
 
+class PhotoNotAvailableError(ValueError):
+    """The photo the app picked isn't one of the caller's (deleted since, or
+    never theirs): the app refreshes its list and the user picks again."""
+
+
 class InferenceJobNotFoundError(ValueError):
     """Raised on GET-by-id when no job with that id exists for this user."""
 
@@ -86,9 +91,16 @@ async def create_inference_job(
             raise InvalidGarmentReferenceError(f"No product {payload.product_id}")
         product_id = payload.product_id
 
-    photo = await UserPhotoRepository(db).get_latest_for_user(user_id)
-    if photo is None:
-        raise NoUserPhotoError("Add your photo before starting a try-on.")
+    photos = UserPhotoRepository(db)
+    if payload.user_photo_id is not None:
+        # Only the caller's own photos: someone else's id is "not there".
+        photo = await photos.get_by_id_for_user(payload.user_photo_id, user_id)
+        if photo is None:
+            raise PhotoNotAvailableError("That photo isn't there any more. Pick another one.")
+    else:
+        photo = await photos.get_latest_for_user(user_id)
+        if photo is None:
+            raise NoUserPhotoError("Add your photo before starting a try-on.")
 
     await ensure_tryon_available(db, user)
 

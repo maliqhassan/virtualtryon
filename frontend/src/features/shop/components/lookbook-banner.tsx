@@ -30,7 +30,7 @@ export function LookbookBanner() {
         ]}
       />
       <View className="absolute left-[18px] right-[120px] top-[18px]">
-        <Text className="font-mono text-[9.5px] tracking-[1.7px] text-gold-soft">
+        <Text className="font-mono text-[11px] tracking-[1.7px] text-gold-soft">
           HOLIDAY EDIT · LOOKBOOK
         </Text>
         <Text className="mt-[9px] font-display text-[28px] leading-[29px] text-[#F4EBD9]">
@@ -39,7 +39,7 @@ export function LookbookBanner() {
         </Text>
         <Text className="mt-md font-sans-bold text-[12px] text-gold-soft">Open lookbook →</Text>
       </View>
-      <Text className="absolute bottom-md right-[14px] font-mono text-[8.5px] text-[rgba(244,235,217,0.4)]">
+      <Text className="absolute bottom-md right-[14px] font-mono text-[11px] text-[rgba(244,235,217,0.4)]">
         [ editorial ]
       </Text>
     </PressableScale>

@@ -339,3 +339,20 @@ Stroke weight is fixed at 400 across all sizes — never optically adjust. Icons
 2. Tab-bar icons are 22 (23 for the raised centre); labels are always present.
 3. Decorative icons inside feature cards take a semantic colour; functional icons inside rows take `textSecondary`.
 4. Never mix filled and outlined variants in the same row. Fill is used only for the *active* favourite (`favorite`) against its inactive counterpart (`favorite_border`).
+
+## Contrast amendments (2026-11-19)
+
+The app ships a few colours a step darker than the tables above, so that text
+meets WCAG AA (4.5:1) on both white and `#F6F4F0`. The originals stay where
+they're decorative (gradients, glows, icon tints).
+
+| Token | Spec | In the app | Contrast (white / background) |
+|---|---|---|---|
+| `primary` (clay) | `#B4713F` (3.56:1) | `#9A6136` | 5.08 / 4.51; cream label on clay 4.62 |
+| `success` | `#3E8F63` (3.95:1) | `#357A54` | 5.17 / 4.70 |
+| `neutral500` / `textMuted` | `#8A8278` (3.45:1) | `#736D64` | 5.12 / 4.55 |
+
+- `neutral400` (`#A39B90`, 2.5:1) is for icons, borders and placeholders on
+  light screens, not text. On the dark stage, muted text uses `neutral400`
+  (6.9:1 on `#12110F`); the darker `neutral500` would be only 3.7:1 there.
+- No text is set below 11px. The spec's 9–10.5px mono captions render at 11px.

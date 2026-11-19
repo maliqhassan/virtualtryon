@@ -1,8 +1,4 @@
-"""Password hashing and session tokens (ADR 0010). Pure functions, no I/O.
-
-Passwords: argon2id with argon2-cffi's defaults (OWASP's recommended
-parameters). Hashing deliberately takes tens of milliseconds, so callers
-run it in a worker thread rather than on the event loop.
+"""Session tokens (ADRs 0010, 0012). Pure functions, no I/O.
 
 Sessions: a JWT signed with SECRET_KEY (HS256) whose subject is the user id
 and whose `ver` is the account's session version. Signing out deletes the
@@ -15,30 +11,11 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 import jwt
-from argon2 import PasswordHasher
-from argon2.exceptions import InvalidHashError, VerificationError
 
 from app.core.config import get_settings
 
 SESSION_LIFETIME = timedelta(days=30)
 _ALGORITHM = "HS256"
-_hasher = PasswordHasher()
-
-
-def hash_password(password: str) -> str:
-    return _hasher.hash(password)
-
-
-def verify_password(password_hash: str, password: str) -> bool:
-    try:
-        return _hasher.verify(password_hash, password)
-    except (VerificationError, InvalidHashError):
-        return False
-
-
-def password_needs_rehash(password_hash: str) -> bool:
-    """True after the hashing parameters were raised; rehash on next sign-in."""
-    return _hasher.check_needs_rehash(password_hash)
 
 
 @dataclass(frozen=True)

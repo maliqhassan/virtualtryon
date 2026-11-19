@@ -113,7 +113,7 @@ export function ShopScreen() {
 
       {myStores.length > 0 && (
         <View className="mb-xl">
-          <Text className="mb-sm font-mono text-[10px] uppercase tracking-[1.6px] text-ink-secondary">
+          <Text className="mb-sm font-mono text-[11px] uppercase tracking-[1.6px] text-ink-secondary">
             Your stores
           </Text>
           <ScrollView
@@ -135,7 +135,7 @@ export function ShopScreen() {
         </View>
       )}
 
-      <Text className="mb-sm font-mono text-[10px] uppercase tracking-[1.6px] text-ink-secondary">
+      <Text className="mb-sm font-mono text-[11px] uppercase tracking-[1.6px] text-ink-secondary">
         Sample stores
       </Text>
 

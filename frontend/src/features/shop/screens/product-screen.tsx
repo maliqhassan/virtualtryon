@@ -92,7 +92,7 @@ export function ProductScreen() {
       </FadeInView>
 
       <FadeInView index={1} className="mt-lg">
-        <Text className="font-mono text-[10px] uppercase tracking-[1.6px] text-primary">
+        <Text className="font-mono text-[11px] uppercase tracking-[1.6px] text-primary">
           {product.storeName}
         </Text>
         <Text className="mt-xs font-display text-[34px] leading-[38px] text-ink-primary">

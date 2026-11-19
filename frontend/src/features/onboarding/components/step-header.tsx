@@ -43,7 +43,7 @@ export function StepHeader({ step, dark = false, back = true }: StepHeaderProps)
           />
         ))}
       </View>
-      <Text className="font-mono text-[10px] text-neutral-500">
+      <Text className={`font-mono text-[11px] ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>
         {step} / {ONBOARDING_STEPS}
       </Text>
     </View>

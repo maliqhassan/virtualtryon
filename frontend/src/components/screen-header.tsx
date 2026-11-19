@@ -40,7 +40,7 @@ export function ScreenHeader({
         <View className="flex-1">
           {eyebrow && (
             <Text
-              className={`mb-[6px] font-mono text-[10px] uppercase tracking-[1.6px] ${
+              className={`mb-[6px] font-mono text-[11px] uppercase tracking-[1.6px] ${
                 dark ? 'text-gold-overline' : 'text-primary'
               }`}
             >

@@ -28,7 +28,8 @@ const PALETTE = {
   bar: 'rgba(255, 255, 255, 0.94)',
   border: 'rgba(22, 19, 15, 0.08)',
   active: themeColors.inkPrimary,
-  inactive: themeColors.neutral400,
+  // Labels are text, so the AA-passing grey (neutral400 is for icons only).
+  inactive: themeColors.neutral500,
   pill: 'rgba(22, 19, 15, 0.07)',
 } as const;
 
@@ -95,8 +96,8 @@ function TabItem({
       </View>
       <Text
         numberOfLines={1}
-        className="mt-[3px] font-mono-semibold text-[9.5px]"
-        style={{ color, lineHeight: 12 }}
+        className="mt-[3px] font-mono-semibold text-[11px]"
+        style={{ color, lineHeight: 14 }}
       >
         {label}
       </Text>
@@ -143,8 +144,8 @@ function CenterItem({
       </View>
       <Text
         numberOfLines={1}
-        className="mt-[3px] font-mono-semibold text-[9.5px]"
-        style={{ color: focused ? palette.active : palette.inactive, lineHeight: 12 }}
+        className="mt-[3px] font-mono-semibold text-[11px]"
+        style={{ color: focused ? palette.active : palette.inactive, lineHeight: 14 }}
       >
         {label}
       </Text>

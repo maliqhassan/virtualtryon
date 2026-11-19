@@ -99,7 +99,7 @@ export function UpgradeScreen() {
             <Text className="font-display-italic text-gold-soft">style without limits.</Text>
           </Text>
           {usage && (
-            <Text className="mt-sm font-mono text-[10.5px] text-neutral-500">
+            <Text className="mt-sm font-mono text-[11px] text-neutral-400">
               now: {describeUsage(usage).toLowerCase()}
             </Text>
           )}
@@ -145,9 +145,7 @@ export function UpgradeScreen() {
                           { offset: 1, color: '#B4713F' },
                         ]}
                       />
-                      <Text className="font-sans-bold text-[10.5px] text-[#1A1509]">
-                        Best value
-                      </Text>
+                      <Text className="font-sans-bold text-[11px] text-[#1A1509]">Best value</Text>
                     </View>
                   )}
                   <View className="flex-row items-center justify-between">
@@ -170,7 +168,7 @@ export function UpgradeScreen() {
             })}
           </View>
 
-          <Text className="mt-lg text-center font-sans text-[11.5px] text-neutral-500">
+          <Text className="mt-lg text-center font-sans text-[11.5px] text-neutral-400">
             Subscriptions open soon. Failed try-ons never count against your allowance.
           </Text>
           <View className="mt-md">

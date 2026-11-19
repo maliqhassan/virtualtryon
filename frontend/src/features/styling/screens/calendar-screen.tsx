@@ -42,7 +42,7 @@ export function CalendarScreen() {
           const label = index === 0 ? 'Today' : index === 1 ? 'Tomorrow' : DAY.format(date);
           return planned.length ? (
             <View key={day} className="flex-row items-center gap-md rounded-[18px] bg-inverse p-sm">
-              <Text className="w-[64px] font-mono-semibold text-[10px] uppercase text-gold-overline">
+              <Text className="w-[64px] font-mono-semibold text-[11px] uppercase text-gold-overline">
                 {label}
               </Text>
               <View className="flex-1 flex-row gap-xs">
@@ -79,7 +79,7 @@ export function CalendarScreen() {
                 borderColor: 'rgba(22, 19, 15, 0.16)',
               }}
             >
-              <Text className="w-[64px] font-mono-semibold text-[10px] uppercase text-neutral-500">
+              <Text className="w-[64px] font-mono-semibold text-[11px] uppercase text-neutral-500">
                 {label}
               </Text>
               <Text className="flex-1 font-sans-semibold text-[13px] text-ink-secondary">

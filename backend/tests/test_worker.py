@@ -1,4 +1,6 @@
 import io
+from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock
 from uuid import UUID
 
 from httpx import AsyncClient
@@ -6,8 +8,11 @@ from PIL import Image
 
 import app.db.session as db_session
 from app.db.repositories.garment_repository import GarmentRepository
+from app.db.repositories.inference_job_repository import InferenceJobRepository
+from app.models.inference_job import InferenceJobStatus
 from app.services.storage import get_storage_service
 from app.worker.inference_worker import GENERIC_LOAD_FAILURE_MESSAGE
+from app.worker.job_processor import PROCESSING_TIMEOUT, STUCK_JOB_MESSAGE, JobProcessor
 from app.worker.worker_service import WorkerService
 
 
@@ -209,3 +214,89 @@ async def test_replacing_photo_does_not_break_a_queued_tryon(
         await client.get(f"/api/v1/inference-jobs/{job_id}", headers={"X-Device-Id": device_id})
     ).json()
     assert body["status"] == "completed"
+
+
+# A try-on cut off by a deploy or crash (or stuck on a call that never
+# returns) is failed once it's older than PROCESSING_TIMEOUT.
+
+
+async def _set_processing(job_id: str, started_ago: timedelta) -> None:
+    async with db_session.AsyncSessionLocal() as db:
+        repo = InferenceJobRepository(db)
+        job = await repo.get_by_id(UUID(job_id))
+        assert job is not None
+        await repo.update(
+            job,
+            status=InferenceJobStatus.PROCESSING,
+            started_at=datetime.now(UTC) - started_ago,
+        )
+
+
+async def _fail_stuck_jobs() -> int:
+    async with db_session.AsyncSessionLocal() as db:
+        return await JobProcessor(db, MagicMock(), MagicMock()).fail_stuck_jobs()
+
+
+async def _job(client: AsyncClient, job_id: str, device_id: str) -> dict:
+    response = await client.get(
+        f"/api/v1/inference-jobs/{job_id}", headers={"X-Device-Id": device_id}
+    )
+    assert response.status_code == 200
+    return response.json()
+
+
+async def test_only_jobs_processing_past_the_timeout_are_failed(
+    client: AsyncClient,
+) -> None:
+    await _fail_stuck_jobs()  # start clean
+    stuck_id, _, stuck_device = await _create_garment_and_job(client)
+    running_id, _, running_device = await _create_garment_and_job(client)
+    queued_id, _, queued_device = await _create_garment_and_job(client)
+    await _set_processing(stuck_id, PROCESSING_TIMEOUT + timedelta(minutes=1))
+    await _set_processing(running_id, timedelta(seconds=30))
+
+    assert await _fail_stuck_jobs() == 1
+
+    stuck = await _job(client, stuck_id, stuck_device)
+    assert stuck["status"] == "failed"
+    assert stuck["error_message"] == STUCK_JOB_MESSAGE
+    assert stuck["completed_at"] is not None
+    assert (await _job(client, running_id, running_device))["status"] == "processing"
+    assert (await _job(client, queued_id, queued_device))["status"] == "queued"
+    assert await _fail_stuck_jobs() == 0
+
+
+async def test_each_worker_pass_fails_stuck_jobs(client: AsyncClient) -> None:
+    job_id, _, device_id = await _create_garment_and_job(client)
+    await _set_processing(job_id, PROCESSING_TIMEOUT * 2)
+
+    async with db_session.AsyncSessionLocal() as db:
+        await WorkerService(db).run_once()
+
+    assert (await _job(client, job_id, device_id))["error_message"] == STUCK_JOB_MESSAGE
+
+
+async def test_a_late_result_does_not_undo_the_failure(client: AsyncClient) -> None:
+    job_id, _, device_id = await _create_garment_and_job(client)
+    await _set_processing(job_id, PROCESSING_TIMEOUT * 2)
+    await _fail_stuck_jobs()
+
+    async with db_session.AsyncSessionLocal() as db:
+        completed = await InferenceJobRepository(db).complete_unless_redacted(
+            UUID(job_id), "/uploads/late.png", completed_at=datetime.now(UTC)
+        )
+
+    assert completed is False
+    job = await _job(client, job_id, device_id)
+    assert job["status"] == "failed"
+    assert job["generated_image_url"] is None
+
+
+async def test_a_stuck_try_on_is_not_counted(client: AsyncClient, real_allowances) -> None:
+    job_id, _, device_id = await _create_garment_and_job(client)
+    await _set_processing(job_id, PROCESSING_TIMEOUT * 2)
+    await _fail_stuck_jobs()
+
+    usage = await client.get("/api/v1/usage", headers={"X-Device-Id": device_id})
+    assert usage.status_code == 200
+    assert usage.json()["used"] == 0

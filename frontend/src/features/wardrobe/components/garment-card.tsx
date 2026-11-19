@@ -34,7 +34,7 @@ export function GarmentCard({ garment }: GarmentCardProps) {
         />
         {tag && (
           <Text
-            className={`absolute left-sm top-sm overflow-hidden rounded-full px-[7px] py-xs font-mono-semibold text-[9.5px] ${
+            className={`absolute left-sm top-sm overflow-hidden rounded-full px-[7px] py-xs font-mono-semibold text-[11px] ${
               inWash ? 'bg-match-goodBg text-match-goodFg' : 'bg-[#F3E6DB] text-[#8A5230]'
             }`}
           >
@@ -46,7 +46,7 @@ export function GarmentCard({ garment }: GarmentCardProps) {
         <Text className="font-sans-bold text-[13px] text-ink-primary" numberOfLines={1}>
           {garment.title}
         </Text>
-        <Text className="mt-xxs font-mono text-[10px] text-neutral-500" numberOfLines={1}>
+        <Text className="mt-xxs font-mono text-[11px] text-neutral-500" numberOfLines={1}>
           {garment.sourceStore ?? garment.category}
         </Text>
       </View>

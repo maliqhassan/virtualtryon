@@ -6,8 +6,9 @@ import { AppScaffold } from '@/components/app-scaffold';
 import { ListCard, ListRow, ListSectionLabel } from '@/components/list-card';
 import { ScreenHeader } from '@/components/screen-header';
 import { themeColors } from '@/constants/theme';
+import { deleteAccountErrorMessage, useAccountQuery, useDeleteAccount } from '@/features/auth';
 import { MY_PHOTO_HREF } from '@/features/my-photo';
-import { useOnboardingPreferences } from '@/features/onboarding';
+import { useOnboardingPreferences, WELCOME_HREF } from '@/features/onboarding';
 import { confirmDestructiveAction } from '@/lib/confirm';
 import { selectionFeedback } from '@/lib/haptics';
 
@@ -15,7 +16,7 @@ import { deleteAllMyData } from '../services/account-api';
 
 const THEMES = ['System', 'Light', 'Dark'] as const;
 
-/** Appearance, style and region, and privacy (including deleting everything). */
+/** Appearance, style and region, and privacy (deleting your data or your account). */
 export function SettingsScreen() {
   const queryClient = useQueryClient();
   const styleFor = useOnboardingPreferences((state) => state.styleFor);
@@ -26,6 +27,27 @@ export function SettingsScreen() {
     // Everything cached is now stale (photo, wardrobe, looks, usage).
     onSuccess: () => queryClient.invalidateQueries(),
   });
+
+  const account = useAccountQuery();
+  const deleteAccount = useDeleteAccount();
+  const isGoogle = account.data?.authProvider === 'google';
+  const deleteAccountError = deleteAccountErrorMessage(deleteAccount.error);
+
+  const handleDeleteAccount = async () => {
+    if (!account.data) return;
+    const confirmed = await confirmDestructiveAction(
+      'Delete your account?',
+      (isGoogle ? 'You’ll confirm with Google next. ' : '') +
+        'This permanently deletes your account, photo, wardrobe, saved looks and try-ons. It can’t be undone.',
+      'Delete account',
+    );
+    if (!confirmed) return;
+    deleteAccount.mutate(account.data, {
+      onSuccess: (deleted) => {
+        if (deleted) router.replace(WELCOME_HREF);
+      },
+    });
+  };
 
   const handleDeleteAll = async () => {
     const confirmed = await confirmDestructiveAction(
@@ -98,7 +120,17 @@ export function SettingsScreen() {
           action={{ label: 'Delete', color: themeColors.error }}
           onPress={deleteData.isPending ? undefined : handleDeleteAll}
         />
+        <ListRow
+          label={deleteAccount.isPending ? 'Deleting account…' : 'Delete my account'}
+          action={{ label: 'Delete', color: themeColors.error }}
+          onPress={deleteAccount.isPending || !account.data ? undefined : handleDeleteAccount}
+        />
       </ListCard>
+      {deleteAccountError && (
+        <Text className="mt-md font-sans text-[12px] text-error" accessibilityRole="alert">
+          {deleteAccountError}
+        </Text>
+      )}
       {deleteData.isSuccess && (
         <Text className="mt-md font-sans text-[12px] text-success" accessibilityRole="alert">
           All your data has been deleted.
@@ -111,7 +143,8 @@ export function SettingsScreen() {
       )}
       <Text className="mt-md font-sans text-[11.5px] leading-[17px] text-ink-secondary">
         Your photo is only used to create your try-ons. Deleting your data removes your photo,
-        wardrobe, saved looks and every image we stored.
+        wardrobe, saved looks and every image we stored, and keeps your account. Deleting your
+        account removes all of that and the account itself.
       </Text>
     </AppScaffold>
   );

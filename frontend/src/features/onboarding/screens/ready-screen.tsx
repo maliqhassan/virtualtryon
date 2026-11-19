@@ -26,7 +26,7 @@ function MosaicTile({ garment, label }: { garment?: Garment; label: string }) {
       ) : (
         <StripeFill tone="dark" period={8} />
       )}
-      {!garment && <Text className="font-mono text-[9px] text-neutral-500">{label}</Text>}
+      {!garment && <Text className="font-mono text-[11px] text-neutral-400">{label}</Text>}
     </View>
   );
 }
@@ -65,7 +65,7 @@ export function ReadyScreen() {
             ]}
           />
         </View>
-        <Text className="font-mono text-[10px] uppercase tracking-[1.6px] text-gold-overline">
+        <Text className="font-mono text-[11px] uppercase tracking-[1.6px] text-gold-overline">
           Your wardrobe · from Noor
         </Text>
       </View>

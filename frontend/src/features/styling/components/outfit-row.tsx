@@ -31,7 +31,7 @@ export function OutfitRow({ title, outfit }: { title: string; outfit: Garment[] 
           <GarmentThumb key={g.id} garment={g} size={64} />
         ))}
       </View>
-      <Text className="mt-sm font-mono text-[10px] text-neutral-500" numberOfLines={1}>
+      <Text className="mt-sm font-mono text-[11px] text-neutral-500" numberOfLines={1}>
         {outfit.map((g) => g.title).join(' · ')}
       </Text>
     </View>

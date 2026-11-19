@@ -2,7 +2,14 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyHttpUrl, Field, PostgresDsn, RedisDsn, field_validator, model_validator
+from pydantic import (
+    AnyHttpUrl,
+    Field,
+    PostgresDsn,
+    RedisDsn,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -29,6 +36,15 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
     CORS_ORIGINS: list[AnyHttpUrl] = []
+
+    # The request header holding the caller's real address, for per-address
+    # abuse limits. Render serves through Cloudflare, which always sets
+    # CF-Connecting-IP and overwrites any value a client sends. X-Forwarded-For
+    # isn't usable there: Render appends to it, so its first entry is
+    # whatever the client wrote. Without this header (local dev, tests) the
+    # connection's own address is used. Set it to "" on a host that isn't
+    # behind Cloudflare, or clients could choose their own address.
+    CLIENT_IP_HEADER: str = "CF-Connecting-IP"
 
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
@@ -60,13 +76,13 @@ class Settings(BaseSettings):
     # Which AIInferenceClient the worker uses (app/worker/inference_client_provider.py).
     # "demo" returns the user's photo with the garment pinned on and a
     # visible "DEMO" banner, so the whole app flow can be tested before a
-    # real try-on API is connected. "vton_d" is a real try-on through
-    # RapidAPI for testing (ADR 0013); FASHN replaces it later. "catvton" is
-    # the unimplemented stub and always fails honestly.
-    TRYON_PROVIDER: Literal["demo", "vton_d", "catvton"] = "demo"
+    # real try-on API is connected. "genlook" is Genlook's Try-On API (ADR
+    # 0018). "vton_d" is the earlier testing provider through RapidAPI (ADR
+    # 0013). "catvton" is the unimplemented stub and always fails honestly.
+    TRYON_PROVIDER: Literal["demo", "genlook", "vton_d", "catvton"] = "demo"
 
-    # The real provider's API key (for vton_d: the RapidAPI key). Secret:
-    # set in the server's environment only.
+    # The real provider's API key (genlook: the gk_... key; vton_d: the
+    # RapidAPI key). Secret: set in the server's environment only.
     TRYON_API_KEY: str = ""
 
     # Most try-ons all users together can start in a UTC day on a real

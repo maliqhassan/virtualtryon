@@ -42,7 +42,11 @@ def test_product_inside_graph_with_image_object() -> None:
         json_ld={
             "@graph": [
                 {"@type": "WebPage", "name": "ignored"},
-                {"@type": ["Product"], "name": "Kurta", "image": {"url": "/img/kurta.png"}},
+                {
+                    "@type": ["Product"],
+                    "name": "Kurta",
+                    "image": {"url": "/img/kurta.png"},
+                },
             ]
         }
     )

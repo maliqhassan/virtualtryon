@@ -92,7 +92,7 @@ export function WelcomeScreen() {
 
         <View className="mt-auto pb-xl">
           <FadeInView key={index}>
-            <Text className="font-mono text-[10px] uppercase tracking-[1.6px] text-gold-overline">
+            <Text className="font-mono text-[11px] uppercase tracking-[1.6px] text-gold-overline">
               {slide.tag}
             </Text>
             <Text

@@ -35,7 +35,11 @@ class InferenceWorker:
         self._storage = storage
 
     def attempt(
-        self, user_image_storage_key: str, garment_image_storage_key: str
+        self,
+        user_image_storage_key: str,
+        garment_image_storage_key: str,
+        garment_title: str | None = None,
+        garment_category: str | None = None,
     ) -> InferenceAttempt:
         # Loading/decoding is a separate try/except from the inference call,
         # not because it's less important to catch (a job whose storage key
@@ -58,13 +62,20 @@ class InferenceWorker:
                 garment_image_storage_key,
             )
             return InferenceAttempt(
-                generated_image=None, model_name=None, error_message=GENERIC_LOAD_FAILURE_MESSAGE
+                generated_image=None,
+                model_name=None,
+                error_message=GENERIC_LOAD_FAILURE_MESSAGE,
             )
 
         # AIInferenceClient's own exception messages (e.g.
         # CatVTONInferenceClient's) are authored, deliberate, and safe to
         # show as-is — unlike the file-load case above, kept verbatim.
-        request = AIInferenceRequest(user_image=user_image, clothing_image=garment_image)
+        request = AIInferenceRequest(
+            user_image=user_image,
+            clothing_image=garment_image,
+            clothing_title=garment_title,
+            clothing_category=garment_category,
+        )
         try:
             response = self._inference_client.infer(request)
         except Exception as exc:

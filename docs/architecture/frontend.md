@@ -44,6 +44,7 @@ class (e.g. a value computed at runtime from a shared value in Reanimated).
 
 ## Forms & validation
 
-React Hook Form for form state, Zod for schema validation, wired together via
-`@hookform/resolvers`. Validate at the boundary (form submit, API response
-parsing) — not everywhere.
+The app's few inputs (a store link, a rename) use local `useState`; no form
+library is installed (React Hook Form and `@hookform/resolvers` were removed
+as unused). Add one only when a real multi-field form needs it. Validate at
+the boundary (submit, API response parsing) — not everywhere.

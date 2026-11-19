@@ -33,7 +33,7 @@ function LookTile({ product, index }: { product: Product; index: number }) {
             accessibilityLabel={product.title}
           />
         </View>
-        <Text className="mt-sm font-mono text-[9px] uppercase tracking-[1.3px] text-gold-overline">
+        <Text className="mt-sm font-mono text-[11px] uppercase tracking-[1.3px] text-gold-overline">
           {product.storeName}
         </Text>
         <Text className="mt-xxs font-display text-[18px] leading-[20px]" style={{ color: TEXT }}>
@@ -72,7 +72,7 @@ export function LookbookScreen() {
             accessibilityLabel="Back"
             onPress={() => router.back()}
           />
-          <Text className="mt-xl font-mono text-[9.5px] tracking-[1.7px] text-gold-soft">
+          <Text className="mt-xl font-mono text-[11px] tracking-[1.7px] text-gold-soft">
             HOLIDAY EDIT · {products.length} PIECES
           </Text>
           <Text

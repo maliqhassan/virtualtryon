@@ -58,7 +58,7 @@ export function QuizScreen() {
     <OnboardingFrame
       footer={
         <>
-          <Text className="mb-[10px] text-center font-mono text-[10px] text-ink-secondary">
+          <Text className="mb-[10px] text-center font-mono text-[11px] text-ink-secondary">
             {picksLabel}
           </Text>
           <AppButton label="Continue" onPress={() => router.push(HOW_IT_WORKS_HREF)} />

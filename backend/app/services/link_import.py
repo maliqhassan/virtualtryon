@@ -25,7 +25,11 @@ from app.schemas.garment import GarmentResponse
 from app.services.attempt_limiter import SlidingWindowLimiter
 from app.services.garments import create_garment
 from app.services.image_validation import MAX_UPLOAD_BYTES, ImageUpload
-from app.services.product_page import NoProductImageError, guess_category, read_product_page
+from app.services.product_page import (
+    NoProductImageError,
+    guess_category,
+    read_product_page,
+)
 from app.services.safe_fetch import PageFetcher
 from app.services.usage import UsageLimitReachedError, get_usage
 
@@ -79,7 +83,12 @@ def _to_storable_image(content: bytes) -> ImageUpload:
             probe.verify()
         image = Image.open(io.BytesIO(content))
         image.load()
-    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError) as exc:
+    except (
+        UnidentifiedImageError,
+        OSError,
+        ValueError,
+        Image.DecompressionBombError,
+    ) as exc:
         raise NoProductImageError("The product photo couldn't be read") from exc
 
     if image.format == "JPEG":

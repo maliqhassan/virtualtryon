@@ -4,6 +4,7 @@ import { Text, View } from 'react-native';
 import { AppIcon } from '@/components/app-icon';
 import { GradientFill } from '@/components/gradient-fill';
 import { PressableScale } from '@/components/pressable-scale';
+import { themeColors } from '@/constants/theme';
 import type { GoalId } from '@/features/onboarding';
 
 import { CALENDAR_HREF, CHAT_HREF, GENERATE_HREF, RATE_HREF } from '../routes';
@@ -24,7 +25,7 @@ const ACTIONS: Action[] = [
     title: 'Rate my fit',
     caption: 'Selfie → score',
     href: RATE_HREF,
-    icon: { name: 'photo_camera', color: '#B4713F', tint: '#F3E6DB' },
+    icon: { name: 'photo_camera', color: themeColors.primary, tint: '#F3E6DB' },
     goals: ['bold', 'style'],
   },
   {

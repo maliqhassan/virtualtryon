@@ -1,9 +1,9 @@
-"""Sign-in: email + password (ADR 0010) and Google through Firebase (ADR
-0012). Each is one call for both cases: an unknown person gets a new
-account, a known one signs in.
+"""Sign-in with Google through Firebase (ADR 0012), the app's only sign-in
+(email + password, ADR 0010, was removed: ADR 0016). One call for both
+cases: an unknown person gets a new account, a known one signs in.
 
 Creating an account from a guest turns that guest's row into the account
-(email, password hash, provider), so everything the guest already made
+(email, Google id, provider), so everything the guest already made
 stays. The row's device id is cleared at the same time: from then on only
 the session token reaches the account, and a phone that signs out starts a
 fresh guest instead of landing back in it. A caller with no guest yet gets
@@ -17,12 +17,7 @@ from dataclasses import dataclass
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import (
-    create_session_token,
-    hash_password,
-    password_needs_rehash,
-    verify_password,
-)
+from app.core.security import create_session_token
 from app.db.repositories.guest_merge_repository import GuestMergeRepository
 from app.db.repositories.user_repository import UserRepository
 from app.models.user import AuthProvider, User
@@ -37,17 +32,13 @@ from app.services.storage import get_storage_service
 logger = logging.getLogger(__name__)
 
 ATTEMPT_WINDOW_SECONDS = 15 * 60
-# Every attempt from one network address (sign-ups included), and every
-# attempt overall: each one costs an argon2 hash, so both bound the work.
+# Every attempt from one network address, and every attempt overall: each
+# one checks a token against Google's keys, so both bound the work.
 ATTEMPTS_PER_ADDRESS = 30
 ATTEMPTS_ALL_CALLERS = 600
-# Wrong passwords for one email. Only failures count, so a person signing
-# in correctly is never locked out by their own successful sign-ins.
-FAILURES_PER_EMAIL = 10
 
 _per_address = SlidingWindowLimiter(ATTEMPTS_PER_ADDRESS, ATTEMPT_WINDOW_SECONDS)
 _all_callers = SlidingWindowLimiter(ATTEMPTS_ALL_CALLERS, ATTEMPT_WINDOW_SECONDS)
-_failures_per_email = SlidingWindowLimiter(FAILURES_PER_EMAIL, ATTEMPT_WINDOW_SECONDS)
 _ALL = "all"
 
 
@@ -55,15 +46,10 @@ def reset_attempt_limits() -> None:
     """For tests."""
     _per_address.reset()
     _all_callers.reset()
-    _failures_per_email.reset()
-
-
-class WrongPasswordError(Exception):
-    """The email has an account and this isn't its password."""
 
 
 class TooManyAttemptsError(Exception):
-    """Too many sign-in attempts from this address, overall, or for this email."""
+    """Too many sign-in attempts from this address, or overall."""
 
 
 @dataclass(frozen=True)
@@ -75,57 +61,6 @@ class SignInResult:
 
 def normalize_email(email: str) -> str:
     return email.strip().lower()
-
-
-async def continue_with_email(
-    db: AsyncSession,
-    current_user: User | None,
-    email: str,
-    password: str,
-    *,
-    caller_address: str,
-) -> SignInResult:
-    """`current_user` is the caller's existing guest or account, or None.
-    Raises WrongPasswordError or TooManyAttemptsError."""
-    email = normalize_email(email)
-    # Locked emails are checked first, so a refused attempt costs nothing
-    # and doesn't use up the caller's own allowance.
-    if _failures_per_email.is_exhausted(email):
-        raise TooManyAttemptsError
-    if not _per_address.try_acquire(caller_address) or not _all_callers.try_acquire(_ALL):
-        raise TooManyAttemptsError
-
-    repo = UserRepository(db)
-    existing = await repo.get_by_email(email)
-    if existing is not None:
-        return await _sign_in(db, existing, email, password)
-
-    password_hash = await asyncio.to_thread(hash_password, password)
-    is_guest = _is_unclaimed_guest(current_user)
-    if is_guest and current_user is not None:
-        user = current_user
-        user.email = email
-        user.password_hash = password_hash
-        user.auth_provider = AuthProvider.EMAIL
-        user.device_id = None
-    else:
-        # No guest yet, or already signed in to another account: a new account.
-        user = repo.stage_new_email_user(email, password_hash)
-    try:
-        await db.commit()
-    except IntegrityError:
-        # The same email was registered a moment ago (a double tap, or two
-        # phones). Treat this attempt as a sign-in to that account.
-        await db.rollback()
-        existing = await repo.get_by_email(email)
-        if existing is None:
-            raise
-        return await _sign_in(db, existing, email, password)
-    await db.refresh(user)
-    logger.info("account created: user_id=%s from_guest=%s", user.id, is_guest)
-    return SignInResult(
-        user=user, token=create_session_token(user.id, user.session_version), created=True
-    )
 
 
 def _is_unclaimed_guest(user: User | None) -> bool:
@@ -201,7 +136,9 @@ async def continue_with_google(
         if known is None:
             raise
         return SignInResult(
-            user=known, token=create_session_token(known.id, known.session_version), created=False
+            user=known,
+            token=create_session_token(known.id, known.session_version),
+            created=False,
         )
     await db.refresh(user)
     if created:
@@ -210,7 +147,9 @@ async def continue_with_google(
         logger.info("guest merged into account: guest=%s user_id=%s", merged_guest, user.id)
         await asyncio.to_thread(_delete_files, superseded_files)
     return SignInResult(
-        user=user, token=create_session_token(user.id, user.session_version), created=created
+        user=user,
+        token=create_session_token(user.id, user.session_version),
+        created=created,
     )
 
 
@@ -237,16 +176,3 @@ def _link_google(user: User, identity: VerifiedIdentity) -> User:
     user.session_version += 1
     logger.info("email account linked to google: user_id=%s", user.id)
     return user
-
-
-async def _sign_in(db: AsyncSession, user: User, email: str, password: str) -> SignInResult:
-    stored = user.password_hash
-    if stored is None or not await asyncio.to_thread(verify_password, stored, password):
-        _failures_per_email.try_acquire(email)
-        raise WrongPasswordError
-    if password_needs_rehash(stored):
-        user.password_hash = await asyncio.to_thread(hash_password, password)
-        await db.commit()
-    return SignInResult(
-        user=user, token=create_session_token(user.id, user.session_version), created=False
-    )

@@ -1,6 +1,74 @@
 # Project Status
 
-Last updated: 2026-10-23
+Last updated: 2026-11-19
+
+## Phase: 27 — Design v2 and v2.1, Google sign-in, real try-ons, hardening
+
+Everything since 2026-10-23, in the order it landed. ADRs 0010–0017 hold
+the decisions.
+
+**Design v2** (the "AI Stylist" redesign): new fonts, colour tokens and
+icons; Today as the first tab (outfit hero from your own wardrobe, week
+ahead, laundry nudge); a new onboarding (splash, story slides, goals, style
+picks, photo steps, profile, first pieces, Plans); the dark Try-On stage,
+generating and result screens; Shop with match cards (scores behind
+`EXPO_PUBLIC_MATCH_SCORES`, since the API doesn't send them); You, Plans,
+Settings, Notifications, Help, Wishlist; Laundry, Wardrobe stats, Packing
+planner; Style an occasion, Calendar, Ask Noor (no language model yet: the
+composer is off) and Rate my fit (explains, offers a try-on); lookbook.
+Wardrobe pieces get a category guess from their photo (api4.ai via
+RapidAPI, ADR 0011; off without `FASHION_API_KEY`).
+
+**Design v2.1** (changes 2–8; change 1, email sign-in, was declined): a
+photo-access screen before the first picker; Today's portraits rail and
+credits; the Try-On studio (bottom sheet of pieces, audience filter); a
+generating screen with a progress ring; the light result screen (save to
+Looks, then to the phone's photos); Wardrobe's Outfits / Portraits /
+Clothes tabs; US market copy. Real stock photos (Pexels, credited) in
+onboarding, photo tips and all 18 sample-store products, which gained
+`audience` and `occasions` tags (`GET /products?audience=&occasion=`).
+
+**Accounts**: Google sign-in through Firebase is the only sign-in (ADR
+0012); session tokens with server-side revocation. A guest's things move
+into the account they sign in to (ADR 0014). Email + password sign-in
+(ADR 0010) was built, then removed as unused (ADR 0016). Settings →
+Delete my account removes the account and everything in it, after a fresh
+Google confirmation for Google accounts (ADR 0015).
+
+**Try-on**: real results through VTON-D on RapidAPI, for testing (ADR
+0013; `TRYON_PROVIDER=vton_d`, `TRYON_API_KEY`, a server-wide
+`TRYON_DAILY_LIMIT`). FASHN is the planned production provider.
+Try-ons stuck in `processing` (a deploy or crash mid-job) fail after 5
+minutes and aren't counted.
+
+**Hardening** (2026-11-19 review): requests over 31 MB refused before
+they're read, each image read only up to 10 MB; new guests limited per
+address (Cloudflare's `CF-Connecting-IP`, not the spoofable
+X-Forwarded-For) and overall; 60 photo uploads per user per day; saving
+stops 150 MB before the disk is full, and files that belong together are
+saved all or none; API docs off in production; unused Android permissions
+(microphone, overlay) removed; deep-link scheme `virtualtryon`; axios
+1.21.1; text colours and sizes pass WCAG AA (clay #9A6136, see
+design/figma/01-foundation.md); CI on GitHub Actions (ADR 0017).
+
+**Deployment**: Render (Docker web service with the worker in the same
+container, Postgres, a 1 GB disk; `render.yaml`, autoDeploy from `main`).
+Release APKs: `frontend/scripts/build-apk.ps1` (debug-signed; copies to
+`releases/`).
+
+**Verified**: 248 backend tests on the SQLite harness (one SQLite-only
+worker test fails there; CI runs the suite on Postgres); app typecheck,
+lint and format clean; Google sign-in (the live endpoint) and the
+catalogue (all 18 products, photos and tags) checked on the live server;
+VTON-D is configured there.
+
+**Not done yet**: Play release (upload key, AAB, privacy policy, Data
+safety, a web page for deletion requests); per-user try-on limits are off
+for testing (`TRYON_LIMITS_ENABLED=false`) and the free plan is 1 try-on
+ever (the handoff says 3 a day); body photos are served at public,
+unguessable URLs (signed URLs before launch); push notifications; ~105
+hard-coded colours to move into tokens; one product name (VirtualTryOn vs
+AI Stylist).
 
 ## Phase: 26 — Tab bar fix, photo views & background removal, Shop search, wardrobe filters
 

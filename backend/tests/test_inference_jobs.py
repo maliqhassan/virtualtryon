@@ -231,3 +231,102 @@ async def test_service_layer_mark_failed(client: AsyncClient) -> None:
         assert failed.status == "failed"
         assert failed.error_message == "inference backend unreachable"
         assert failed.completed_at is not None
+
+
+# Choosing which model photo a try-on uses
+
+
+async def _photo_id(client: AsyncClient, headers: dict, color=(1, 2, 3)) -> str:
+    import io as _io
+
+    from PIL import Image as _Image
+
+    buf = _io.BytesIO()
+    _Image.new("RGB", (64, 64), color=color).save(buf, format="JPEG")
+    response = await client.post(
+        "/api/v1/user-photos",
+        files={"image": ("p.jpg", buf.getvalue(), "image/jpeg")},
+        headers=headers,
+    )
+    assert response.status_code == 201
+    return response.json()["id"]
+
+
+async def _garment_id(client: AsyncClient, headers: dict) -> str:
+    import io as _io
+
+    from PIL import Image as _Image
+
+    buf = _io.BytesIO()
+    _Image.new("RGB", (64, 64), color=(9, 9, 9)).save(buf, format="JPEG")
+    response = await client.post(
+        "/api/v1/garments",
+        files={"image": ("g.jpg", buf.getvalue(), "image/jpeg")},
+        data={"title": "Coat", "category": "Jackets"},
+        headers=headers,
+    )
+    return response.json()["id"]
+
+
+async def _job_photo_bytes(job_id: str) -> bytes:
+    from uuid import UUID as _UUID
+
+    import app.db.session as _db_session
+    from app.db.repositories.inference_job_repository import InferenceJobRepository
+    from app.services.storage import get_storage_service
+
+    async with _db_session.AsyncSessionLocal() as db:
+        job = await InferenceJobRepository(db).get_by_id(_UUID(job_id))
+    return get_storage_service().read(job.user_image_storage_key)
+
+
+async def test_a_try_on_uses_the_chosen_photo(client: AsyncClient) -> None:
+    from app.services.storage import get_storage_service
+
+    headers = {"X-Device-Id": (await client.get("/api/v1/usage")).headers["x-device-id"]}
+    chosen = await _photo_id(client, headers, (200, 0, 0))
+    await _photo_id(client, headers, (0, 0, 200))  # newer, not chosen
+    garment = await _garment_id(client, headers)
+
+    job = await client.post(
+        "/api/v1/inference-jobs",
+        json={"garment_id": garment, "user_photo_id": chosen},
+        headers=headers,
+    )
+
+    assert job.status_code == 201
+    photos = (await client.get("/api/v1/user-photos", headers=headers)).json()
+    chosen_file = next(p for p in photos if p["id"] == chosen)["storage_key"]
+    assert await _job_photo_bytes(job.json()["id"]) == get_storage_service().read(chosen_file)
+
+
+async def test_without_a_choice_the_newest_photo_is_used(client: AsyncClient) -> None:
+    from app.services.storage import get_storage_service
+
+    headers = {"X-Device-Id": (await client.get("/api/v1/usage")).headers["x-device-id"]}
+    await _photo_id(client, headers, (200, 0, 0))
+    newest = await _photo_id(client, headers, (0, 0, 200))
+    garment = await _garment_id(client, headers)
+
+    job = await client.post("/api/v1/inference-jobs", json={"garment_id": garment}, headers=headers)
+
+    photos = (await client.get("/api/v1/user-photos", headers=headers)).json()
+    newest_file = next(p for p in photos if p["id"] == newest)["storage_key"]
+    assert await _job_photo_bytes(job.json()["id"]) == get_storage_service().read(newest_file)
+
+
+async def test_someone_elses_photo_cannot_be_used(client: AsyncClient) -> None:
+    theirs_headers = {"X-Device-Id": (await client.get("/api/v1/usage")).headers["x-device-id"]}
+    theirs = await _photo_id(client, theirs_headers)
+    mine = {"X-Device-Id": (await client.get("/api/v1/usage")).headers["x-device-id"]}
+    await _photo_id(client, mine)
+    garment = await _garment_id(client, mine)
+
+    job = await client.post(
+        "/api/v1/inference-jobs",
+        json={"garment_id": garment, "user_photo_id": theirs},
+        headers=mine,
+    )
+
+    assert job.status_code == 409
+    assert job.json()["detail"]["code"] == "photo_gone"

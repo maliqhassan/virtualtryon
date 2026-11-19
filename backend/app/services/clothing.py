@@ -15,6 +15,7 @@ from app.models.inference_job import InferenceJob
 class JobClothing:
     image_url: str
     title: str
+    category: str | None = None
 
 
 async def resolve_job_clothing(db: AsyncSession, job: InferenceJob) -> JobClothing | None:
@@ -22,8 +23,16 @@ async def resolve_job_clothing(db: AsyncSession, job: InferenceJob) -> JobClothi
     must already have checked the job belongs to whoever is asking."""
     if job.garment_id is not None:
         garment = await GarmentRepository(db).get_by_id(job.garment_id)
-        return JobClothing(garment.image_url, garment.title) if garment is not None else None
+        return (
+            JobClothing(garment.image_url, garment.title, garment.category)
+            if garment is not None
+            else None
+        )
     if job.product_id is not None:
         row = await CatalogRepository(db).get_product(job.product_id)
-        return JobClothing(row[0].image_url, row[0].title) if row is not None else None
+        return (
+            JobClothing(row[0].image_url, row[0].title, row[0].category)
+            if row is not None
+            else None
+        )
     return None

@@ -14,6 +14,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
+# Model photos one user can keep. Enforced by uploads (app/services/
+# user_photos.py) and by the guest merge (guest_merge_repository.py).
+MAX_PHOTOS_PER_USER = 10
+
 
 class UserPhoto(Base):
     __tablename__ = "user_photos"

@@ -48,7 +48,7 @@ export function ListRow({
     <>
       {icon && <AppIcon name={icon} size="md" color={iconColor} />}
       <Text className="flex-1 font-sans-semibold text-[14px] text-ink-primary">{label}</Text>
-      {meta && <Text className="font-mono text-[10.5px] text-neutral-400">{meta}</Text>}
+      {meta && <Text className="font-mono text-[11px] text-neutral-500">{meta}</Text>}
       {right}
       {action ? (
         <Text
@@ -80,7 +80,7 @@ export function ListRow({
 /** The mono overline above a group of rows. */
 export function ListSectionLabel({ children }: { children: string }) {
   return (
-    <Text className="mb-[10px] mt-[20px] font-mono text-[10px] uppercase tracking-[1.4px] text-neutral-500">
+    <Text className="mb-[10px] mt-[20px] font-mono text-[11px] uppercase tracking-[1.4px] text-neutral-500">
       {children}
     </Text>
   );

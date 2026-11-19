@@ -50,7 +50,10 @@ module.exports = {
           200: '#E2DED6',
           300: '#C9C3B9',
           400: '#A39B90',
-          500: '#8A8278',
+          // A step darker than the design's #8A8278 so secondary text passes
+          // WCAG AA. 400 is for icons, borders and placeholders, or text on
+          // the dark stage, not text on light backgrounds.
+          500: '#736D64',
           600: '#6B655D',
           700: '#4E4841',
           900: '#16130F',

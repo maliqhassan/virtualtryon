@@ -36,7 +36,7 @@ export function ProfileScreen() {
       }
     >
       <StepHeader step={4} back={false} />
-      <Text className="mt-xxl font-mono text-[10px] uppercase tracking-[1.6px] text-primary">
+      <Text className="mt-xxl font-mono text-[11px] uppercase tracking-[1.6px] text-primary">
         Style profile · sample
       </Text>
       <Text
@@ -57,7 +57,7 @@ export function ProfileScreen() {
         {TILES.map(([key, value], index) => (
           <FadeInView key={key} index={index} className="w-[48.8%]">
             <View className="rounded-xl border border-border bg-surface px-[14px] py-[13px]">
-              <Text className="font-mono text-[9px] tracking-[1.1px] text-neutral-400">{key}</Text>
+              <Text className="font-mono text-[11px] tracking-[1.1px] text-neutral-500">{key}</Text>
               <Text className="mt-[6px] font-display text-[21px] leading-[22px] text-ink-primary">
                 {value}
               </Text>
@@ -66,7 +66,7 @@ export function ProfileScreen() {
         ))}
       </View>
 
-      <Text className="mt-[22px] font-mono text-[10px] uppercase tracking-[1.4px] text-neutral-500">
+      <Text className="mt-[22px] font-mono text-[11px] uppercase tracking-[1.4px] text-neutral-500">
         Colours that love you
       </Text>
       <View className="mt-[10px] flex-row gap-[6px]">
@@ -76,7 +76,7 @@ export function ProfileScreen() {
               className="h-[58px] rounded-lg border border-[rgba(22,19,15,0.06)]"
               style={{ backgroundColor: color }}
             />
-            <Text className="mt-[6px] font-mono text-[9px] text-neutral-500">{name}</Text>
+            <Text className="mt-[6px] font-mono text-[11px] text-neutral-500">{name}</Text>
           </View>
         ))}
       </View>

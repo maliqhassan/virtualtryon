@@ -129,7 +129,7 @@ export function FirstPiecesScreen() {
           style={{ borderWidth: 1.5, borderStyle: 'dashed', borderColor: 'rgba(22, 19, 15, 0.2)' }}
         >
           <AppIcon name="add_photo_alternate" size="lg" color={themeColors.inkSecondary} />
-          <Text className="font-mono text-[9.5px] text-ink-secondary">camera roll</Text>
+          <Text className="font-mono text-[11px] text-ink-secondary">camera roll</Text>
         </Pressable>
         {picked.map((image, index) => (
           <Pressable
@@ -143,7 +143,7 @@ export function FirstPiecesScreen() {
           >
             <Image source={{ uri: image.uri }} style={{ flex: 1 }} contentFit="cover" />
             <View className="absolute right-[6px] top-[6px] h-[22px] w-[22px] items-center justify-center rounded-full bg-inverse">
-              <Text className="font-sans-bold text-[10px] text-surface">{index + 1}</Text>
+              <Text className="font-sans-bold text-[11px] text-surface">{index + 1}</Text>
             </View>
           </Pressable>
         ))}

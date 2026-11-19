@@ -45,10 +45,15 @@ class WorkerService:
         return await self._job_processor.process_single_job(job_id)
 
     async def run_once(self) -> WorkerRunResult:
-        """Processes every currently-queued job once. Not a real
+        """Fails any try-on stuck in `processing`, then processes every
+        currently-queued job once. Not a real
         long-running loop or scheduler itself — that's
         app/worker/worker_runner.py's job; this remains directly callable
         on its own (e.g. from a test, or a future queue consumer)."""
+        stuck = await self._job_processor.fail_stuck_jobs()
+        if stuck:
+            logger.warning("worker: failed %d try-on(s) stuck in processing", stuck)
+
         job_repo = InferenceJobRepository(self._db)
         queued_jobs = await job_repo.list_queued()
 

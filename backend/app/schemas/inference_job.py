@@ -25,13 +25,15 @@ class InferenceJobResponse(BaseModel):
 
 class CreateInferenceJobRequest(BaseModel):
     """POST body: the clothing to try on, either a wardrobe garment or a store
-    product (exactly one). The user photo is the caller's current "My Photo"
-    looked up server-side, never a client-supplied storage key, so a request
-    can't point a job at a file the caller doesn't own. `profile_id` isn't a
-    field either; the service auto-attaches the caller's own Profile."""
+    product (exactly one), and optionally which of the caller's model photos
+    to use (`user_photo_id`; the newest when left out). The photo is looked
+    up server-side among the caller's own, never a client-supplied storage
+    key, so a request can't point a job at someone else's photo. `profile_id`
+    isn't a field either; the service auto-attaches the caller's own Profile."""
 
     garment_id: UUID | None = None
     product_id: UUID | None = None
+    user_photo_id: UUID | None = None
 
     @model_validator(mode="after")
     def exactly_one_clothing_source(self) -> "CreateInferenceJobRequest":

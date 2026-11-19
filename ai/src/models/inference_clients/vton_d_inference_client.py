@@ -8,10 +8,8 @@ response body. VTON-D dresses the person in the whole look of the clothing
 photo, so a photo of someone wearing the outfit works best.
 
 The user's body photo leaves our server here. Nothing else about the user
-(id, email, names) is sent.
-
-Exception messages are shown to the user as the job's error, so each one
-is a plain sentence; details go to the log.
+(id, email, names) is sent. Errors and photo preparation are shared with
+the other providers (tryon_service.py).
 """
 
 import io
@@ -19,9 +17,32 @@ import logging
 import time
 
 import httpx
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError
 
-from ..inference_client import AIInferenceClient, AIInferenceRequest, AIInferenceResponse
+from ..inference_client import (
+    AIInferenceClient,
+    AIInferenceRequest,
+    AIInferenceResponse,
+)
+from .tryon_service import (
+    BUSY,
+    NOT_SET_UP,
+    REJECTED,
+    UNAVAILABLE,
+    UNREADABLE,
+    TryOnServiceError,
+    to_jpeg,
+)
+
+__all__ = [
+    "BUSY",
+    "NOT_SET_UP",
+    "REJECTED",
+    "UNAVAILABLE",
+    "UNREADABLE",
+    "TryOnServiceError",
+    "VtonDInferenceClient",
+]
 
 logger = logging.getLogger(__name__)
 
@@ -33,16 +54,6 @@ _UPLOAD_MAX_SIDE = 1280
 # It usually answers in 5-10 s but queues requests when busy.
 _TIMEOUT = httpx.Timeout(90.0, connect=10.0)
 _MAX_RESULT_BYTES = 20 * 1024 * 1024
-
-NOT_SET_UP = "Try-on isn’t set up on the server yet."
-BUSY = "The try-on service is busy or out of try-ons for now. Please try again later."
-REJECTED = "The try-on service couldn’t use these photos. Try another photo of you or of the piece."
-UNAVAILABLE = "The try-on service didn’t respond. Please try again in a minute."
-UNREADABLE = "We couldn’t read one of the photos. Please add it again."
-
-
-class TryOnServiceError(Exception):
-    """A try-on that didn't happen; the message is safe to show the user."""
 
 
 class VtonDInferenceClient(AIInferenceClient):
@@ -58,8 +69,8 @@ class VtonDInferenceClient(AIInferenceClient):
         # Stored images are opened lazily, so a damaged file first fails
         # here; its raw error text isn't for the user.
         try:
-            avatar = _to_jpeg(request.user_image)
-            clothing = _to_jpeg(request.clothing_image)
+            avatar = to_jpeg(request.user_image, _UPLOAD_MAX_SIDE)
+            clothing = to_jpeg(request.clothing_image, _UPLOAD_MAX_SIDE)
         except (OSError, ValueError, Image.DecompressionBombError):
             logger.warning("Could not prepare the photos for VTON-D", exc_info=True)
             raise TryOnServiceError(UNREADABLE) from None
@@ -110,21 +121,3 @@ class VtonDInferenceClient(AIInferenceClient):
             model_name="vton-d",
             inference_time_seconds=elapsed,
         )
-
-
-def _to_jpeg(image: Image.Image) -> bytes:
-    """Upright (phone photos often rely on EXIF rotation), on white where
-    transparent (cut-out product PNGs), at most _UPLOAD_MAX_SIDE on the
-    long side."""
-    upright = ImageOps.exif_transpose(image)
-    if upright.mode in ("RGBA", "LA") or (upright.mode == "P" and "transparency" in upright.info):
-        rgba = upright.convert("RGBA")
-        flat = Image.new("RGB", rgba.size, (255, 255, 255))
-        flat.paste(rgba, mask=rgba.getchannel("A"))
-        upright = flat
-    else:
-        upright = upright.convert("RGB")
-    upright.thumbnail((_UPLOAD_MAX_SIDE, _UPLOAD_MAX_SIDE))
-    out = io.BytesIO()
-    upright.save(out, format="JPEG", quality=90)
-    return out.getvalue()
