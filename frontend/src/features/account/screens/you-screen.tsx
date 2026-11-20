@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/app-icon';
+import { BrandMark } from '@/components/brand-mark';
 import { AppImage } from '@/components/app-image';
 import { AppScaffold } from '@/components/app-scaffold';
 import { GradientFill } from '@/components/gradient-fill';
@@ -217,9 +218,10 @@ export function YouScreen() {
         </ListCard>
       </View>
 
-      <Text className="mt-xl text-center font-mono text-[11px] text-neutral-500">
-        AI Stylist · v1.0.0
-      </Text>
+      <View className="mt-xl flex-row items-center justify-center gap-[6px]">
+        <BrandMark width={15} color={themeColors.neutral500} />
+        <Text className="font-mono text-[11px] text-neutral-500">AI Stylist · v1.0.0</Text>
+      </View>
     </AppScaffold>
   );
 }

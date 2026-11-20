@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/app-icon';
-import { BreathingOrb } from '@/components/breathing-orb';
+import { BreathingMark } from '@/components/brand-mark';
 import { NightGlow } from '@/components/gradient-fill';
 import { themeColors } from '@/constants/theme';
 
@@ -36,7 +36,10 @@ export function AnalysingScreen() {
   return (
     <OnboardingFrame dark scroll={false} backdrop={<NightGlow center={{ x: 0.5, y: 0.34 }} />}>
       <View className="flex-1 items-center px-md pt-[110px]">
-        <BreathingOrb size={110} />
+        {/* The old orb's 110px box, so the title and steps stay put. */}
+        <View className="h-[110px] w-[110px] items-center justify-center">
+          <BreathingMark width={96} />
+        </View>
         <Text
           className="mt-[30px] text-center font-display text-[32px] leading-[35px] text-night-text"
           accessibilityRole="header"

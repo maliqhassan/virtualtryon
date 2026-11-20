@@ -1,13 +1,16 @@
 import type { Tabs } from 'expo-router';
-import { useEffect, type ComponentProps } from 'react';
-import { Text, View } from 'react-native';
+import { useEffect, useState, type ComponentProps } from 'react';
+import { Keyboard, Platform, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { themeColors } from '@/constants/theme';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { selectionFeedback } from '@/lib/haptics';
 
 import { AppIcon } from './app-icon';
+import { BrandMark } from './brand-mark';
+import { GradientFill } from './gradient-fill';
 import { PressableScale } from './pressable-scale';
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
@@ -24,8 +27,7 @@ const ICONS: Record<string, string> = {
 
 /** The bar's colours. (It used to turn dark on Try-On; the studio hides it.) */
 const PALETTE = {
-  stage: themeColors.background,
-  bar: 'rgba(255, 255, 255, 0.94)',
+  bar: 'rgba(255, 255, 255, 0.96)',
   border: 'rgba(22, 19, 15, 0.08)',
   active: themeColors.inkPrimary,
   // Labels are text, so the AA-passing grey (neutral400 is for icons only).
@@ -36,6 +38,38 @@ const PALETTE = {
 type Palette = typeof PALETTE;
 
 const BAR_SHADOW = '0px 10px 28px rgba(22, 19, 15, 0.14)';
+const BAR_HEIGHT = 66;
+const BAR_TOP_GAP = 10;
+const bottomGapFor = (insetBottom: number) => Math.max(insetBottom, 12);
+
+/** How much of the bottom of a tab screen the floating bar covers. */
+export function useTabBarHeight(): number {
+  const insets = useSafeAreaInsets();
+  return BAR_TOP_GAP + BAR_HEIGHT + bottomGapFor(insets.bottom);
+}
+
+/** Bottom padding for a list in a tab, so its last item scrolls clear of
+ * the floating bar. */
+export function useTabBarSpace(): number {
+  return useTabBarHeight() + 16;
+}
+
+/** Android: the bar would ride up on the keyboard and cover the field being
+ * typed in (Shop search), so it steps aside while the keyboard is open. */
+function useKeyboardOpen(): boolean {
+  // Already open when the bar mounts (it remounts with the tabs) counts too.
+  const [open, setOpen] = useState(() => Platform.OS === 'android' && Keyboard.isVisible());
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const shown = Keyboard.addListener('keyboardDidShow', () => setOpen(true));
+    const hidden = Keyboard.addListener('keyboardDidHide', () => setOpen(false));
+    return () => {
+      shown.remove();
+      hidden.remove();
+    };
+  }, []);
+  return open;
+}
 
 function TabItem({
   label,
@@ -130,17 +164,10 @@ function CenterItem({
         className="h-[58px] w-[58px] items-center justify-center rounded-full bg-inverse"
         style={{
           marginTop: -30,
-          // The ring matches the stage, so the button looks cut out of the bar.
-          borderWidth: 4,
-          borderColor: palette.stage,
           boxShadow: '0px 8px 18px rgba(22, 19, 15, 0.3)',
         }}
       >
-        <AppIcon
-          name="auto_awesome"
-          size={25}
-          color={focused ? themeColors.goldSoft : themeColors.cream}
-        />
+        <BrandMark width={27} color={focused ? themeColors.goldSoft : themeColors.cream} />
       </View>
       <Text
         numberOfLines={1}
@@ -154,7 +181,9 @@ function CenterItem({
 }
 
 /**
- * Floating pill tab bar with a raised Try-On button.
+ * Floating pill tab bar with a raised Try-On button. It floats over the
+ * screen (no strip behind it); a soft fade keeps it readable as content
+ * scrolls underneath, and lists pad their end with `useTabBarSpace`.
  *
  * Android: since SDK 55 apps draw edge-to-edge, so the system navigation bar
  * sits on top of the app. `insets.bottom` is that bar's real height (gesture
@@ -162,9 +191,10 @@ function CenterItem({
  * so it never overlaps the system buttons on any phone.
  */
 export function FloatingTabBar({ state, descriptors, navigation, insets }: TabBarProps) {
+  const keyboardOpen = useKeyboardOpen();
   // The Try-On studio is full screen, with its own back button (handoff v2.1 change 4).
-  if (state.routes[state.index]?.name === CENTER) return null;
-  const bottomGap = Math.max(insets.bottom, 12);
+  if (state.routes[state.index]?.name === CENTER || keyboardOpen) return null;
+  const bottomGap = bottomGapFor(insets.bottom);
   const palette = PALETTE;
 
   const routes = ORDER.map((name) => state.routes.find((route) => route.name === name)).filter(
@@ -173,19 +203,34 @@ export function FloatingTabBar({ state, descriptors, navigation, insets }: TabBa
 
   return (
     <View
+      // Taps outside the pill reach the screen below.
+      pointerEvents="box-none"
       style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
         paddingBottom: bottomGap,
-        paddingTop: 10,
+        paddingTop: BAR_TOP_GAP,
         paddingLeft: Math.max(insets.left, 14),
         paddingRight: Math.max(insets.right, 14),
-        backgroundColor: palette.stage,
       }}
     >
+      {/* Solid at the bottom, behind Android's navigation buttons. */}
+      <GradientFill
+        kind="linear"
+        stops={[
+          { offset: 0, color: themeColors.background, opacity: 0 },
+          { offset: 0.5, color: themeColors.background, opacity: 0.75 },
+          { offset: 0.85, color: themeColors.background, opacity: 1 },
+          { offset: 1, color: themeColors.background, opacity: 1 },
+        ]}
+      />
       <View
         accessibilityRole="tablist"
         className="flex-row items-center rounded-[28px] px-xs"
         style={{
-          height: 66,
+          height: BAR_HEIGHT,
           backgroundColor: palette.bar,
           borderWidth: 1,
           borderColor: palette.border,

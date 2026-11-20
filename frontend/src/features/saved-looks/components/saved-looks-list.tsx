@@ -13,9 +13,11 @@ import { SavedLookCard } from './saved-look-card';
 /**
  * The user's saved try-ons, newest first, with favourites and pull to
  * refresh. Wardrobe's Outfits tab (handoff v2.1 change 7); it replaced the
- * separate Looks screen. Fills its parent.
+ * separate Looks screen. Fills its parent;
+ * `bottomInset` is room at the end of the list (a tab screen passes the
+ * floating tab bar's).
  */
-export function SavedLooksList() {
+export function SavedLooksList({ bottomInset = 24 }: { bottomInset?: number } = {}) {
   const savedLooksQuery = useSavedLooksQuery();
   const updateLook = useUpdateSavedLook();
 
@@ -74,7 +76,7 @@ export function SavedLooksList() {
           onRefresh={() => savedLooksQuery.refetch()}
         />
       }
-      contentContainerStyle={{ paddingBottom: 24 }}
+      contentContainerStyle={{ paddingBottom: bottomInset }}
     />
   );
 }

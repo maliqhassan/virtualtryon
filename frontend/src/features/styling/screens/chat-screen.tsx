@@ -2,7 +2,7 @@ import { type Href, router } from 'expo-router';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { AppScaffold } from '@/components/app-scaffold';
-import { BreathingOrb } from '@/components/breathing-orb';
+import { BrandMark } from '@/components/brand-mark';
 import { IconButton } from '@/components/icon-button';
 import { themeColors } from '@/constants/theme';
 import { MY_PHOTO_HREF } from '@/features/my-photo';
@@ -33,8 +33,8 @@ export function ChatScreen() {
   return (
     <AppScaffold scroll={false}>
       <View className="flex-row items-center gap-md">
-        <View className="h-10 w-10 items-center justify-center">
-          <BreathingOrb size={40} tone="brand" />
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-inverse">
+          <BrandMark width={22} />
         </View>
         <View className="flex-1">
           <Text className="font-sans-bold text-[15px] text-ink-primary">Noor</Text>

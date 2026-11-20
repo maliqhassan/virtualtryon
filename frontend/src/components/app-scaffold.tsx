@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useTabBarSpace } from './floating-tab-bar';
 import { IconButton } from './icon-button';
 import { ScreenStatusBar } from './screen-status-bar';
 
@@ -10,7 +11,9 @@ export type AppScaffoldProps = {
   children: ReactNode;
   /** Set false for a screen that manages its own scroll (e.g. a list). */
   scroll?: boolean;
-  /** Inside a tab: the tab bar already handles the bottom safe area. */
+  /** Inside a tab: the floating tab bar covers the bottom, so a scrolling
+   * screen leaves room for it (lists in `scroll={false}` screens pad
+   * themselves with useTabBarSpace). */
   inTabs?: boolean;
   /** Show a back button (stack screens). */
   back?: boolean;
@@ -39,6 +42,7 @@ export function AppScaffold({
   back = false,
   dark = false,
 }: AppScaffoldProps) {
+  const tabBarSpace = useTabBarSpace();
   const content = (
     <>
       {back && <BackButton dark={dark} />}
@@ -54,7 +58,8 @@ export function AppScaffold({
       {scroll ? (
         <ScrollView
           className="flex-1 px-xl pt-lg"
-          contentContainerClassName="pb-xxxl"
+          contentContainerClassName={inTabs ? undefined : 'pb-xxxl'}
+          contentContainerStyle={inTabs ? { paddingBottom: tabBarSpace } : undefined}
           showsVerticalScrollIndicator={false}
         >
           {content}

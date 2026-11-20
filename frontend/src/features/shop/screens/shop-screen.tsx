@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
+import { useTabBarSpace } from '@/components/floating-tab-bar';
 import { AppIcon } from '@/components/app-icon';
 import { AppScaffold } from '@/components/app-scaffold';
 import { FadeInView } from '@/components/fade-in-view';
@@ -67,6 +68,7 @@ function CategoryChip({
  * store (PasteLinkCard), or browse the sample stores below it.
  */
 export function ShopScreen() {
+  const tabBarSpace = useTabBarSpace();
   const storesQuery = useStoresQuery();
   const [storeId, setStoreId] = useState<string | null>(null);
   const [category, setCategory] = useState(ALL);
@@ -244,7 +246,7 @@ export function ShopScreen() {
         keyExtractor={(item) => item.id}
         ListHeaderComponent={header}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: tabBarSpace }}
         refreshControl={
           <RefreshControl
             refreshing={productsQuery.isRefetching}

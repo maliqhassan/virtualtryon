@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 
 import { AppScaffold } from '@/components/app-scaffold';
+import { useTabBarSpace } from '@/components/floating-tab-bar';
 import { IconButton } from '@/components/icon-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { SegmentedControl } from '@/components/segmented-control';
@@ -28,6 +29,7 @@ function isTab(value: unknown): value is WardrobeTab {
  * URL (`?tab=outfits`), so other screens can link straight to one.
  */
 export function WardrobeScreen() {
+  const tabBarSpace = useTabBarSpace();
   const params = useLocalSearchParams<{ tab?: string }>();
   const tab: WardrobeTab = isTab(params.tab) ? params.tab : 'clothes';
   // The count only once known: never "0 pieces" while loading or offline.
@@ -61,9 +63,9 @@ export function WardrobeScreen() {
         />
       </View>
       <View className="flex-1">
-        {tab === 'outfits' && <SavedLooksList />}
-        {tab === 'portraits' && <PortraitsGrid />}
-        {tab === 'clothes' && <ClothesTab />}
+        {tab === 'outfits' && <SavedLooksList bottomInset={tabBarSpace} />}
+        {tab === 'portraits' && <PortraitsGrid bottomInset={tabBarSpace} />}
+        {tab === 'clothes' && <ClothesTab bottomInset={tabBarSpace} />}
       </View>
     </AppScaffold>
   );

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/app-icon';
+import { BrandMark } from '@/components/brand-mark';
 import { PressableScale } from '@/components/pressable-scale';
 import { PhotoFill } from '@/components/photo-fill';
 import type { StockPhoto } from '@/constants/stock-photos';
@@ -82,6 +83,10 @@ export function SignInScreen() {
 
   return (
     <OnboardingFrame>
+      <View className="mb-sm flex-row items-center gap-sm" accessibilityRole="header">
+        <BrandMark width={26} color={themeColors.primary} />
+        <Text className="font-display text-[19px] text-ink-primary">AI Stylist</Text>
+      </View>
       <View
         className="h-[290px]"
         accessibilityElementsHidden

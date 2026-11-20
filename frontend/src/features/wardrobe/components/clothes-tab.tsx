@@ -15,9 +15,11 @@ import { GarmentCard } from './garment-card';
 /**
  * Wardrobe's Clothes tab: category chips (only those the user owns, with
  * counts) over a two-column grid. What the Wardrobe screen used to be
- * before it gained tabs (handoff v2.1 change 7). Fills its parent.
+ * before it gained tabs (handoff v2.1 change 7). Fills its parent;
+ * `bottomInset` is room at the end of the list (a tab screen passes the
+ * floating tab bar's).
  */
-export function ClothesTab() {
+export function ClothesTab({ bottomInset = 24 }: { bottomInset?: number } = {}) {
   const garmentsQuery = useGarmentsQuery();
   const [category, setCategory] = useState<string | null>(null);
   const all = useMemo(() => garmentsQuery.data ?? [], [garmentsQuery.data]);
@@ -134,7 +136,7 @@ export function ClothesTab() {
             onRefresh={() => garmentsQuery.refetch()}
           />
         }
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: bottomInset }}
       />
     </View>
   );

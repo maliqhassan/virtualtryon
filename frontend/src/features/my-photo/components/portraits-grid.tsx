@@ -17,9 +17,11 @@ import { displayUrl } from '../types';
  * Wardrobe's Portraits tab (handoff v2.1 change 7): an "Add portrait" tile,
  * then the user's model photos, two to a row. Tapping a photo makes it the
  * one try-ons use ("in use"); "Manage" opens My photos to add or delete.
- * Fills its parent.
+ * Fills its parent;
+ * `bottomInset` is room at the end of the list (a tab screen passes the
+ * floating tab bar's).
  */
-export function PortraitsGrid() {
+export function PortraitsGrid({ bottomInset = 24 }: { bottomInset?: number } = {}) {
   const { ordered, inUseId, select, addHref, isFull, isLoading, isError, refetch } = usePortraits();
 
   if (isLoading) {
@@ -49,7 +51,10 @@ export function PortraitsGrid() {
   }
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-xl">
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: bottomInset }}
+    >
       <View className="flex-row flex-wrap justify-between gap-y-[11px]">
         <Pressable
           onPress={() => addHref && router.push(addHref)}
