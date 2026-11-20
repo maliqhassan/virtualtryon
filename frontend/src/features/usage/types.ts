@@ -17,8 +17,11 @@ export type Usage = {
 export type PlanOffer = {
   id: PlanId;
   name: string;
+  /** "$3.99"; shown with "/ week" from `per`. */
   price: string;
-  allowance: string;
+  credits: number;
+  /** How often the credits renew; null for the one-off free credits. */
+  per: 'week' | 'month' | null;
   highlight?: boolean;
 };
 
@@ -26,13 +29,7 @@ export type PlanOffer = {
 export const FREE_CREDITS = 5;
 
 export const PLAN_OFFERS: PlanOffer[] = [
-  { id: 'free', name: 'Free', price: '$0', allowance: `${FREE_CREDITS} free credits` },
-  { id: 'weekly', name: 'Weekly', price: '$3.99 / week', allowance: '20 credits every week' },
-  {
-    id: 'monthly',
-    name: 'Monthly',
-    price: '$19.99 / month',
-    allowance: '100 credits every month',
-    highlight: true,
-  },
+  { id: 'free', name: 'Free', price: '$0', credits: FREE_CREDITS, per: null },
+  { id: 'weekly', name: 'Weekly', price: '$3.99', credits: 20, per: 'week' },
+  { id: 'monthly', name: 'Monthly', price: '$19.99', credits: 100, per: 'month', highlight: true },
 ];

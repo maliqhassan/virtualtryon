@@ -10,7 +10,8 @@ const credits = (n: number) => `${n} credit${n === 1 ? '' : 's'}`;
 export function describeUsage(usage: Usage): string {
   if (usage.unlimited) return 'Unlimited try-ons (testing)';
   if (usage.period === 'lifetime') {
-    return usage.remaining > 0 ? `${credits(usage.remaining)} free left` : 'Free credits used';
+    const n = usage.remaining;
+    return n > 0 ? `${n} free credit${n === 1 ? '' : 's'} left` : 'Free credits used';
   }
   const left = `${usage.remaining} of ${credits(usage.limit)} left this ${usage.period}`;
   if (!usage.resetsAt) return left;
