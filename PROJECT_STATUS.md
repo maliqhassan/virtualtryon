@@ -2,6 +2,22 @@
 
 Last updated: 2026-11-20
 
+## Phase: 29 — Design pass: logo, floating tab bar, calendar, Home
+
+A new mark (a hanger with a spark, `components/brand-mark.tsx`, drawn by
+`scripts/draw-logo.py`) on the icon, splash, sign-in, the tab bar's centre
+Try-On button, onboarding's analysing step, Noor and You. The tab bar
+floats over content. The calendar plans the next 14 days piece by piece
+(on the phone; the store now lives in `features/today`).
+
+**Home**: today's outfit comes first and says where it came from (worn
+today → planned in the calendar → a pick from the wardrobe); "This week"
+shows the next six days' real plans and opens the calendar on a day
+(`/calendar?day=`); portraits; four shortcuts (Ask Noor, Style an occasion,
+Rate my fit, Saved looks); a laundry note only when something is in the
+wash. The floating "Start a new outfit" button (handoff v2.1) is gone: the
+tab bar's centre button does the same.
+
 ## Phase: 28 — Genlook try-ons, several model photos, credits
 
 **Try-on provider**: Genlook (ADR 0018; `TRYON_PROVIDER=genlook`,

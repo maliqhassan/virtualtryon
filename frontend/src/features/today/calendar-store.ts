@@ -4,8 +4,16 @@ import { persist } from 'zustand/middleware';
 import { appStateStorage } from '@/lib/app-storage';
 import { onIdentityChange } from '@/lib/identity-events';
 
+import { dayNumber } from './lib/pick-outfit';
+
+/** Plans from today on; nothing reads a day that has passed. */
+function upcoming(plans: Record<number, string[]>): Record<number, string[]> {
+  const today = dayNumber(new Date());
+  return Object.fromEntries(Object.entries(plans).filter(([day]) => Number(day) >= today));
+}
+
 type CalendarState = {
-  /** Planned outfits: garment ids by day number (see today's dayNumber). */
+  /** Planned outfits: garment ids by day number (see lib/pick-outfit's dayNumber). */
   plans: Record<number, string[]>;
   plan: (day: number, garmentIds: string[]) => void;
   clear: (day: number) => void;
@@ -16,10 +24,12 @@ export const useCalendar = create<CalendarState>()(
   persist(
     (set) => ({
       plans: {},
-      plan: (day, garmentIds) => set((state) => ({ plans: { ...state.plans, [day]: garmentIds } })),
+      // Each change also drops days that have passed, so the store stays small.
+      plan: (day, garmentIds) =>
+        set((state) => ({ plans: upcoming({ ...state.plans, [day]: garmentIds }) })),
       clear: (day) =>
         set((state) => {
-          const plans = { ...state.plans };
+          const plans = upcoming(state.plans);
           delete plans[day];
           return { plans };
         }),

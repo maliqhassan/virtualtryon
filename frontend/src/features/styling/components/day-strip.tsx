@@ -1,8 +1,11 @@
+import { useRef } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { selectionFeedback } from '@/lib/haptics';
 
 const WEEKDAY = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
+/** A chip's width plus the gap after it. */
+const CHIP_STEP = 56 + 8;
 
 export type StripDay = { day: number; date: Date };
 
@@ -21,8 +24,25 @@ export function DayStrip({
   planned: (day: number) => boolean;
   onSelect: (day: number) => void;
 }) {
+  const scroller = useRef<ScrollView>(null);
+  const selectedIndex = days.findIndex((d) => d.day === selected);
+
+  // Opened on a day further along (from Home's week), bring its chip into
+  // view, with one chip of context before it. Once, when the chips are
+  // first measured, so the strip doesn't jump while the user scrolls and taps.
+  const scrolled = useRef(false);
+  const scrollToSelected = () => {
+    if (scrolled.current) return;
+    scrolled.current = true;
+    if (selectedIndex > 3) {
+      scroller.current?.scrollTo({ x: (selectedIndex - 1) * CHIP_STEP, animated: false });
+    }
+  };
+
   return (
     <ScrollView
+      ref={scroller}
+      onContentSizeChange={scrollToSelected}
       horizontal
       showsHorizontalScrollIndicator={false}
       // Bleed to the screen edges, past the scaffold's padding.

@@ -56,19 +56,50 @@ function OutlineIconButton({
   );
 }
 
-type OutfitHeroProps = {
-  outfit: Garment[];
-  /** Changes on every shuffle; the mosaic cross-fades when it does. */
-  seed: number;
-  wearing: boolean;
-  onShuffle: () => void;
-  onWear: () => void;
+/** Where today's outfit came from, most deliberate first. */
+export type OutfitSource = 'wearing' | 'planned' | 'pick';
+
+const OVERLINE: Record<OutfitSource, string> = {
+  wearing: 'Wearing today',
+  planned: 'Planned for today',
+  pick: 'Today’s outfit',
+};
+const REASON: Record<OutfitSource, string> = {
+  wearing: 'You’re wearing this today. It stays until tomorrow.',
+  planned: 'From your calendar. Tap the calendar button to change it.',
+  pick: 'Picked from your wardrobe. Shuffle for another.',
 };
 
-/** The dark hero card: today's three pieces, why, and the actions. */
-export function OutfitHero({ outfit, seed, wearing, onShuffle, onWear }: OutfitHeroProps) {
+type OutfitHeroProps = {
+  outfit: Garment[];
+  source: OutfitSource;
+  /** Planned pieces left out because they're in the wash. */
+  washedOut: number;
+  /** Changes on every shuffle; the mosaic cross-fades when it does. */
+  seed: number;
+  onShuffle: () => void;
+  onWear: () => void;
+  /** Opens today in the calendar. */
+  onEditPlan: () => void;
+};
+
+/** The dark hero card: today's pieces, where they came from, and the actions. */
+export function OutfitHero({
+  outfit,
+  source,
+  washedOut,
+  seed,
+  onShuffle,
+  onWear,
+  onEditPlan,
+}: OutfitHeroProps) {
   const [first, second, third] = outfit;
   const empty = outfit.length === 0;
+  const wearing = source === 'wearing';
+  const reason =
+    washedOut > 0
+      ? `From your calendar. ${washedOut === 1 ? 'One piece is' : `${washedOut} pieces are`} in the wash, so ${washedOut === 1 ? 'it’s' : 'they’re'} left out.`
+      : REASON[source];
   const name = empty
     ? 'Your first outfit is waiting'
     : outfit.length === 1
@@ -100,7 +131,7 @@ export function OutfitHero({ outfit, seed, wearing, onShuffle, onWear }: OutfitH
 
       <View className="px-xl pb-xl pt-lg">
         <Text className="font-mono text-[11px] uppercase tracking-[1.6px] text-gold-overline">
-          Today’s outfit
+          {empty ? 'Today’s outfit' : OVERLINE[source]}
         </Text>
         <Text
           className="mt-[6px] font-display text-[27px] leading-[29px] text-cream"
@@ -112,8 +143,8 @@ export function OutfitHero({ outfit, seed, wearing, onShuffle, onWear }: OutfitH
           <AppIcon name="auto_awesome" size={15} color="#D9B26A" />
           <Text className="flex-1 font-sans text-[12.5px] leading-[19px] text-night-body">
             {empty
-              ? 'Add a few pieces and Noor puts together an outfit from what you own, every morning.'
-              : 'Picked from your wardrobe for today. Noor’s weather- and calendar-aware picks arrive in an update.'}
+              ? 'Add a few pieces and an outfit from what you own is waiting here every morning.'
+              : reason}
           </Text>
         </View>
 
@@ -135,24 +166,29 @@ export function OutfitHero({ outfit, seed, wearing, onShuffle, onWear }: OutfitH
               />
             )}
           </View>
-          <OutlineIconButton
-            icon="shuffle"
-            label="Shuffle the outfit"
-            onPress={onShuffle}
-            disabled={outfit.length < 2}
-          />
+          {/* Only the daily pick shuffles: a planned outfit is changed in the
+              calendar, and a worn one is undone first. */}
+          {source === 'planned' ? (
+            <OutlineIconButton
+              icon="edit_calendar"
+              label="Change today’s plan"
+              onPress={onEditPlan}
+            />
+          ) : (
+            <OutlineIconButton
+              icon="shuffle"
+              label="Shuffle the outfit"
+              onPress={onShuffle}
+              disabled={source === 'wearing' || outfit.length < 2}
+            />
+          )}
           <OutlineIconButton
             icon={wearing ? 'check_circle' : 'bookmark_border'}
-            label={wearing ? 'Wearing this today' : 'Wear this today'}
+            label={wearing ? 'Wearing this today. Tap to undo' : 'Wear this today'}
             onPress={onWear}
             disabled={empty}
           />
         </View>
-        <Text className="mt-[11px] font-mono text-[11px] text-neutral-400">
-          {wearing
-            ? 'wearing this today · it stays until tomorrow'
-            : 'changes every morning · shuffle any time'}
-        </Text>
       </View>
     </View>
   );

@@ -1,15 +1,14 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/app-button';
 import { AppScaffold } from '@/components/app-scaffold';
 import { ScreenHeader } from '@/components/screen-header';
-import { dayNumber, pickOutfit } from '@/features/today';
+import { dayNumber, pickOutfit, planPieces, useCalendar } from '@/features/today';
 import { ADD_GARMENT_HREF, GarmentThumb, useGarmentsQuery, useLaundry } from '@/features/wardrobe';
 import { selectionFeedback } from '@/lib/haptics';
 
-import { useCalendar } from '../calendar-store';
 import { DayStrip, type StripDay } from '../components/day-strip';
 import { OutfitPickerSheet } from '../components/outfit-picker-sheet';
 
@@ -39,8 +38,13 @@ export function CalendarScreen() {
     const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
     return { day: dayNumber(date), date };
   });
-  const [chosen, setSelected] = useState<number | null>(null);
-  // A chosen day that has since passed falls back to today.
+  // Opened from Home's week cards on a given day (?day=); anything that isn't
+  // one of the days shown is ignored by the check below.
+  const { day: dayParam } = useLocalSearchParams<{ day?: string }>();
+  const [chosen, setSelected] = useState<number | null>(() =>
+    dayParam && /^\d+$/.test(dayParam) ? Number(dayParam) : null,
+  );
+  // A chosen day that's not shown (passed, or out of range) falls back to today.
   const selected = days.some((d) => d.day === chosen) ? (chosen as number) : days[0].day;
   const [picking, setPicking] = useState(false);
   // The pieces ticked in the sheet, until Save.
@@ -49,13 +53,11 @@ export function CalendarScreen() {
   const garments = useGarmentsQuery().data ?? [];
   const inWash = useLaundry((state) => state.garmentIds);
   const { plans, plan, clear } = useCalendar();
-  const byId = new Map(garments.map((g) => [g.id, g]));
   const available = garments.filter((g) => !inWash.includes(g.id));
 
   const index = days.findIndex((d) => d.day === selected);
   const title = dayTitle(index, days[index].date);
-  // Pieces deleted since the plan was made just drop out.
-  const outfit = (plans[selected] ?? []).flatMap((id) => byId.get(id) ?? []);
+  const outfit = planPieces(plans[selected], garments);
 
   // Each opening starts from the day's current outfit.
   const openPicker = () => {

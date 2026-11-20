@@ -22,7 +22,7 @@ export function PortraitsRail() {
   const { ordered, inUseId, select, addHref, isFull } = usePortraits();
 
   return (
-    <View className="mt-[22px]">
+    <View className="mt-xxl">
       <View className="flex-row items-baseline justify-between">
         <Text className="font-sans-bold text-[17px] text-ink-primary" accessibilityRole="header">
           My portraits
