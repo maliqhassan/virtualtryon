@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "VirtualTryOn",
+    "name": "AI Stylist",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,15 +8,14 @@
     "scheme": "virtualtryon",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/icon.png"
     },
     "android": {
       "package": "com.maliqhassan.virtualtryon",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#F6F4F0",
+        "backgroundColor": "#12110F",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
@@ -34,30 +33,30 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F6F4F0",
+          "backgroundColor": "#12110F",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 188
         }
       ],
       [
         "expo-camera",
         {
-          "cameraPermission": "VirtualTryOn uses your camera to capture photos for virtual try-on.",
+          "cameraPermission": "AI Stylist uses your camera to capture photos for virtual try-on.",
           "recordAudioAndroid": false
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "VirtualTryOn uses your photo library to select images for virtual try-on.",
+          "photosPermission": "AI Stylist uses your photo library to select images for virtual try-on.",
           "microphonePermission": false
         }
       ],
       [
         "expo-media-library",
         {
-          "photosPermission": "VirtualTryOn uses your photo library to select images for virtual try-on.",
-          "savePhotosPermission": "VirtualTryOn saves your try-ons to your photos when you tap Save.",
+          "photosPermission": "AI Stylist uses your photo library to select images for virtual try-on.",
+          "savePhotosPermission": "AI Stylist saves your try-ons to your photos when you tap Save.",
           "isAccessMediaLocationEnabled": false,
           "granularPermissions": []
         }
