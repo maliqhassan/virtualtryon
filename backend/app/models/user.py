@@ -36,8 +36,8 @@ class Plan(enum.StrEnum):
     client directly."""
 
     FREE = "free"
-    PRO = "pro"
-    PRO_PLUS = "pro_plus"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
 
 
 class User(Base):

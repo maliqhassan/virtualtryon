@@ -24,11 +24,11 @@ const QUESTIONS = [
   },
   {
     q: 'A try-on failed',
-    a: 'Failed try-ons never count against your allowance. Try again, or use a clearer photo of you and of the piece.',
+    a: 'A failed try-on never uses a credit. Try again, or use a clearer photo of you and of the piece.',
   },
   {
     q: 'Plans and payments',
-    a: 'Free includes one try-on; Pro and Pro Plus add daily try-ons. Payments aren’t open yet, so nothing is charged.',
+    a: 'One credit is one try-on. You start with 5 free credits; Weekly ($3.99) adds 20 every week and Monthly ($19.99) 100 every month. Payments aren’t open yet, so nothing is charged.',
   },
 ];
 

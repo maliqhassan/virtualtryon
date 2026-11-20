@@ -1,9 +1,9 @@
-export type PlanId = 'free' | 'pro' | 'pro_plus';
+export type PlanId = 'free' | 'weekly' | 'monthly';
 
 /** Mirrors backend/app/schemas/usage.py. */
 export type Usage = {
   plan: PlanId;
-  period: 'lifetime' | 'day';
+  period: 'lifetime' | 'week' | 'month';
   limit: number;
   used: number;
   remaining: number;
@@ -12,7 +12,7 @@ export type Usage = {
   unlimited: boolean;
 };
 
-/** What the upgrade screen shows. The server decides the real limits
+/** What the plans screen shows. One credit is one try-on. The server decides the real limits
  * (backend/app/services/plans.py); these must match it. */
 export type PlanOffer = {
   id: PlanId;
@@ -22,14 +22,17 @@ export type PlanOffer = {
   highlight?: boolean;
 };
 
+/** The free credits every account starts with (FREE_CREDITS on the server). */
+export const FREE_CREDITS = 5;
+
 export const PLAN_OFFERS: PlanOffer[] = [
-  { id: 'free', name: 'Free', price: '$0', allowance: '1 free try-on' },
-  { id: 'pro', name: 'Pro', price: '$9.99 / month', allowance: '2 try-ons every day' },
+  { id: 'free', name: 'Free', price: '$0', allowance: `${FREE_CREDITS} free credits` },
+  { id: 'weekly', name: 'Weekly', price: '$3.99 / week', allowance: '20 credits every week' },
   {
-    id: 'pro_plus',
-    name: 'Pro Plus',
+    id: 'monthly',
+    name: 'Monthly',
     price: '$19.99 / month',
-    allowance: '3 try-ons every day',
+    allowance: '100 credits every month',
     highlight: true,
   },
 ];

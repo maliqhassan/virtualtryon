@@ -11,7 +11,7 @@ import type { Usage } from '../types';
 import { describeUsage } from './usage-pill';
 
 /**
- * "✦ 3" in Today's header (handoff v2.1 change 3): try-ons left, opening
+ * "✦ 3" in Today's header (handoff v2.1 change 3): credits left (one per try-on), opening
  * Plans. "∞" while limits are off for testing.
  */
 export function CreditsPill({ usage }: { usage: Usage }) {

@@ -41,10 +41,10 @@ function toTryOnJob(dto: InferenceJobDto): TryOnJob {
   };
 }
 
-/** No try-ons left on the user's plan (HTTP 402): the app opens the upgrade screen. */
+/** No credits left on the user's plan (HTTP 402): the app opens the plans screen. */
 export class TryOnLimitReachedError extends Error {
   constructor() {
-    super('No try-ons left on your plan.');
+    super('No credits left on your plan.');
     this.name = 'TryOnLimitReachedError';
   }
 }

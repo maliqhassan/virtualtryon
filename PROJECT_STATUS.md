@@ -1,6 +1,26 @@
 # Project Status
 
-Last updated: 2026-11-19
+Last updated: 2026-11-20
+
+## Phase: 28 — Genlook try-ons, several model photos, credits
+
+**Try-on provider**: Genlook (ADR 0018; `TRYON_PROVIDER=genlook`,
+`TRYON_API_KEY` = the `gk_…` key). VTON-D stays as a fallback.
+
+**Model photos**: a user keeps up to 10 photos of themselves and picks the
+one try-ons use (Try-On studio "Change portrait", Today's portraits rail,
+Wardrobe → Portraits, My photos). `POST /inference-jobs` takes an optional
+`user_photo_id`; `DELETE /user-photos/{id}`. A guest's photos all join the
+account on sign-in.
+
+**Credits** (one credit = one try-on; failed ones are free;
+services/plans.py): Free 5 credits once; Weekly $3.99 for 20 a week
+(renews Monday 00:00 UTC); Monthly $19.99 for 100 a month (renews on the
+1st). Plans renamed from Pro / Pro Plus (migration e2f3a4b5c6d7). The plans
+screen still opens after onboarding with a close button; buying isn't
+possible yet (Google Play Billing is a separate, undecided feature), so a
+plan can only be set on the server. Credits are only enforced while
+`TRYON_LIMITS_ENABLED` is true.
 
 ## Phase: 27 — Design v2 and v2.1, Google sign-in, real try-ons, hardening
 

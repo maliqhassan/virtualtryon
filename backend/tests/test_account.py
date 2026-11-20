@@ -58,6 +58,7 @@ async def test_delete_my_data_removes_everything_but_keeps_usage(
     for path in (garment.json()["image_url"], photo.json()["storage_key"], result_url):
         with pytest.raises(FileNotFoundError):
             storage.read(path)
-    # The used free try-on still counts, so deleting data can't reset it.
+    # The used free credit still counts, so deleting data can't reset it.
     usage = (await client.get("/api/v1/usage", headers=headers)).json()
-    assert usage["remaining"] == 0
+    assert usage["used"] == 1
+    assert usage["remaining"] == usage["limit"] - 1

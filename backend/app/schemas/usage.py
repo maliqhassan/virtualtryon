@@ -12,8 +12,8 @@ class UsageResponse(BaseModel):
     limit: int
     used: int
     remaining: int
-    # Next reset for daily plans (midnight UTC); null for the free plan,
-    # whose allowance never resets.
+    # When Weekly/Monthly credits renew (UTC); null for the free credits,
+    # which never renew.
     resets_at: datetime | None
     # True while try-on limits are switched off (TRYON_LIMITS_ENABLED=false).
     unlimited: bool = False

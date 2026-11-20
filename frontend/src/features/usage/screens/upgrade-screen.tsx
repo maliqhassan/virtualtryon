@@ -15,10 +15,10 @@ import { selectionFeedback } from '@/lib/haptics';
 
 import { describeUsage } from '../components/usage-pill';
 import { useUsageQuery } from '../hooks/use-usage-query';
-import { PLAN_OFFERS, type PlanId } from '../types';
+import { FREE_CREDITS, PLAN_OFFERS, type PlanId } from '../types';
 
 const BENEFITS = [
-  'Daily try-ons instead of a single one',
+  'One credit = one try-on, and failed ones are free',
   'Mix pieces from any store on your photo',
   'Everything saved to your Looks',
 ];
@@ -35,8 +35,8 @@ function GlassChip({ label, style }: { label: string; style: object }) {
 }
 
 /**
- * Plans on the dark stage: a before/after hero, the benefits, and Pro /
- * Pro Plus as radio cards. Buying isn't possible yet (in-app purchase is
+ * Plans on the dark stage: a before/after hero, the benefits, and Weekly /
+ * Monthly as radio cards (app/services/plans.py has the real numbers). Buying isn't possible yet (in-app purchase is
  * a later feature), so the main button says so instead of pretending.
  * "Continue with Free" is always visible.
  */
@@ -46,7 +46,7 @@ export function UpgradeScreen() {
   const fromOnboarding = useLocalSearchParams<{ from?: string }>().from === 'onboarding';
   const close = () => (fromOnboarding ? router.replace('/') : router.back());
   const paid = PLAN_OFFERS.filter((offer) => offer.id !== 'free');
-  const [selected, setSelected] = useState<PlanId>('pro_plus');
+  const [selected, setSelected] = useState<PlanId>('monthly');
   const insets = useSafeAreaInsets();
 
   return (
@@ -95,8 +95,8 @@ export function UpgradeScreen() {
             className="font-display text-[38px] leading-[39px] text-cream"
             accessibilityRole="header"
           >
-            Go Pro,{'\n'}
-            <Text className="font-display-italic text-gold-soft">style without limits.</Text>
+            More credits,{'\n'}
+            <Text className="font-display-italic text-gold-soft">more looks.</Text>
           </Text>
           {usage && (
             <Text className="mt-sm font-mono text-[11px] text-neutral-400">
@@ -145,7 +145,9 @@ export function UpgradeScreen() {
                           { offset: 1, color: '#B4713F' },
                         ]}
                       />
-                      <Text className="font-sans-bold text-[11px] text-[#1A1509]">Best value</Text>
+                      <Text className="font-sans-bold text-[11px] text-[#1A1509]">
+                        Most credits
+                      </Text>
                     </View>
                   )}
                   <View className="flex-row items-center justify-between">
@@ -169,7 +171,8 @@ export function UpgradeScreen() {
           </View>
 
           <Text className="mt-lg text-center font-sans text-[11.5px] text-neutral-400">
-            Subscriptions open soon. Failed try-ons never count against your allowance.
+            Payments open soon. You start with {FREE_CREDITS} free credits; failed try-ons never use
+            one.
           </Text>
           <View className="mt-md">
             <AppButton label="Payments coming soon" variant="accent" onPress={() => {}} disabled />

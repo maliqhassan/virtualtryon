@@ -27,12 +27,29 @@ class UsageLimitReachedError(Exception):
     """Raised when a user has no try-ons left on their current plan."""
 
     def __init__(self, usage: UsageResponse) -> None:
-        super().__init__("No try-ons left on the current plan.")
+        super().__init__("No credits left on your plan.")
         self.usage = usage
 
 
 def _start_of_today_utc(now: datetime) -> datetime:
     return datetime.combine(now.date(), time.min, tzinfo=UTC)
+
+
+def current_period(
+    period: AllowancePeriod, now: datetime
+) -> tuple[datetime | None, datetime | None]:
+    """(start, renews_at) of the period `now` is in, in UTC: a week starts
+    Monday 00:00, a month on the 1st. (None, None) for the free credits,
+    which never renew."""
+    if period is AllowancePeriod.WEEK:
+        start = _start_of_today_utc(now) - timedelta(days=now.weekday())
+        return start, start + timedelta(days=7)
+    if period is AllowancePeriod.MONTH:
+        start = _start_of_today_utc(now).replace(day=1)
+        if start.month == 12:
+            return start, start.replace(year=start.year + 1, month=1)
+        return start, start.replace(month=start.month + 1)
+    return None, None
 
 
 async def get_usage(db: AsyncSession, user: User, now: datetime | None = None) -> UsageResponse:
@@ -49,12 +66,7 @@ async def get_usage(db: AsyncSession, user: User, now: datetime | None = None) -
             unlimited=True,
         )
 
-    since: datetime | None = None
-    resets_at: datetime | None = None
-    if allowance.period is AllowancePeriod.DAY:
-        since = _start_of_today_utc(now)
-        resets_at = since + timedelta(days=1)
-
+    since, resets_at = current_period(allowance.period, now)
     used = await InferenceJobRepository(db).count_counted_for_user(
         user.id, since, stale_before=now - STALE_JOB_AFTER
     )

@@ -22,7 +22,7 @@ import { resolveMediaUrl } from '@/lib/media-url';
 
 import { HELP_HREF, SETTINGS_HREF } from '../routes';
 
-const PLAN_NAMES = { free: 'Free', pro: 'Pro', pro_plus: 'Pro Plus' } as const;
+const PLAN_NAMES = { free: 'Free', weekly: 'Weekly', monthly: 'Monthly' } as const;
 const PALETTE = ['#F2E8D8', '#C9A06A', '#4E5B44', '#A8452F', '#3A362F'];
 
 function Stat({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
@@ -130,7 +130,7 @@ export function YouScreen() {
         <Stat value={String(looks.length)} label="SAVED LOOKS" />
         <Stat
           value={usage ? (usage.unlimited ? '∞' : String(usage.remaining)) : '–'}
-          label="TRY-ONS LEFT"
+          label="CREDITS LEFT"
           accent
         />
       </View>
@@ -156,7 +156,7 @@ export function YouScreen() {
             {usage ? `${PLAN_NAMES[usage.plan]} plan · ${describeUsage(usage)}` : 'Your plan'}
           </Text>
           <Text className="mt-[6px] font-display text-[23px] leading-[25px] text-[#1A1509]">
-            {usage?.plan === 'pro_plus' ? 'You’re on our top plan' : 'Go Pro for more try-ons'}
+            {usage && usage.plan !== 'free' ? 'See your plan' : 'Get more try-on credits'}
           </Text>
         </View>
         <View className="h-10 w-10 items-center justify-center rounded-full bg-inverse">
